@@ -8,14 +8,22 @@ import os
 PLANES_MOVIL = {
     "Pospago Negocios 4.9 Plus+ (60 GB)": 44900.0,
     "Pospago Negocios 5.4 Plus+ (100 GB)": 53900.0,
-    "Pospago 5.3 Empresarial (Ilim GB)": 113900.0
-}
-PLANES_FIJO = {
-    "Internet Business 300 Mbps": 88880.0,
-    "Internet Business 500 Mbps": 115000.0,
-    "Internet Full Tigo Business 1000 Mbps": 274000.0
+    "Pospago 5.3 Empresarial (Ilim GB)": 113900.0,
+    "Plan Datos Tigo Empresarial 6.9 (30 GB)": 38300.0,
+    "Plan Datos Tigo Empresarial 6.10 (60 GB)": 47900.0,
+    "Plan Datos Tigo Empresarial 6.11 (110 GB)": 57900.0,
+    "Plan Datos Tigo Empresarial 6.12 (Ilim GB)": 113900.0,
+    "Plan Datos Tigo Empresarial 6.8 FULL TIGO (Ilim GB)": 54900.0
 }
 
+PLANES_FIJO = {
+    "Internet Business 300 Mbps (HFC/FTTx)": 88880.0,
+    "Internet Business 500 Mbps (HFC/FTTx)": 115000.0,
+    "Internet Business 700 Mbps (HFC/FTTx)": 180001.0,
+    "Internet Full Tigo Business 500 Mbps": 144000.0,
+    "Internet Full Tigo Business 700 Mbps": 174000.0,
+    "Internet Full Tigo Business 1000 Mbps": 274000.0
+}
 # ==========================================
 # 2. INTERFAZ DE REGISTRO COMPLETA
 # ==========================================
