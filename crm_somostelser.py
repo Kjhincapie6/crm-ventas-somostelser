@@ -215,7 +215,22 @@ with pestana_registro:
         with col_f1:
             id_contrato = st.number_input("ID único del Contrato / Pedido:", min_value=10000, step=1)
             nombre_cliente = st.text_input("Razón Social del Cliente Comercial:", placeholder="Eje: ALMACENES ÉXITO S.A.")
-            estado_venta = st.selectbox("Estado del Proceso Técnico:", ["Ingreso de pedido", "Instalacion y aprovisionamiento", "Instalado", "Activado"])
+            
+            # PIPELINE COMPLETO Y REAL DE ETAPAS DE CONTRATO (SOMOSTELSER)
+            estado_venta = st.selectbox(
+                "Estado del Proceso Técnico / Comercial:", 
+                [
+                    "En proceso de firma", 
+                    "Enviado", 
+                    "Ingreso de pedido", 
+                    "Instalacion y aprovisionamiento", 
+                    "Instalado", 
+                    "Activado",
+                    "Cancelado",
+                    "Anulado"
+                ]
+            )
+            
             tipo_plan = st.selectbox("Plan Estructural Seleccionado (Oferta 5.0):", list(TARIFAS_PLANES.keys()))
             
         with col_f2:
@@ -287,7 +302,7 @@ with pestana_historial:
     with kpi_c1:
         st.metric("Contratos Totales", f"{total_filas} Cuentas")
     with kpi_c2:
-        st.metric("Facturación Mensual Administrada", f"${ingreso_unificado:,.0f} COP")
+        st.metric("Facturación Mensual Administrado", f"${ingreso_unificado:,.0f} COP")
         
     st.markdown("<br>", unsafe_allow_html=True)
     
