@@ -1,4 +1,3 @@
-%%writefile crm_somostelser.py
 import streamlit as st
 import pandas as pd
 import os
@@ -98,7 +97,7 @@ st.sidebar.markdown("### 📥 Extracción Corporativa")
 # Descarga de la base unificada interactiva al instante
 csv_data = st.session_state.df_master.to_csv(index=False).encode('utf-8')
 st.sidebar.download_button(
-    label="📥 Descargar Base Consolidad (CSV)",
+    label="📥 Descargar Base Consolidada (CSV)",
     data=csv_data,
     file_name="crm_ventas_consolidadas.csv",
     mime="text/csv",
