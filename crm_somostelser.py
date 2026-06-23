@@ -17,7 +17,6 @@ PLANES_MOVIL = {
     "Plan Datos Tigo Empresarial 6.8 FULL TIGO (Ilim GB)": 54900.0
 }
 
-# Planes Fijos manuales
 PLANES_FIJO = {
     "Internet Business 300 Mbps (HFC/FTTx)": 88880.0,
     "Internet Business 500 Mbps (HFC/FTTx)": 115000.0,
@@ -25,6 +24,7 @@ PLANES_FIJO = {
     "Internet Full Tigo Business 500 Mbps": 144000.0,
     "Internet Full Tigo Business 700 Mbps": 174000.0,
     "Internet Full Tigo Business 1000 Mbps": 274000.0
+}
 
 # ==========================================
 # 2. CONFIGURACIÓN Y SEGURIDAD
@@ -59,61 +59,59 @@ if not st.session_state.autenticado:
     st.stop()
 
 # ==========================================
-# 3. INTERFAZ PRINCIPAL
+# 3. INTERFAZ Y REACTIVIDAD
 # ==========================================
 if st.sidebar.button("Cerrar Sesión"): 
     st.session_state.autenticado = False
     st.rerun()
 
 st.title("🏢 Panel de Gestión de Contratos B2B")
-pestana1, pestana2 = st.tabs(["✍️ Cargar Venta", "📋 Pipeline Maestro"])
 
-with pestana1:
-    # FILTRO DE DIVISIÓN REACTIVO
-    div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio")
+# --- SELECTOR FUERA DEL FORM PARA REACTIVIDAD ---
+div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio")
+
+with st.form("registro_total"):
+    col_cli, col_rep = st.columns(2)
+    with col_cli:
+        st.subheader("Datos Cliente")
+        t_doc = st.selectbox("Tipo:", ["NIT", "Cédula", "CE", "PPT"])
+        n_doc = st.text_input("Documento:")
+        nombre = st.text_input("Razón Social:")
+        dir = st.text_input("Dirección:")
+        muni = st.text_input("Municipio:")
+    with col_rep:
+        st.subheader("Rep. Legal")
+        nom_rep = st.text_input("Nombre:")
+        mail_rep = st.text_input("Correo:")
+        estado = st.selectbox("Estado:", ["En proceso de firma", "Enviado", "Ingreso de pedido", "Instalacion y aprovisionamiento", "Instalado", "Activado", "Cancelado", "Anulado"])
+        
+    st.subheader("Detalle Comercial")
     
-    with st.form("registro_total"):
-        col_cli, col_rep = st.columns(2)
-        with col_cli:
-            st.subheader("Datos Cliente")
-            t_doc = st.selectbox("Tipo:", ["NIT", "Cédula", "CE", "PPT"])
-            n_doc = st.text_input("Documento:")
-            nombre = st.text_input("Razón Social:")
-            dir = st.text_input("Dirección:")
-            muni = st.text_input("Municipio:")
-        with col_rep:
-            st.subheader("Rep. Legal")
-            nom_rep = st.text_input("Nombre:")
-            mail_rep = st.text_input("Correo:")
-            estado = st.selectbox("Estado:", ["En proceso de firma", "Enviado", "Ingreso de pedido", "Instalacion y aprovisionamiento", "Instalado", "Activado", "Cancelado", "Anulado"])
-            
-        st.subheader("Detalle Comercial")
+    # Lógica dinámica estricta según división
+    tarifas_activas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
+    
+    c_plan, c_lineas = st.columns(2)
+    with c_plan:
+        servicio = st.selectbox("Servicio:", list(tarifas_activas.keys()))
+    with c_lineas:
+        lineas = st.number_input("Cantidad / Líneas:", min_value=1, value=1)
         
-        # Lógica dinámica según división
-        tarifas_activas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
-        
-        c_plan, c_lineas = st.columns(2)
-        with c_plan:
-            servicio = st.selectbox("Servicio:", list(tarifas_activas.keys()))
-        with c_lineas:
-            lineas = st.number_input("Cantidad / Líneas:", min_value=1, value=1)
-            
-        # Cálculo de descuento según volumen de líneas[cite: 1]
-        dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
-        valor = (tarifas_activas[servicio] * lineas) * (1 - dcto/100)
-        
-        st.info(f"💰 Resumen: {div} | Servicio: {servicio} | Dcto aplicado: {dcto}% | Total estimado: ${valor:,.0f} COP")
-        
-        if st.form_submit_button("💾 Guardar Registro Completo"):
-            nueva_fila = pd.DataFrame([{
-                'DIVISION': div, 'ID_DOC': n_doc, 'NOMBRE_CLIENTE': nombre, 'DIRECCION': dir, 
-                'MUNICIPIO': muni, 'ESTADO': estado, 'SERVICIO': servicio, 'LINEAS': lineas, 
-                'VALOR_TOTAL': valor, 'ASESOR': st.session_state.correo_asesor, 
-                'REP_LEGAL': nom_rep, 'MAIL_REP': mail_rep
-            }])
-            st.session_state.df_master = pd.concat([st.session_state.df_master, nueva_fila], ignore_index=True)
-            st.session_state.df_master.to_csv("crm_sistema_maestro.csv", index=False)
-            st.success("✅ Venta registrada correctamente bajo estándares Junio 2026.")
+    # Cálculo de descuento según volumen[cite: 1]
+    dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
+    valor = (tarifas_activas[servicio] * lineas) * (1 - dcto/100)
+    
+    st.info(f"💰 Resumen: {div} | Servicio: {servicio} | Dcto aplicado: {dcto}% | Total: ${valor:,.0f} COP")
+    
+    if st.form_submit_button("💾 Guardar Registro Completo"):
+        nueva_fila = pd.DataFrame([{
+            'DIVISION': div, 'ID_DOC': n_doc, 'NOMBRE_CLIENTE': nombre, 'DIRECCION': dir, 
+            'MUNICIPIO': muni, 'ESTADO': estado, 'SERVICIO': servicio, 'LINEAS': lineas, 
+            'VALOR_TOTAL': valor, 'ASESOR': st.session_state.correo_asesor, 
+            'REP_LEGAL': nom_rep, 'MAIL_REP': mail_rep
+        }])
+        st.session_state.df_master = pd.concat([st.session_state.df_master, nueva_fila], ignore_index=True)
+        st.session_state.df_master.to_csv("crm_sistema_maestro.csv", index=False)
+        st.success("✅ Venta registrada correctamente.")
 
-with pestana2:
-    st.dataframe(st.session_state.df_master, use_container_width=True)
+st.subheader("📋 Pipeline Maestro")
+st.dataframe(st.session_state.df_master, use_container_width=True)
