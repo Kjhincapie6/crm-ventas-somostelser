@@ -3,82 +3,80 @@ import pandas as pd
 import os
 
 # ==========================================
-# 1. CATÁLOGO MANUAL DE PLANES (JUNIO 2026)
+# 1. PORTAFOLIO MANUAL (JUNIO 2026)
 # ==========================================
 PLANES_MOVIL = {
     "Pospago Negocios 4.9 Plus+ (60 GB)": 44900.0,
     "Pospago Negocios 5.4 Plus+ (100 GB)": 53900.0,
-    "Pospago 5.3 Empresarial (Ilim GB)": 113900.0,
-    "Plan Datos Tigo Empresarial 6.9 (30 GB)": 38300.0,
-    "Plan Datos Tigo Empresarial 6.10 (60 GB)": 47900.0,
-    "Plan Datos Tigo Empresarial 6.11 (110 GB)": 57900.0,
-    "Plan Datos Tigo Empresarial 6.12 (Ilim GB)": 113900.0,
-    "Plan Datos Tigo Empresarial 6.8 FULL TIGO (Ilim GB)": 54900.0
+    "Pospago 5.3 Empresarial (Ilim GB)": 113900.0
 }
-
 PLANES_FIJO = {
-    "Internet Business 300 Mbps (HFC/FTTx)": 88880.0,
-    "Internet Business 500 Mbps (HFC/FTTx)": 115000.0,
-    "Internet Business 700 Mbps (HFC/FTTx)": 180001.0,
-    "Internet Full Tigo Business 500 Mbps": 144000.0,
-    "Internet Full Tigo Business 700 Mbps": 174000.0,
+    "Internet Business 300 Mbps": 88880.0,
+    "Internet Business 500 Mbps": 115000.0,
     "Internet Full Tigo Business 1000 Mbps": 274000.0
 }
 
 # ==========================================
-# 2. CONFIGURACIÓN
+# 2. INTERFAZ DE REGISTRO COMPLETA
 # ==========================================
-st.set_page_config(page_title="CRM Somos Telser - Junio 2026", layout="centered")
+st.set_page_config(page_title="CRM Somos Telser - Junio 2026", layout="wide")
+st.title("🏢 Gestión Integral de Contratos B2B")
 
-if 'df_master' not in st.session_state:
-    if os.path.exists("crm_sistema_maestro.csv"):
-        st.session_state.df_master = pd.read_csv("crm_sistema_maestro.csv")
-    else:
-        st.session_state.df_master = pd.DataFrame(columns=[
-            'DIVISION', 'ID_DOC', 'NOMBRE_CLIENTE', 'ESTADO', 'SERVICIO', 
-            'VALOR_TOTAL', 'ASESOR', 'MUNICIPIO'
-        ])
+div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio")
 
-# ==========================================
-# 3. INTERFAZ DE REGISTRO
-# ==========================================
-st.title("🏢 Gestión de Contratos B2B")
-
-div = st.radio("Seleccione División de Negocio:", ["Móvil", "Fijo"], key="div_radio")
-
-with st.form("registro_total"):
-    col_c, col_r = st.columns(2)
-    with col_c:
-        st.subheader("Datos Cliente")
-        n_doc = st.text_input("N° Documento (NIT/CC):")
-        nombre = st.text_input("Razón Social:")
-        muni = st.text_input("Municipio:")
-    with col_r:
-        st.subheader("Seguimiento")
-        nom_rep = st.text_input("Nombre Rep. Legal:")
+with st.form("registro_full"):
+    # Sección Cliente
+    c1, c2 = st.columns(2)
+    with c1:
+        st.subheader("🏢 Datos del Cliente")
+        t_doc = st.selectbox("Tipo Doc:", ["NIT", "Cédula", "CE", "PPT"])
+        n_doc = st.text_input("Número de Documento:")
+        nombre = st.text_input("Razón Social o Nombre:")
+        dir = st.text_input("Dirección de instalación:")
+        barrio = st.text_input("Barrio:")
+        muni = st.text_input("Municipio / Departamento:")
+        email_cli = st.text_input("Correo Electrónico del Cliente:")
+        movil_cli = st.text_input("Móvil de Contacto:")
+        
+    with c2:
+        st.subheader("👤 Representante Legal")
+        nom_rep = st.text_input("Nombre del Rep. Legal:")
+        cc_rep = st.text_input("Cédula Rep. Legal:")
+        mail_rep = st.text_input("Correo Rep. Legal:")
+        tel_rep = st.text_input("Móvil Rep. Legal:")
+        
+        st.subheader("📊 Estado y Plan")
         estado = st.selectbox("Estado del Proceso:", [
             "En proceso de firma", "Enviado", "Ingreso de pedido", 
             "Instalacion y aprovisionamiento", "Instalado", "Activado", 
             "Cancelado", "Anulado"
         ])
-    
-    st.subheader("Detalle Comercial")
-    tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
-    servicio = st.selectbox("Seleccione el plan:", list(tarifas.keys()))
-    lineas = st.number_input("Cantidad / Líneas:", min_value=1, value=1)
-    
-    # Cálculo de descuento[cite: 1]
+        
+        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
+        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
+        lineas = st.number_input("Cantidad / Líneas:", min_value=1, value=1)
+
+    # Cálculo y Guardado
     dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
     valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
     
-    st.info(f"💰 Resumen: {div} | Plan: {servicio} | Dcto: {dcto}% | Total: ${valor:,.0f} COP")
+    st.info(f"💰 Resumen: {div} | Servicio: {servicio} | Dcto: {dcto}% | Total: ${valor:,.0f} COP")
     
-    if st.form_submit_button("💾 Guardar Registro"):
+    if st.form_submit_button("💾 Guardar Venta Completa"):
+        # Guardado en CSV (incluyendo todos los nuevos campos)
         nueva_fila = pd.DataFrame([{
-            'DIVISION': div, 'ID_DOC': n_doc, 'NOMBRE_CLIENTE': nombre, 
-            'ESTADO': estado, 'SERVICIO': servicio, 'VALOR_TOTAL': valor, 
-            'ASESOR': "ASESOR_ACTUAL", 'MUNICIPIO': muni
+            'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'DIRECCION': dir, 
+            'BARRIO': barrio, 'MUNICIPIO': muni, 'EMAIL': email_cli, 'MOVIL': movil_cli,
+            'REP_LEGAL': nom_rep, 'CC_REP': cc_rep, 'MAIL_REP': mail_rep, 
+            'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'ESTADO': estado
         }])
-        st.session_state.df_master = pd.concat([st.session_state.df_master, nueva_fila], ignore_index=True)
-        st.session_state.df_master.to_csv("crm_sistema_maestro.csv", index=False)
-        st.success("✅ Venta registrada correctamente según portafolio junio 2026[cite: 1].")
+        
+        archivo = "crm_sistema_maestro.csv"
+        if os.path.exists(archivo):
+            base = pd.read_csv(archivo)
+            base = pd.concat([base, nueva_fila], ignore_index=True)
+            base.to_csv(archivo, index=False)
+        else:
+            nueva_fila.to_csv(archivo, index=False)
+            
+        st.success("✅ Venta registrada con toda la información técnica y legal.")
