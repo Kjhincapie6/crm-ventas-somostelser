@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # ==========================================
-# 1. PORTAFOLIO MANUAL (JUNIO 2026)
+# 1. PORTAFOLIO Y DATOS (JUNIO 2026)
 # ==========================================
 PLANES_MOVIL = {
     "Pospago Negocios 4.9 Plus+ (60 GB)": 44900.0,
@@ -24,16 +24,38 @@ PLANES_FIJO = {
     "Internet Full Tigo Business 700 Mbps": 174000.0,
     "Internet Full Tigo Business 1000 Mbps": 274000.0
 }
+
 # ==========================================
-# 2. INTERFAZ DE REGISTRO COMPLETA
+# 2. CONFIGURACIÓN E IDENTIDAD CORPORATIVA
 # ==========================================
 st.set_page_config(page_title="CRM Somos Telser - Junio 2026", layout="wide")
-st.title("🏢 Gestión Integral de Contratos B2B")
 
-div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio")
+# Inicialización de Sesión (Simulada para el usuario conectado)
+if 'correo_asesor' not in st.session_state:
+    st.session_state.correo_asesor = "ASESOR.B2B@SOMOSTELSER.COM"
+
+# Barra Lateral: Identidad y Control
+with st.sidebar:
+    if os.path.exists("logo_somostelser.png"):
+        st.image("logo_somostelser.png", use_container_width=True)
+    else:
+        st.info("⚠️ Logo no encontrado (añade 'logo_somostelser.png')")
+    
+    st.markdown(f"👤 **Asesor:** `{st.session_state.correo_asesor}`")
+    if st.button("🚪 Cerrar Sesión"):
+        st.session_state.correo_asesor = None
+        st.rerun()
+
+# ==========================================
+# 3. INTERFAZ DE REGISTRO OPTIMIZADA
+# ==========================================
+st.title("🏢 Gestión Integral de Contratos B2B")
+st.markdown("---")
+
+# Selector de división con reactividad
+div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
 
 with st.form("registro_full"):
-    # Sección Cliente
     c1, c2 = st.columns(2)
     with c1:
         st.subheader("🏢 Datos del Cliente")
@@ -60,23 +82,26 @@ with st.form("registro_full"):
             "Cancelado", "Anulado"
         ])
         
+        # Selección dinámica de planes
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Cantidad / Líneas:", min_value=1, value=1)
 
-    # Cálculo y Guardado
+    # Cálculo del valor con descuento
     dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
     valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
     
-    st.info(f"💰 Resumen: {div} | Servicio: {servicio} | Dcto: {dcto}% | Total: ${valor:,.0f} COP")
+    # Resumen visual mejorado
+    st.info(f"💰 **Resumen:** División: **{div}** | Servicio: **{servicio}** | Descuento: **{dcto}%** | **Total: ${valor:,.0f} COP**")
     
+    # Guardado de Venta
     if st.form_submit_button("💾 Guardar Venta Completa"):
-        # Guardado en CSV (incluyendo todos los nuevos campos)
         nueva_fila = pd.DataFrame([{
             'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'DIRECCION': dir, 
             'BARRIO': barrio, 'MUNICIPIO': muni, 'EMAIL': email_cli, 'MOVIL': movil_cli,
             'REP_LEGAL': nom_rep, 'CC_REP': cc_rep, 'MAIL_REP': mail_rep, 
-            'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'ESTADO': estado
+            'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'ESTADO': estado,
+            'ASESOR_REGISTRO': st.session_state.correo_asesor
         }])
         
         archivo = "crm_sistema_maestro.csv"
@@ -87,4 +112,4 @@ with st.form("registro_full"):
         else:
             nueva_fila.to_csv(archivo, index=False)
             
-        st.success("✅ Venta registrada con toda la información técnica y legal.")
+        st.success("✅ Venta registrada correctamente con trazabilidad del asesor.")
