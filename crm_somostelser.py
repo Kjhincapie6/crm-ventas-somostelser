@@ -32,36 +32,25 @@ PLANES_FIJO = {
 # ==========================================
 st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
+if not os.path.exists("documentos_ventas"): os.makedirs("documentos_ventas")
+
 if 'correo_asesor' not in st.session_state:
     st.session_state.correo_asesor = None
 
 # --- PANTALLA DE ACCESO ---
 if st.session_state.correo_asesor is None:
     st.title("🔐 Acceso al CRM Somos Telser")
-    st.write("Por favor, selecciona tu perfil para ingresar:")
-    
-    usuario_seleccionado = st.selectbox("Usuario:", [
-        "", 
-        "ADMIN@SOMOSTELSER.COM", 
-        "ASESOR1@SOMOSTELSER.COM", 
-        "ASESOR2@SOMOSTELSER.COM"
-    ])
-    
+    usuario_seleccionado = st.selectbox("Usuario:", ["", "ADMIN@SOMOSTELSER.COM", "ASESOR1@SOMOSTELSER.COM", "ASESOR2@SOMOSTELSER.COM"])
     if st.button("Ingresar al Portal") and usuario_seleccionado != "":
         st.session_state.correo_asesor = usuario_seleccionado
         st.rerun()
     st.stop()
 
-# --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
+# --- SIDEBAR ---
 with st.sidebar:
-    if os.path.exists("logo_somostelser.png"):
-        st.image("logo_somostelser.png", use_container_width=True)
-    
-    # Identificador de rol
+    if os.path.exists("logo_somostelser.png"): st.image("logo_somostelser.png", use_container_width=True)
     es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
-    rol = "👑 Admin" if es_admin else "👤 Asesor"
-    st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
-    
+    st.markdown(f"**{'👑 Admin' if es_admin else '👤 Asesor'}:** `{st.session_state.correo_asesor}`")
     if st.button("🚪 Cerrar Sesión"):
         st.session_state.correo_asesor = None
         st.rerun()
@@ -74,37 +63,9 @@ with st.sidebar:
         if 'FECHA_SEGUIMIENTO' in df_tasks.columns:
             df_tasks['FECHA_SEGUIMIENTO'] = pd.to_datetime(df_tasks['FECHA_SEGUIMIENTO'])
             hoy = pd.Timestamp(date.today())
-            pendientes = df_tasks[(df_tasks['FECHA_SEGUIMIENTO'] <= hoy) & 
-                                 (~df_tasks['ESTADO'].isin(['Activado', 'Anulado']))]
-            if not es_admin:
-                pendientes = pendientes[pendientes['ASESOR'] == st.session_state.correo_asesor]
-            
-            if not pendientes.empty:
-                for _, row in pendientes.iterrows():
-                    st.warning(f"📞 {row['CLIENTE']} | {row['TIPO_SEGUIMIENTO']}")
-            else:
-                st.success("¡Todo al día!")
-
-    st.markdown("---")
-    st.subheader("📊 Dashboard")
-    if os.path.exists("crm_sistema_maestro.csv"):
-        try:
-            df = pd.read_csv("crm_sistema_maestro.csv")
-            if 'ASESOR' not in df.columns: df['ASESOR'] = "Sin Asesor"
-            
-            # --- FILTRO POR ROL ---
-            if not es_admin:
-                df = df[df['ASESOR'] == st.session_state.correo_asesor]
-                
-            if 'DIVISION' in df.columns and not df.empty:
-                st.metric("💰 Ingresos Totales", f"${df['VALOR_TOTAL'].sum():,.0f} COP")
-                st.bar_chart(df['DIVISION'].value_counts())
-                
-                if es_admin:
-                    st.download_button("📥 Exportar CRM", data=df.to_csv(index=False).encode('utf-8'), file_name='CRM_Ventas.csv', mime='text/csv')
-            else:
-                st.caption("Aún no hay ventas registradas.")
-        except: st.caption("Cargando...")
+            pendientes = df_tasks[(df_tasks['FECHA_SEGUIMIENTO'] <= hoy) & (~df_tasks['ESTADO'].isin(['Activado', 'Anulado']))]
+            if not es_admin: pendientes = pendientes[pendientes['ASESOR'] == st.session_state.correo_asesor]
+            for _, row in pendientes.iterrows(): st.warning(f"📞 {row['CLIENTE']} | {row['TIPO_SEGUIMIENTO']}")
 
 # ==========================================
 # 3. INTERFAZ Y AGENTE FINANCIERO
@@ -121,31 +82,33 @@ with tab1:
         nombre = st.text_input("Razón Social o Nombre:")
         dir, barrio, muni = st.text_input("Dirección:"), st.text_input("Barrio:"), st.text_input("Municipio:")
         email_cli, movil_cli, tel_contacto = st.text_input("Departamento:"), st.text_input("Contacto autorizado:"), st.text_input("Móvil Contacto autorizado:")
+        # CAMPO DE DOCUMENTO
+        doc_adjunto = st.file_uploader("📂 Adjuntar documento:", type=["pdf", "jpg", "png"])
     with c2:
-        st.subheader("👤 Representante Legal")
-        nom_rep, cc_rep = st.text_input("Nombre Rep. Legal:"), st.text_input("Cédula Rep. Legal:")
-        mail_rep, tel_rep = st.text_input("Correo Rep. Legal:"), st.text_input("Móvil Rep. Legal:")
         st.subheader("📊 Estado, Plan y Seguimiento")
         estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
         fecha_seg = st.date_input("📅 Fecha de Seguimiento:", value=date.today())
         tipo_seg = st.selectbox("Tipo de Acción:", ["Llamada", "Visita Presencial", "Envío Correo", "Seguimiento WhatsApp"])
         bitacora = st.text_area("📝 Notas / Bitácora:")
-        
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
         valor = (tarifas[servicio] * lineas) * (1 - (30 if lineas >= 9 else 25 if lineas >= 6 else 20 if lineas >= 3 else 10 if lineas == 2 else 0)/100)
-        
         guardar = st.button("💾 Guardar Venta", use_container_width=True)
 
     if guardar:
         if n_doc and nombre:
+            ruta_doc = "No adjunto"
+            if doc_adjunto:
+                ruta_doc = f"documentos_ventas/{n_doc}_{doc_adjunto.name}"
+                with open(ruta_doc, "wb") as f: f.write(doc_adjunto.getbuffer())
+            
             archivo = "crm_sistema_maestro.csv"
             df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
             nueva_fila = pd.DataFrame([{
                 'ID_VENTA': len(df_ex) + 1, 'ASESOR': st.session_state.correo_asesor, 'ESTADO': estado,
-                'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg, 'DIVISION': div, 
-                'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 'VALOR_TOTAL': valor, 
+                'DOCUMENTO_RUTA': ruta_doc, 'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg, 
+                'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 'VALOR_TOTAL': valor, 
                 'BITACORA': bitacora, 'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
             }])
             pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
@@ -156,9 +119,7 @@ with tab2:
     if os.path.exists("crm_sistema_maestro.csv"):
         df_up = pd.read_csv("crm_sistema_maestro.csv")
         if 'ASESOR' not in df_up.columns: df_up['ASESOR'] = "Sin Asesor"
-        
         if not es_admin: df_up = df_up[df_up['ASESOR'] == st.session_state.correo_asesor]
-        
         if not df_up.empty:
             venta_idx = st.selectbox("Selecciona venta:", df_up['ID_VENTA'].astype(str) + " - " + df_up['CLIENTE'])
             id_v = int(venta_idx.split(" - ")[0])
