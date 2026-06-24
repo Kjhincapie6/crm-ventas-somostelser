@@ -370,7 +370,7 @@ with tab2:
 with tab3:
     st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
     
-    archivo = "(crm_sistema_maestro.csv)":
+    archivo = ("crm_sistema_maestro.csv")
     
     if os.path.exists(archivo):
         # Leemos el archivo real
