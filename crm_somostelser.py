@@ -361,12 +361,7 @@ with tab2:
 # ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
-mensaje = (
-    f"✅ Venta {id_venta} actualizada.\n"
-    f"Nuevo estado: {nuevo_estado}"
-)
 
-enviar_telegram(mensaje)
 if st.button(
     "🔄 Guardar Nuevo Estado",
     key="btn_guardar_estado_tab2",
