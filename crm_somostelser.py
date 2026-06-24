@@ -41,6 +41,19 @@ with st.sidebar:
         st.session_state.correo_asesor = None
         st.rerun()
 
+    # DASHBOARD EN LA BARRA LATERAL
+    st.markdown("---")
+    st.subheader("📊 Dashboard")
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_ventas = pd.read_csv("crm_sistema_maestro.csv")
+        if not df_ventas.empty and 'DIVISION' in df_ventas.columns:
+            st.write("Ventas por División")
+            st.bar_chart(df_ventas['DIVISION'].value_counts())
+        else:
+            st.info("Realiza una venta para ver métricas.")
+    else:
+        st.info("Sistema listo.")
+
 st.title("🏢 Gestión Integral de Contratos B2B")
 div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
 
@@ -89,7 +102,7 @@ with st.form("registro_full", clear_on_submit=True):
     
     guardar = st.form_submit_button("💾 Guardar Venta Completa")
 
-# Lógica de guardado y ID_VENTA (Unificada)
+# Lógica de guardado y ID_VENTA
 if guardar:
     if n_doc and nombre:
         archivo = "crm_sistema_maestro.csv"
@@ -111,27 +124,3 @@ if guardar:
         st.success(f"✅ Venta #{nuevo_id} registrada correctamente.")
     else:
         st.error("⚠️ Error: Debe ingresar el Documento y el Nombre del Cliente.")
-
-# ==========================================
-# 4. DASHBOARD EJECUTIVO
-# ==========================================
-st.markdown("---")
-st.subheader("📊 Dashboard de Rendimiento de Ventas")
-
-if os.path.exists("crm_sistema_maestro.csv"):
-    df_ventas = pd.read_csv("crm_sistema_maestro.csv")
-    
-    # Validamos que las columnas existan antes de graficar
-    if not df_ventas.empty and 'DIVISION' in df_ventas.columns and 'ESTADO_FINANCIERO' in df_ventas.columns:
-        col_g1, col_g2 = st.columns(2)
-        with col_g1:
-            st.write("### Ventas por División")
-            st.bar_chart(df_ventas['DIVISION'].value_counts())
-        with col_g2:
-            st.write("### Auditoría Financiera")
-            st.bar_chart(df_ventas['ESTADO_FINANCIERO'].value_counts())
-    else:
-        st.warning("⚠️ El archivo de datos existe pero no tiene el formato correcto (faltan columnas). Por favor, borra el archivo CSV o realiza una nueva venta.")
-else:
-    st.info("ℹ️ Sistema listo: Realiza la primera venta para generar el Dashboard.")
-    st.info("ℹ️ Sistema listo: Realiza la primera venta para generar el Dashboard.")
