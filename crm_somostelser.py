@@ -215,48 +215,13 @@ with tab1:
 # ------------------------------------------
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ------------------------------------------
-# ------------------------------------------
-# PESTAÑA 2: ACTUALIZAR EL ESTADO
-# ------------------------------------------
-# ------------------------------------------
-# PESTAÑA 2: ACTUALIZAR EL ESTADO
-# ------------------------------------------
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
     
     if os.path.exists("crm_sistema_maestro.csv"):
         df_update = pd.read_csv("crm_sistema_maestro.csv")
-        
-        # --- PARCHES DE SEGURIDAD ---
-        if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "Cotizado"
-        if 'ID_VENTA' not in df_update.columns: df_update['ID_VENTA'] = range(1, len(df_update) + 1)
-        if 'CLIENTE' not in df_update.columns: df_update['CLIENTE'] = "Cliente Desconocido"
-        if 'ASESOR' not in df_update.columns: df_update['ASESOR'] = "Sin Asesor"
-        
-        # --- FILTRO ---
-        if not es_admin:
-            df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
-        else:
-            df_mis_ventas = df_update
-            
-        if not df_mis_ventas.empty:
-            opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
-            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist())
-            
-            if venta_seleccionada:
-                id_venta = int(venta_seleccionada.split(" - ")[0])
-                nuevo_estado = st.selectbox("Cambiar estado a:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
-                nueva_fecha = st.date_input("Nueva fecha seguimiento:")
-                
-                if st.button("🔄 Guardar Actualización", use_container_width=True):
-                    df_update.loc[df_update['ID_VENTA'] == id_venta, ['ESTADO', 'FECHA_SEGUIMIENTO']] = [nuevo_estado, nueva_fecha]
-                    df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                    st.success("✅ Actualizado correctamente.")
-                    st.rerun()
-        else:
-            st.warning("No tienes ventas para actualizar.")
-    else:
-        st.info("Aún no hay base de datos. Registra una venta primero.")
+
+
         
         # --- PARCHES DE SEGURIDAD PARA CSV ANTIGUOS ---
         if 'ESTADO' not in df_update.columns:
