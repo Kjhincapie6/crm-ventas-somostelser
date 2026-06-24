@@ -108,7 +108,44 @@ if guardar:
         st.success("✅ Venta registrada correctamente.")
     else:
         st.error("⚠️ Error: Debe ingresar el Documento y el Nombre del Cliente.")
+# ... (tu código del formulario sigue igual hasta aquí) ...
+    guardar = st.form_submit_button("💾 Guardar Venta Completa")
 
+# Lógica de guardado y Agente Financiero
+if guardar:
+    if n_doc and nombre:
+        # Generar Consecutivo (ID_VENTA)
+        archivo = "crm_sistema_maestro.csv"
+        if os.path.exists(archivo):
+            df_existente = pd.read_csv(archivo)
+            nuevo_id = len(df_existente) + 1
+        else:
+            nuevo_id = 1
+        
+        estado_financiero = "APROBADO" if valor >= umbral else "REVISION"
+        
+        nueva_fila = pd.DataFrame([{
+            'ID_VENTA': nuevo_id, # <--- ¡Aquí se asigna el número!
+            'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'DIRECCION': dir, 
+            'BARRIO': barrio, 'MUNICIPIO': muni, 'EMAIL': email_cli, 'MOVIL': movil_cli,
+            'REP_LEGAL': nom_rep, 'CC_REP': cc_rep, 'MAIL_REP': mail_rep, 
+            'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'ESTADO': estado,
+            'ESTADO_FINANCIERO': estado_financiero,
+            'ASESOR_REGISTRO': st.session_state.correo_asesor
+        }])
+        
+        # Guardar en archivo
+        pd.concat([pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame(), nueva_fila]).to_csv(archivo, index=False)
+        st.success(f"✅ Venta #{nuevo_id} registrada correctamente.")
+    else:
+        st.error("⚠️ Error: Debe ingresar el Documento y el Nombre del Cliente.")
+
+# ==========================================
+# 4. DASHBOARD EJECUTIVO (VISUALIZACIÓN)
+# ==========================================
+st.markdown("---")
+st.subheader("📊 Dashboard de Rendimiento de Ventas")
+# ... (tu código del dashboard sigue aquí) ...
 # ==========================================
 # 4. DASHBOARD EJECUTIVO (VISUALIZACIÓN)
 # ==========================================
