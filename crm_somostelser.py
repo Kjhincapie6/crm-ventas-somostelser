@@ -312,7 +312,7 @@ with tab2:
                     ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"]
                 )
                 
-                if st.button("🔄 Guardar Nuevo Estado", use_container_width=True):
+                if st.button("🔄 Guardar Nuevo Estado", key="btn_guardar_estado_tab2", use_container_width=True):
                     df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
                     df_update.to_csv("crm_sistema_maestro.csv", index=False)
                     st.success(f"✅ El estado de la venta ha sido actualizado a '{nuevo_estado}'.")
