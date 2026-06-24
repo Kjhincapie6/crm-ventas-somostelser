@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import random
 import requests
+import altair as alt
 from datetime import date
 
 # ==========================================
@@ -370,7 +371,7 @@ with tab2:
 with tab3:
     st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
     
-    # Asegúrate de usar el nombre de archivo correcto (el optimizado)
+    # Archivo optimizado y limpio
     archivo = "crm_sistema_maestro.csv"
     
     if os.path.exists(archivo):
@@ -382,30 +383,40 @@ with tab3:
             c1, c2, c3 = st.columns(3)
             c1.metric("Total Registros", len(df))
             
-            # Contar ventas instaladas
             instaladas = len(df[df['ESTADO'] == 'Instalado'])
             c2.metric("Ventas Instaladas", instaladas)
             
-            # Contar Portafolio (Fijo vs Móvil)
             fijos = len(df[df['PORTAFOLIO'] == 'FIJO'])
             moviles = len(df[df['PORTAFOLIO'] == 'MOVIL'])
             c3.metric("Fijo vs Móvil", f"{fijos} | {moviles}")
             
             st.divider()
             
-            # 2. Gráficos
+            # 2. Gráficos con Altair (Colores Personalizados)
             col1, col2 = st.columns(2)
             
             with col1:
                 st.markdown("#### 📈 Ventas por Estado")
-                estado_counts = df['ESTADO'].value_counts()
-                st.bar_chart(estado_counts)
+                estado_data = df['ESTADO'].value_counts().reset_index()
+                estado_data.columns = ['ESTADO', 'CANTIDAD']
+                
+                chart1 = alt.Chart(estado_data).mark_bar(color='#2ecc71').encode(
+                    x='ESTADO',
+                    y='CANTIDAD'
+                )
+                st.altair_chart(chart1, use_container_width=True)
                 
             with col2:
-                st.markdown("#### 📊 Distribución Portafolio (Fijo vs Móvil)")
-                # Aquí graficamos específicamente la columna PORTAFOLIO
-                portafolio_counts = df['PORTAFOLIO'].value_counts()
-                st.bar_chart(portafolio_counts)
+                st.markdown("#### 📊 Portafolio (Fijo vs Móvil)")
+                portafolio_data = df['PORTAFOLIO'].value_counts().reset_index()
+                portafolio_data.columns = ['PORTAFOLIO', 'CANTIDAD']
+                
+                chart2 = alt.Chart(portafolio_data).mark_bar().encode(
+                    x='PORTAFOLIO',
+                    y='CANTIDAD',
+                    color=alt.Color('PORTAFOLIO', scale=alt.Scale(range=['#3498db', '#e74c3c']))
+                )
+                st.altair_chart(chart2, use_container_width=True)
             
             st.divider()
             
