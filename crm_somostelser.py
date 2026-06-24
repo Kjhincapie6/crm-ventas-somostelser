@@ -41,20 +41,33 @@ with st.sidebar:
         st.session_state.correo_asesor = None
         st.rerun()
 
-    # DASHBOARD EN LA BARRA LATERAL
+    # ASISTENTE DE PRECIOS INTELIGENTE
+    st.markdown("---")
+    st.subheader("🤖 Asistente de Precios")
+    consulta = st.text_input("¿Qué oferta buscas?")
+    if consulta:
+        portafolio_total = {**PLANES_MOVIL, **PLANES_FIJO}
+        resultados = {k: v for k, v in portafolio_total.items() if consulta.lower() in k.lower()}
+        if resultados:
+            for plan, precio in resultados.items():
+                st.write(f"✅ *{plan}*: **${precio:,.0f}**")
+        else:
+            st.warning("No encontrado.")
+
+    # DASHBOARD
     st.markdown("---")
     st.subheader("📊 Dashboard")
     if os.path.exists("crm_sistema_maestro.csv"):
-        df_ventas = pd.read_csv("crm_sistema_maestro.csv")
-        if not df_ventas.empty and 'DIVISION' in df_ventas.columns:
-            st.write("Ventas por División")
-            st.bar_chart(df_ventas['DIVISION'].value_counts())
-        else:
-            st.info("Realiza una venta para ver métricas.")
+        try:
+            df_ventas = pd.read_csv("crm_sistema_maestro.csv")
+            if 'DIVISION' in df_ventas.columns and not df_ventas.empty:
+                st.bar_chart(df_ventas['DIVISION'].value_counts())
+        except:
+            st.info("Cargando datos...")
     else:
-        st.info("Sistema listo.")
+        st.info("Realiza una venta.")
 
-# TÍTULOS CON IDENTIDAD
+# TÍTULOS
 st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
 div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
@@ -79,54 +92,3 @@ with st.form("registro_full", clear_on_submit=True):
         nom_rep = st.text_input("Nombre del Rep. Legal:")
         cc_rep = st.text_input("Cédula Rep. Legal:")
         mail_rep = st.text_input("Correo Rep. Legal:")
-        tel_rep = st.text_input("Móvil Rep. Legal:")
-        st.subheader("📊 Estado y Plan")
-        estado = st.selectbox("Estado del Proceso:", ["En proceso de firma", "Enviado", "Ingreso de pedido", "Instalacion y aprovisionamiento", "Instalado", "Activado", "Cancelado", "Anulado"])
-        
-        # NUEVA BITÁCORA COLABORATIVA
-        bitacora = st.text_area("📝 Notas / Bitácora de seguimiento:")
-        
-        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
-        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
-        lineas = st.number_input("Cantidad / Líneas:", min_value=1, value=1)
-
-    dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
-    valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
-    umbral = 35000.0
-    es_rentable = valor >= umbral
-    
-    if n_doc and nombre and valor > 0:
-        if es_rentable:
-            st.success("✅ Venta financieramente saludable.")
-        else:
-            st.warning("⚠️ Alerta: Rentabilidad baja, requiere aprobación gerencial.")
-    else:
-        st.info("ℹ️ Complete los datos del cliente para auditar la rentabilidad.")
-        
-    st.info(f"💰 **Resumen:** {div} | {servicio} | Dcto: {dcto}% | **Total: ${valor:,.0f} COP**")
-    
-    guardar = st.form_submit_button("💾 Guardar Venta Completa")
-
-# Lógica de guardado y ID_VENTA
-if guardar:
-    if n_doc and nombre:
-        archivo = "crm_sistema_maestro.csv"
-        df_existente = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
-        nuevo_id = len(df_existente) + 1
-        
-        estado_financiero = "APROBADO" if es_rentable else "REVISION"
-        nueva_fila = pd.DataFrame([{
-            'ID_VENTA': nuevo_id,
-            'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'DIRECCION': dir, 
-            'BARRIO': barrio, 'MUNICIPIO': muni, 'EMAIL': email_cli, 'MOVIL': movil_cli,
-            'REP_LEGAL': nom_rep, 'CC_REP': cc_rep, 'MAIL_REP': mail_rep, 
-            'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'ESTADO': estado,
-            'ESTADO_FINANCIERO': estado_financiero,
-            'BITACORA': bitacora, # Se guarda la nota aquí
-            'ASESOR_REGISTRO': st.session_state.correo_asesor
-        }])
-        
-        pd.concat([df_existente, nueva_fila]).to_csv(archivo, index=False)
-        st.success(f"✅ Venta #{nuevo_id} registrada correctamente.")
-    else:
-        st.error("⚠️ Error: Debe ingresar el Documento y el Nombre del Cliente.")
