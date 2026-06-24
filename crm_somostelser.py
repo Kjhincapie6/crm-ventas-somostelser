@@ -189,7 +189,7 @@ st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
 
 # --- LAS PESTAÑAS ---
-tab1, tab2 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de Venta"])
+tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de Venta", "📊 Base de Datos"])
 
 # ------------------------------------------
 # PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
