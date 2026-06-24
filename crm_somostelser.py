@@ -9,9 +9,10 @@ from datetime import date
 # TELEGRAM
 # ==========================================
 def enviar_telegram(mensaje):
-    TOKEN = "..."
-    CHAT_ID = "..."
-
+    TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" 
+    # REEMPLAZA EL ID DE ABAJO POR TU ID NUMÉRICO REAL (sin @)
+    CHAT_ID = "1415966548" 
+    
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     params = {"chat_id": CHAT_ID, "text": mensaje}
 
@@ -310,59 +311,6 @@ with tab1:
 # ------------------------------------------
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ------------------------------------------
-
-                carpeta_documentos = "documentos_clientes"
-
-                if not os.path.exists(carpeta_documentos):
-                    os.makedirs(carpeta_documentos)
-
-                archivos_guardados = []
-
-                if archivo_subido:
-                    for archivo_doc in archivo_subido:
-
-                        nombre_archivo = f"{n_doc}_{archivo_doc.name}"
-
-                        ruta_archivo = os.path.join(
-                            carpeta_documentos,
-                            nombre_archivo
-                        )
-
-                        with open(ruta_archivo, "wb") as f:
-                            f.write(archivo_doc.getbuffer())
-
-                        archivos_guardados.append(nombre_archivo)
-
-                archivo = "crm_sistema_maestro.csv"
-                df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
-
-                nueva_fila = pd.DataFrame([{
-                    'ID_VENTA': len(df_ex) + 1,
-                    'ASESOR': st.session_state.correo_asesor,
-                    'ESTADO': estado,
-                    'DIVISION': div,
-                    'NIT': n_doc,
-                    'CLIENTE': nombre,
-                    'SERVICIO': servicio,
-                    'VALOR_TOTAL': valor,
-                    'BITACORA': bitacora,
-                    'DOCUMENTOS': ";".join(archivos_guardados),
-                    'ESTADO_FINANCIERO': (
-                        "APROBADO" if valor >= 35000 else "REVISION"
-                    )
-                }])
-
-                pd.concat(
-                    [df_ex, nueva_fila],
-                    ignore_index=True
-                ).to_csv(archivo, index=False)
-
-                st.success("✅ Venta registrada correctamente.")
-                st.rerun()
-
-# ------------------------------------------
-# PESTAÑA 2: ACTUALIZAR EL ESTADO
-# ------------------------------------------
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
     
@@ -415,13 +363,6 @@ with tab2:
     else:
         st.info("Aún no hay base de datos creada.")
 # 1. Función definida al inicio (fuera de cualquier 'with' o 'if')
-def enviar_telegram(mensaje):
-    TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" 
-    # REEMPLAZA EL ID DE ABAJO POR TU ID NUMÉRICO REAL (sin @)
-    CHAT_ID = "1415966548" 
-    
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    params = {"chat_id": CHAT_ID, "text": mensaje}
     
     try:
         respuesta = requests.get(url, params=params)
