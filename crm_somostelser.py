@@ -338,24 +338,20 @@ with tab2:
                 st.info(f"📌 Estado Actual: **{estado_actual}**")
                 
 # 1. Función definida al inicio (fuera de cualquier 'with' o 'if')
-# Asegúrate de definir esto una sola vez en tu archivo
 def enviar_telegram(mensaje):
-    TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" # Usa tu token nuevo
-    CHAT_ID = "@SomosTelserAlbot"
+    TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" 
+    # REEMPLAZA EL ID DE ABAJO POR TU ID NUMÉRICO REAL (sin @)
+    CHAT_ID = "3015704518" 
     
-    # URL ÚNICA Y CLARA
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    
-    # Parámetros enviados como diccionario para evitar errores
     params = {"chat_id": CHAT_ID, "text": mensaje}
     
-    # Ejecución única
-    respuesta = requests.get(url, params=params)
-    
-    if respuesta.status_code == 200:
-        st.success("✅ ¡Mensaje enviado!")
-    else:
-        st.error(f"❌ Error {respuesta.status_code}: {respuesta.text}")
+    try:
+        respuesta = requests.get(url, params=params)
+        if respuesta.status_code == 200:
+            st.success("✅ ¡Mensaje enviado!")
+        else:
+            st.error(f"❌ Error {respuesta.status_code}: {respuesta.text}")
     except Exception as e:
         st.error(f"❌ Error: {e}")
 
