@@ -49,7 +49,7 @@ if st.session_state.correo_asesor is None:
     if st.button("Ingresar al Portal") and usuario_seleccionado != "":
         st.session_state.correo_asesor = usuario_seleccionado
         st.rerun()
-    st.stop() # Detiene la app aquí si no han iniciado sesión
+    st.stop()
 
 # --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
 with st.sidebar:
@@ -89,7 +89,6 @@ with st.sidebar:
                 df = df[df['ASESOR'] == st.session_state.correo_asesor]
                 
             if 'DIVISION' in df.columns and not df.empty:
-                # Sumatoria de ingresos para el perfil actual
                 st.metric("💰 Ingresos Totales", f"${df['VALOR_TOTAL'].sum():,.0f} COP")
                 st.bar_chart(df['DIVISION'].value_counts())
                 
@@ -112,11 +111,11 @@ with st.sidebar:
 st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
 
-# --- PESTAÑAS PARA CREAR Y ACTUALIZAR ---
-tab1, tab2 = st.tabs(["📝 Registrar Nueva Venta", "🔄 Actualizar Seguimiento"])
+# --- LAS PESTAÑAS ---
+tab1, tab2 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de Venta"])
 
 # ------------------------------------------
-# PESTAÑA 1: CREAR VENTA NUEVA
+# PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
 # ------------------------------------------
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
@@ -143,19 +142,18 @@ with tab1:
         tel_rep = st.text_input("Móvil Rep. Legal:")
         
         st.subheader("📊 Estado y Plan")
-        # El estado inicial se fija en "En proceso de firma" para no confundir al inicio
-        estado_inicial = st.selectbox("Estado:", ["En proceso de firma"])
+        estado = st.selectbox("Estado:", ["En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
         bitacora = st.text_area("📝 Notas / Bitácora:")
         
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
         
-        # CÁLCULO FINANCIERO DINÁMICO (EN VIVO)
+        # CÁLCULO FINANCIERO DINÁMICO
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         
-        # --- NUEVO PANEL DE VALOR COMERCIAL ---
+        # PANEL DE VALOR COMERCIAL
         frases = [
             "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
             "💎 La calidad de tu servicio es nuestra mayor ventaja.",
@@ -173,3 +171,67 @@ with tab1:
             """, unsafe_allow_html=True)
         
         guardar = st.button("💾 Guardar Venta", use_container_width=True)
+
+    if guardar:
+        if n_doc and nombre:
+            archivo = "crm_sistema_maestro.csv"
+            df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
+            nueva_fila = pd.DataFrame([{
+                'ID_VENTA': len(df_ex) + 1, 
+                'ASESOR': st.session_state.correo_asesor, 
+                'ESTADO': estado, # <-- SE GUARDA EL ESTADO QUE ELEGISTE
+                'DIVISION': div, 
+                'NIT': n_doc, 
+                'CLIENTE': nombre,
+                'SERVICIO': servicio, 
+                'VALOR_TOTAL': valor, 
+                'BITACORA': bitacora,
+                'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
+            }])
+            pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
+            st.success("✅ Venta registrada correctamente.")
+            st.rerun()
+        else:
+            st.error("⚠️ Faltan datos obligatorios.")
+
+# ------------------------------------------
+# PESTAÑA 2: ACTUALIZAR EL ESTADO
+# ------------------------------------------
+with tab2:
+    st.subheader("🔄 Actualizar Seguimiento de Venta")
+    
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_update = pd.read_csv("crm_sistema_maestro.csv")
+        
+        if 'ESTADO' not in df_update.columns:
+            df_update['ESTADO'] = "En proceso de firma"
+            
+        if not es_admin and 'ASESOR' in df_update.columns:
+            df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
+        else:
+            df_mis_ventas = df_update
+            
+        if not df_mis_ventas.empty:
+            opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
+            venta_seleccionada = st.selectbox("Selecciona la venta que deseas actualizar:", opciones_ventas.tolist())
+            
+            if venta_seleccionada:
+                id_venta = int(venta_seleccionada.split(" - ")[0])
+                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
+                
+                st.info(f"📌 Estado Actual: **{estado_actual}**")
+                
+                nuevo_estado = st.selectbox(
+                    "Cambiar estado a:", 
+                    ["En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"]
+                )
+                
+                if st.button("🔄 Guardar Nuevo Estado", use_container_width=True):
+                    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
+                    df_update.to_csv("crm_sistema_maestro.csv", index=False)
+                    st.success(f"✅ El estado de la venta ha sido actualizado a '{nuevo_estado}'.")
+                    st.rerun()
+        else:
+            st.warning("No tienes ventas registradas para actualizar.")
+    else:
+        st.info("Aún no hay base de datos creada. Registra una venta primero.")
