@@ -2,6 +2,15 @@ import streamlit as st
 import pandas as pd
 import os
 import random
+from datetime import date
+
+# --- DEFINICIÓN SEGURA INICIAL (ESTO VA DE PRIMERO) ---
+if 'correo_asesor' not in st.session_state:
+    st.session_state.correo_asesor = None
+
+es_admin = False 
+if st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM":
+    es_admin = True
 
 # ==========================================
 # 1. PORTAFOLIO Y DATOS
