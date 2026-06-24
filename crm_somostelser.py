@@ -365,36 +365,62 @@ with tab2:
     else:
         st.info("Aún no hay base de datos creada.")
 # ==========================================
-# PESTAÑA 3: VISUALIZACIÓN DE LA DATA
+# PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ==========================================
 with tab3:
-    st.subheader("📊 Base de Datos Maestra")
+    st.subheader("📊 Dashboard y Base de Datos Maestra")
     
-    if os.path.exists("crm_sistema_maestro.csv"):
-        df_maestra = pd.read_csv("crm_sistema_maestro.csv")
+    archivo = "Somostelser.csv"
+    
+    if os.path.exists(archivo):
+        df_maestra = pd.read_csv(archivo)
         
-        # Si NO es admin, solo ve sus propias ventas
-        if not es_admin and 'ASESOR' in df_maestra.columns:
-            df_maestra = df_maestra[df_maestra['ASESOR'] == st.session_state.correo_asesor]
+        # Filtro de seguridad: Si NO es admin, solo ve sus propias ventas
+        # Nota: Usamos 'CREADO_POR' porque es la columna que existe en tu archivo real
+        if not es_admin and 'CREADO_POR' in df_maestra.columns:
+            df_maestra = df_maestra[df_maestra['CREADO_POR'] == st.session_state.correo_asesor]
             
         if not df_maestra.empty:
-            # 1. Tarjetas de Resumen
+            # --- 1. TARJETAS DE MÉTRICAS CLAVE ---
             c1, c2, c3 = st.columns(3)
-            c1.metric("Total de Ventas", len(df_maestra))
+            c1.metric("Total de Ventas (Histórico)", len(df_maestra))
             
-            if 'VALOR_TOTAL' in df_maestra.columns:
-                ingresos = df_maestra['VALOR_TOTAL'].sum()
-                c2.metric("Ingresos Totales", f"${ingresos:,.0f} COP")
-                
             if 'ESTADO' in df_maestra.columns:
-                ventas_cerradas = len(df_maestra[df_maestra['ESTADO'] == "Activado"])
-                c3.metric("Ventas Activadas", ventas_cerradas)
+                # En tu archivo real vi que usan "Instalado" u otros estados
+                ventas_exitosas = len(df_maestra[df_maestra['ESTADO'] == "Instalado"])
+                c2.metric("Ventas Instaladas", ventas_exitosas)
+                
+            if 'PORTAFOLIO' in df_maestra.columns:
+                ventas_fijas = len(df_maestra[df_maestra['PORTAFOLIO'] == "FIJO"])
+                c3.metric("Servicios Fijos", ventas_fijas)
+                
+            st.divider() # Línea separadora visual
             
-            # 2. Muestra la tabla interactiva en pantalla
+            # --- 2. ZONA DE GRÁFICOS (ANALÍTICA VISUAL) ---
+            col_graf1, col_graf2 = st.columns(2)
+            
+            with col_graf1:
+                st.markdown("#### 📈 Distribución por Estado")
+                if 'ESTADO' in df_maestra.columns:
+                    # Agrupamos y contamos cuántas ventas hay por cada estado
+                    resumen_estado = df_maestra['ESTADO'].value_counts()
+                    st.bar_chart(resumen_estado)
+                    
+            with col_graf2:
+                st.markdown("#### 📊 Distribución por Portafolio")
+                if 'PORTAFOLIO' in df_maestra.columns:
+                    # Agrupamos y contamos ventas por portafolio (Fijo vs Móvil)
+                    resumen_portafolio = df_maestra['PORTAFOLIO'].value_counts()
+                    st.bar_chart(resumen_portafolio)
+                    
+            st.divider()
+            
+            # --- 3. TABLA DE DATOS INTERACTIVA ---
             st.markdown("### 📋 Registro Detallado")
+            # st.dataframe permite buscar, ordenar y hacer scroll en la tabla
             st.dataframe(df_maestra, use_container_width=True)
             
         else:
-            st.info("No hay datos para mostrar en este momento.")
+            st.info("No hay datos para mostrar con los filtros actuales.")
     else:
         st.info("La base de datos aún no se ha creado. Registra la primera venta.")
