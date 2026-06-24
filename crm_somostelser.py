@@ -423,4 +423,4 @@ with tab3:
                 st.dataframe(df, use_container_width=True)
                 
         except Exception as e:
-            st.error(f"Error al leer el archivo: {e}. Por favor revisa el
+            st.error(f"Error al leer el archivo: {e}. Por favor revisa el formato del CSV.")
