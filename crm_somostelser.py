@@ -338,11 +338,20 @@ with tab2:
                 st.info(f"📌 Estado Actual: **{estado_actual}**")
                 
                 # PEGA EL CÓDIGO AQUÍ:
-                nombre_cliente_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'CLIENTE'].values[0]
-                mensaje_soporte = f"Hola, necesito asistencia con la venta del cliente {nombre_cliente_actual} (ID: {id_venta})."
-                url_soporte = f"https://t.me/TuUsuarioDeTelegram?text={mensaje_soporte.replace(' ', '%20')}"
-                st.link_button("📩 Consultar al Admin por Telegram", url_soporte, use_container_width=True)
-                
+
+def probar_bot():
+    token = "8942591199:AAF8CLBH9dBowNxj4SHRr0pIiFyuIyX6zR4"
+    chat_id = "3015704518" # El que sacaste de @userinfobot
+    mensaje = "¡Hola! Probando integración con CRM Somos Telser."
+    url = f"https://api.telegram.org/@SomosTelserAIbot/sendMessage?chat_id={chat_id}&text={mensaje}"
+    respuesta = requests.get(url)
+    if respuesta.status_code == 200:
+        st.success("✅ ¡Mensaje enviado con éxito!")
+    else:
+        st.error("❌ Falló el envío. Revisa tu token o ID.")
+
+if st.button("Enviar mensaje de prueba a Telegram"):
+    probar_bot()
                 # Luego sigue el resto de tu código de actualización...
                 nuevo_estado = st.selectbox(...)
 
