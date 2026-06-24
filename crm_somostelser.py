@@ -79,9 +79,6 @@ with st.sidebar:
     rol = "👑 Admin" if es_admin else "👤 Asesor"
     st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
     
-    if st.button("🚪 Cerrar Sesión"):
-        st.session_state.correo_asesor = None
-        st.rerun()
 
     st.markdown("---")
     st.subheader("🤖 Asistente de Ofertas")
@@ -101,6 +98,11 @@ with st.sidebar:
     if os.path.exists("crm_sistema_maestro.csv"):
         try:
             df = pd.read_csv("crm_sistema_maestro.csv")
+
+
+     if st.button("🚪 Cerrar Sesión"):
+        st.session_state.correo_asesor = None
+        st.rerun()
             
             # --- FILTRO POR ROL ---
             if not es_admin and 'ASESOR' in df.columns:
