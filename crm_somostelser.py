@@ -182,7 +182,6 @@ with st.sidebar:
                 st.caption("Aún no hay ventas registradas.")
         except: 
             st.caption("Cargando...")
-
 # ==========================================
 # 3. INTERFAZ Y AGENTE FINANCIERO
 # ==========================================
