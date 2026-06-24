@@ -320,8 +320,10 @@ with tab1:
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
     
-    if os.path.exists("crm_sistema_maestro.csv"):
-        df_update = pd.read_csv("crm_sistema_maestro.csv")
+    if os.path.exists(archivo):
+        try:
+        df = pd.read_csv(archivo, encoding='utf-8', on_bad_lines='skip', engine='python')
+        df = df.dropna(how='all')
         
         # Parches de seguridad
         if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "En proceso de firma"
