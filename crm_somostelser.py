@@ -361,23 +361,11 @@ with tab2:
 # ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
+mensaje = (
+    f"✅ Venta {id_venta} actualizada.\n"
+    f"Nuevo estado: {nuevo_estado}"
+)
 
-if st.button("🔄 Guardar Nuevo Estado",
-             key="btn_guardar_estado_tab2",
-             use_container_width=True):
+enviar_telegram(mensaje).")
 
-    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
-    df_update.to_csv("crm_sistema_maestro.csv", index=False)
 
-    mensaje = (
-        f"✅ Venta {id_venta} actualizada.\n"
-        f"Nuevo estado: {nuevo_estado}"
-    )
-
-    enviar_telegram(mensaje)
-
-    st.success(
-        f"✅ El estado de la venta ha sido actualizado a '{nuevo_estado}'."
-    )
-
-    st.rerun()
