@@ -68,10 +68,21 @@ with st.sidebar:
         if 'FECHA_SEGUIMIENTO' in df_tasks.columns:
             df_tasks['FECHA_SEGUIMIENTO'] = pd.to_datetime(df_tasks['FECHA_SEGUIMIENTO'])
             hoy = pd.Timestamp(date.today())
-            pendientes = df_tasks[(df_tasks['FECHA_SEGUIMIENTO'] <= hoy) & (~df_tasks['ESTADO'].isin(['Cotizado', 'Anulado']))]
-            if not es_admin: pendientes = pendientes[pendientes['ASESOR'] == st.session_state.correo_asesor]
-            for _, row in pendientes.iterrows(): st.warning(f"📞 {row['CLIENTE']} | {row['TIPO_SEGUIMIENTO']}")
-            else: st.success("¡Todo al día!")
+            
+            # CAMBIO AQUÍ: Filtramos solo para Cotizado o En proceso de firma
+            pendientes = df_tasks[
+                (df_tasks['FECHA_SEGUIMIENTO'] <= hoy) & 
+                (df_tasks['ESTADO'].isin(['Cotizado', 'En proceso de firma']))
+            ]
+            
+            if not es_admin: 
+                pendientes = pendientes[pendientes['ASESOR'] == st.session_state.correo_asesor]
+            
+            if not pendientes.empty:
+                for _, row in pendientes.iterrows(): 
+                    st.warning(f"📞 {row['CLIENTE']} | {row['TIPO_SEGUIMIENTO']}")
+            else: 
+                st.success("¡Todo al día!")
                 
     
         # Identificador de rol
