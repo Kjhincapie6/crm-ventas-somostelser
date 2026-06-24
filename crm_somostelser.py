@@ -375,10 +375,10 @@ with tab3:
     if os.path.exists(archivo):
         df_maestra = pd.read_csv(archivo)
         
-        # Filtro de seguridad: Si NO es admin, solo ve sus propias ventas
-        # Nota: Usamos 'CREADO_POR' porque es la columna que existe en tu archivo real
-        if not es_admin and 'CREADO_POR' in df_maestra.columns:
-            df_maestra = df_maestra[df_maestra['CREADO_POR'] == st.session_state.correo_asesor]
+        # --- FILTRO DESACTIVADO TEMPORALMENTE ---
+        # Para que puedas ver toda la data y los gráficos sin importar tu usuario.
+        # if not es_admin and 'CREADO_POR' in df_maestra.columns:
+        #     df_maestra = df_maestra[df_maestra['CREADO_POR'] == st.session_state.correo_asesor]
             
         if not df_maestra.empty:
             # --- 1. TARJETAS DE MÉTRICAS CLAVE ---
@@ -386,7 +386,6 @@ with tab3:
             c1.metric("Total de Ventas (Histórico)", len(df_maestra))
             
             if 'ESTADO' in df_maestra.columns:
-                # En tu archivo real vi que usan "Instalado" u otros estados
                 ventas_exitosas = len(df_maestra[df_maestra['ESTADO'] == "Instalado"])
                 c2.metric("Ventas Instaladas", ventas_exitosas)
                 
@@ -394,33 +393,32 @@ with tab3:
                 ventas_fijas = len(df_maestra[df_maestra['PORTAFOLIO'] == "FIJO"])
                 c3.metric("Servicios Fijos", ventas_fijas)
                 
-            st.divider() # Línea separadora visual
+            st.divider()
             
-            # --- 2. ZONA DE GRÁFICOS (ANALÍTICA VISUAL) ---
+            # --- 2. ZONA DE GRÁFICOS ---
             col_graf1, col_graf2 = st.columns(2)
             
             with col_graf1:
                 st.markdown("#### 📈 Distribución por Estado")
                 if 'ESTADO' in df_maestra.columns:
-                    # Agrupamos y contamos cuántas ventas hay por cada estado
+                    # Cuenta cuántos hay de cada estado y grafica
                     resumen_estado = df_maestra['ESTADO'].value_counts()
                     st.bar_chart(resumen_estado)
                     
             with col_graf2:
-                st.markdown("#### 📊 Distribución por Portafolio")
+                st.markdown("#### 📊 Portafolio (Fijo vs Móvil)")
                 if 'PORTAFOLIO' in df_maestra.columns:
-                    # Agrupamos y contamos ventas por portafolio (Fijo vs Móvil)
+                    # Cuenta cuántos hay de cada portafolio y grafica
                     resumen_portafolio = df_maestra['PORTAFOLIO'].value_counts()
                     st.bar_chart(resumen_portafolio)
                     
             st.divider()
             
-            # --- 3. TABLA DE DATOS INTERACTIVA ---
+            # --- 3. TABLA COMPLETA ---
             st.markdown("### 📋 Registro Detallado")
-            # st.dataframe permite buscar, ordenar y hacer scroll en la tabla
             st.dataframe(df_maestra, use_container_width=True)
             
         else:
-            st.info("No hay datos para mostrar con los filtros actuales.")
+            st.info("El archivo CSV está completamente vacío.")
     else:
-        st.info("La base de datos aún no se ha creado. Registra la primera venta.")
+        st.info("La base de datos aún no se ha creado. Asegúrate de que 'Somostelser.csv' esté en la misma carpeta.")
