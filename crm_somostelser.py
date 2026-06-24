@@ -115,4 +115,14 @@ with tab2:
         df_up = pd.read_csv("crm_sistema_maestro.csv")
         if not es_admin: df_up = df_up[df_up['ASESOR'] == st.session_state.correo_asesor]
         
-        if not df_up
+        if not df_up.empty:
+            venta_idx = st.selectbox("Selecciona venta:", df_up['ID_VENTA'].astype(str) + " - " + df_up['CLIENTE'])
+            id_v = int(venta_idx.split(" - ")[0])
+            
+            # AGREGAMOS "Cotizado" AQUÍ TAMBIÉN
+            nuevo_est = st.selectbox("Cambiar estado a:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+            if st.button("🔄 Actualizar"):
+                df_up.loc[df_up['ID_VENTA'] == id_v, 'ESTADO'] = nuevo_est
+                df_up.to_csv("crm_sistema_maestro.csv", index=False)
+                st.success("✅ Actualizado.")
+                st.rerun()
