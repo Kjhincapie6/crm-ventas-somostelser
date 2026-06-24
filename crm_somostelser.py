@@ -76,13 +76,17 @@ with st.form("registro_full", clear_on_submit=True):
     dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
     valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
     umbral = 35000.0
-    es_rentable = valor >= umbral
     
-    # Visualización del Agente
-    if es_rentable:
-        st.success("✅ Venta financieramente saludable.")
+    # NUEVA VALIDACIÓN: Solo validamos si hay datos suficientes
+    if n_doc and nombre and valor > 0:
+        es_rentable = valor >= umbral
+        if es_rentable:
+            st.success("✅ Venta financieramente saludable.")
+        else:
+            st.warning("⚠️ Alerta: Rentabilidad baja, requiere aprobación gerencial.")
     else:
-        st.warning("⚠️ Alerta: Rentabilidad baja, requiere aprobación gerencial.")
+        # Mensaje neutro mientras se digita
+        st.info("ℹ️ Complete los datos del cliente para auditar la rentabilidad.")
         
     st.info(f"💰 **Resumen:** {div} | {servicio} | Dcto: {dcto}% | **Total: ${valor:,.0f} COP**")
     
