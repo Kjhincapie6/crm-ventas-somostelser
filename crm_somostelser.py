@@ -26,7 +26,7 @@ PLANES_FIJO = {
 }
 
 # ==========================================
-# 2. CONFIGURACIÓN
+# 2. CONFIGURACIÓN E IDENTIDAD
 # ==========================================
 st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
@@ -66,7 +66,8 @@ with st.sidebar:
 # 3. INTERFAZ Y AGENTE FINANCIERO
 # ==========================================
 st.title("📡 Portal de Ventas Somos Telser")
-div = st.radio("Seleccione División:", ["Móvil", "Fijo"], horizontal=True)
+st.subheader("Gestión Inteligente de Contratos B2B")
+div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
 tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
 
 with st.form("registro_full", clear_on_submit=True):
@@ -77,15 +78,21 @@ with st.form("registro_full", clear_on_submit=True):
         n_doc = st.text_input("Número de Documento:")
         nombre = st.text_input("Razón Social o Nombre:")
         dir = st.text_input("Dirección:")
+        barrio = st.text_input("Barrio:")
+        muni = st.text_input("Municipio:")
     with c2:
+        st.subheader("👤 Representante Legal")
+        nom_rep = st.text_input("Nombre Rep. Legal:")
+        cc_rep = st.text_input("Cédula Rep. Legal:")
         st.subheader("📊 Estado y Plan")
+        estado = st.selectbox("Estado:", ["En proceso de firma", "Ingreso de pedido", "Activado"])
+        bitacora = st.text_area("📝 Notas / Bitácora:")
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
-        lineas = st.number_input("Líneas/Cantidad:", min_value=1, value=1)
+        lineas = st.number_input("Líneas:", min_value=1, value=1)
         
-        # CÁLCULO DINÁMICO
+        # Cálculo financiero dinámico
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
-        
         st.info(f"💰 **Total: ${valor:,.0f} COP** (Dcto: {dcto}%)")
         guardar = st.form_submit_button("💾 Guardar Venta")
 
@@ -95,10 +102,11 @@ if guardar:
         df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
         nueva_fila = pd.DataFrame([{
             'ID_VENTA': len(df_ex) + 1, 'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre,
-            'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
+            'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'BITACORA': bitacora,
+            'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
         }])
         pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
-        st.success("✅ Venta registrada.")
+        st.success("✅ Venta registrada correctamente.")
         st.rerun()
     else:
-        st.error("⚠️ Faltan datos.")
+        st.error("⚠️ Faltan datos obligatorios.")
