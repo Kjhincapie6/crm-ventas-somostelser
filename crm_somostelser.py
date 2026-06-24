@@ -373,11 +373,18 @@ with tab3:
     st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
     
     # Archivo optimizado y limpio
-    archivo = "crm_sistema_maestro.csv"
+    archivo_original = "crm_sistema_maestro.csv"
+    df = pd.read_csv(archivo_original)
     
-    if os.path.exists(archivo):
-        # Leemos el archivo optimizado
-        df = pd.read_csv(archivo)
+# 2. Eliminamos las columnas que NO quieres
+columnas_a_borrar = ['ID', 'SERVICIO', 'FRENTE', 'AGENCIA', 'CONVERGENTE']
+df = df.drop(columns=[c for c in columnas_a_borrar if c in df.columns])
+
+# 3. Guardamos REEMPLAZANDO el archivo maestro
+# index=False evita que se cree la columna extra de índices
+df.to_csv("crm_sistema_maestro.csv", index=False)
+
+print("¡Archivo 'crm_sistema_maestro.csv' limpio y reducido con éxito!")
             
         if not df.empty:
             # 1. Métricas Rápidas
