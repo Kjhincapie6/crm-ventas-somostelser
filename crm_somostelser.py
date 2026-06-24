@@ -70,15 +70,18 @@ with st.sidebar:
     if os.path.exists("logo_somostelser.png"):
         st.image("logo_somostelser.png", use_container_width=True)
     
+    # Identificador de rol
     rol = "👑 Admin" if es_admin else "👤 Asesor"
     st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
     
-    # Botón de cierre de sesión con clave única
+    # Botón único de cierre de sesión
     if st.button("🚪 Cerrar Sesión", key="btn_cerrar_sesion"):
         st.session_state.correo_asesor = None
         st.rerun()
 
     st.markdown("---")
+    st.subheader("🔔 Tareas Pendientes")
+    # ... aquí continúa tu código de tareas pendientes ...
 
 # --- TAREAS PENDIENTES ---
     st.markdown("---")
