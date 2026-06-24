@@ -271,9 +271,17 @@ if guardar:
             'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
         }])
 
-        pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
-        st.success("✅ Venta registrada correctamente.")
-        st.rerun()
+        # --- NUEVA VERSIÓN DE PRUEBA ---
+        df_final = pd.concat([df_ex, nueva_fila], ignore_index=True)
+        df_final.to_csv(archivo, index=False)
+        
+        # Muestra una tabla rápida para ver si se guardó en memoria
+        st.write("Datos guardados en memoria:")
+        st.dataframe(df_final)
+        
+        st.success(f"✅ Venta registrada. Total filas actuales: {len(df_final)}")
+        if st.button("Recargar para ver en Dashboard"):
+            st.rerun()
     else:
         st.error("⚠️ Faltan datos obligatorios.")
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
