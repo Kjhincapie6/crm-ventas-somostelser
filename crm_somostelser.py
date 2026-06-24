@@ -3,18 +3,6 @@ import pandas as pd
 import os
 
 # ==========================================
-# 0. SEGURIDAD (AUTENTICACIÓN)
-# ==========================================
-def check_password():
-    if "pw" not in st.session_state:
-        st.text_input("🔑 Acceso al Portal:", type="password", key="pw")
-        return False
-    return st.session_state["pw"] == "TELSER2026"
-
-if not check_password():
-    st.stop()
-
-# ==========================================
 # 1. PORTAFOLIO Y DATOS
 # ==========================================
 PLANES_MOVIL = {
@@ -42,13 +30,8 @@ PLANES_FIJO = {
 # ==========================================
 st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
-if 'correo_asesor' not in st.session_state:
-    st.session_state.correo_asesor = "ASESOR.B2B@SOMOSTELSER.COM"
-
 with st.sidebar:
-    if os.path.exists("logo_somostelser.png"):
-        st.image("logo_somostelser.png", use_container_width=True)
-    st.markdown(f"👤 **Asesor:** `{st.session_state.correo_asesor}`")
+    st.markdown("### 👤 Asesor B2B")
     
     st.markdown("---")
     st.subheader("🤖 Asistente de Ofertas")
@@ -85,7 +68,6 @@ st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
 div = st.radio("Seleccione División:", ["Móvil", "Fijo"], horizontal=True)
 
-# Definir tarifas según selección
 tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
 
 with st.form("registro_full", clear_on_submit=True):
@@ -95,18 +77,12 @@ with st.form("registro_full", clear_on_submit=True):
         t_doc = st.selectbox("Tipo Doc:", ["NIT", "Cédula", "CE", "PPT"])
         n_doc = st.text_input("Número de Documento:")
         nombre = st.text_input("Razón Social o Nombre:")
-        dir = st.text_input("Dirección:")
-        email_cli = st.text_input("Correo Cliente:")
     with c2:
         st.subheader("📊 Estado y Plan")
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
-        bitacora = st.text_area("📝 Notas / Bitácora:")
-        
-        # CÁLCULO DINÁMICO DEL VALOR TOTAL
         valor_final = tarifas[servicio] * lineas
         st.info(f"💰 **Total Estimado: ${valor_final:,.0f} COP**")
-        
         guardar = st.form_submit_button("💾 Guardar Venta")
 
 if guardar:
@@ -115,7 +91,7 @@ if guardar:
         df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
         nueva_fila = pd.DataFrame([{
             'ID_VENTA': len(df_ex) + 1, 'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre,
-            'SERVICIO': servicio, 'VALOR_TOTAL': valor_final, 'BITACORA': bitacora
+            'SERVICIO': servicio, 'VALOR_TOTAL': valor_final
         }])
         pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
         st.success("✅ Venta registrada correctamente.")
