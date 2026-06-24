@@ -370,54 +370,50 @@ with tab2:
 with tab3:
     st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
     
-    archivo = "crm_sistema_maestro.csv"
+    # Asegúrate de usar el nombre de archivo correcto (el optimizado)
+    archivo = "CRM_Somostelser_Optimizado.csv"
     
     if os.path.exists(archivo):
-        # Leemos el archivo real
+        # Leemos el archivo optimizado
         df = pd.read_csv(archivo)
-        
-        # --- FILTRO DESACTIVADO PARA VISUALIZACIÓN ---
-        # Si quieres volver a filtrar por asesor, descomenta las líneas de abajo:
-        # if not es_admin and 'CREADO_POR' in df.columns:
-        #     df = df[df['CREADO_POR'] == st.session_state.correo_asesor]
             
         if not df.empty:
             # 1. Métricas Rápidas
             c1, c2, c3 = st.columns(3)
             c1.metric("Total Registros", len(df))
             
-            # Contar ventas instaladas (usando tu columna ESTADO)
+            # Contar ventas instaladas
             instaladas = len(df[df['ESTADO'] == 'Instalado'])
             c2.metric("Ventas Instaladas", instaladas)
             
-            # Contar portafolio FIJO
+            # Contar Portafolio (Fijo vs Móvil)
             fijos = len(df[df['PORTAFOLIO'] == 'FIJO'])
-            c3.metric("Portafolio FIJO", fijos)
+            moviles = len(df[df['PORTAFOLIO'] == 'MOVIL'])
+            c3.metric("Fijo vs Móvil", f"{fijos} | {moviles}")
             
             st.divider()
             
-            # 2. Gráficos basados en tus columnas reales
+            # 2. Gráficos
             col1, col2 = st.columns(2)
             
             with col1:
                 st.markdown("#### 📈 Ventas por Estado")
-                # Contamos cuántos hay por estado
                 estado_counts = df['ESTADO'].value_counts()
                 st.bar_chart(estado_counts)
                 
             with col2:
-                st.markdown("#### 📊 Ventas por Frente")
-                # Contamos cuántos hay por frente (FIJO/MOVIL)
-                frente_counts = df['FRENTE'].value_counts()
-                st.bar_chart(frente_counts)
+                st.markdown("#### 📊 Distribución Portafolio (Fijo vs Móvil)")
+                # Aquí graficamos específicamente la columna PORTAFOLIO
+                portafolio_counts = df['PORTAFOLIO'].value_counts()
+                st.bar_chart(portafolio_counts)
             
             st.divider()
             
-            # 3. Dataframe interactivo (para que el Admin vea todo)
+            # 3. Dataframe interactivo
             st.markdown("### 📋 Base de Datos Somostelser")
             st.dataframe(df, use_container_width=True)
             
         else:
             st.warning("El archivo CSV no tiene datos.")
     else:
-        st.error(f"No se encuentra el archivo {archivo}. Asegúrate de subirlo al servidor.")
+        st.error(f"No se encuentra el archivo {archivo}. Asegúrate de haberlo subido a GitHub.")
