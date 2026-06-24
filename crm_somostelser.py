@@ -66,6 +66,7 @@ if st.session_state.correo_asesor is None:
 es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
 
 # --- SIDEBAR ---
+# --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
 with st.sidebar:
     if os.path.exists("logo_somostelser.png"):
         st.image("logo_somostelser.png", use_container_width=True)
@@ -74,14 +75,13 @@ with st.sidebar:
     rol = "👑 Admin" if es_admin else "👤 Asesor"
     st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
     
-    # Botón único de cierre de sesión
-    if st.button("🚪 Cerrar Sesión", key="btn_cerrar_sesion"):
+    # ÚNICO BOTÓN DE CERRAR SESIÓN
+    if st.button("🚪 Cerrar Sesión", key="btn_unico_cerrar"):
         st.session_state.correo_asesor = None
         st.rerun()
 
     st.markdown("---")
-    st.subheader("🔔 Tareas Pendientes")
-    # ... aquí continúa tu código de tareas pendientes ...
+    # Aquí siguen tus Tareas Pendientes...
 
 # --- TAREAS PENDIENTES ---
     st.markdown("---")
