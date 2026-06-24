@@ -44,8 +44,6 @@ PLANES_FIJO = {
 # ==========================================
 # 2. CONFIGURACIÓN E IDENTIDAD (SISTEMA DE LOGIN)
 # ==========================================
-st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
-
 if 'correo_asesor' not in st.session_state:
     st.session_state.correo_asesor = None
 
@@ -210,7 +208,7 @@ with tab1:
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         
-              # PANEL DE VALOR COMERCIAL
+        # PANEL DE VALOR COMERCIAL
         frases = [
             "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
             "💎 La calidad de tu servicio es nuestra mayor ventaja.",
