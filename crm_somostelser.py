@@ -63,8 +63,22 @@ if st.session_state.correo_asesor is None:
             
     st.stop() # Detiene la ejecución aquí hasta que el usuario ingrese correctamente
 
-# --- SI PASA EL STOP, YA SABEMOS QUE EL CORREO EXISTE ---
-es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
+# --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
+with st.sidebar:
+    if os.path.exists("logo_somostelser.png"):
+        st.image("logo_somostelser.png", use_container_width=True)
+    
+    # Identificador de rol
+    rol = "👑 Admin" if es_admin else "👤 Asesor"
+    st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
+    
+    if st.button("🚪 Cerrar Sesión"):
+        st.session_state.correo_asesor = None
+        st.rerun()
+
+    st.markdown("---")
+    st.subheader("🔔 Tareas Pendientes")
+    # ... resto de tu código de tareas ...
 
 # --- TAREAS PENDIENTES ---
     st.markdown("---")
