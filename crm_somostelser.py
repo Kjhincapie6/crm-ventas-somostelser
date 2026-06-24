@@ -325,7 +325,9 @@ with tab2:
                 if st.button("🔄 Guardar Nuevo Estado", key="btn_guardar_estado_tab2", use_container_width=True):
                     df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
                     df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                    st.success(f"✅ El estado de la venta ha sido actualizado a '{nuevo_estado}'.")
+                    mensaje_notificacion = f"✅ Venta ID {id_venta} actualizada.\nNuevo Estado: {nuevo_estado}"
+                    enviar_telegram(mensaje_notificacion)
+                    st.success(f"✅ El estado de la venta ha sido actualizado a '{nuevo_estado}' y se ha enviado la notificación.")
                     st.rerun()
         else:
             st.warning("No tienes ventas registradas para actualizar.")
