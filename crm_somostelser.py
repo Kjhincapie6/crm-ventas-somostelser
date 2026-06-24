@@ -337,19 +337,18 @@ with tab2:
                 
                 st.info(f"📌 Estado Actual: **{estado_actual}**")
                 
-# --- DEFINICIÓN DE LA FUNCIÓN (SIN ESPACIOS AL INICIO) ---
 def probar_bot():
     token = "8942591199:AAF8CLBH9dBowNxj4SHRr0pIiFyuIyX6zR4"
     chat_id = "3015704518"
     mensaje = "¡Hola! Probando integración con CRM Somos Telser."
-    url = f"https://api.telegram.org/@SomosTelserAIbot/sendMessage"
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
     params = {"chat_id": chat_id, "text": mensaje}
+    
     respuesta = requests.get(url, params=params)
+    
     if respuesta.status_code == 200:
         st.success("✅ ¡Mensaje enviado con éxito!")
     else:
+        # AQUÍ VEMOS EL ERROR REAL
         st.error(f"❌ Falló el envío. Código: {respuesta.status_code}")
-
-# --- EN LA PESTAÑA DONDE QUIERAS EL BOTÓN ---
-if st.button("Enviar mensaje de prueba a Telegram"):
-    probar_bot()
+        st.write("Detalle del error:", respuesta.json())
