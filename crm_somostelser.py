@@ -1,8 +1,8 @@
+Python
 import streamlit as st
 import pandas as pd
 import os
 import random
-import requests
 from datetime import date
 
 # --- DEFINICIÓN SEGURA INICIAL (ESTO VA DE PRIMERO) ---
@@ -285,7 +285,6 @@ if guardar:
             st.rerun()
     else:
         st.error("⚠️ Faltan datos obligatorios.")
-        
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ------------------------------------------
 with tab2:
@@ -325,20 +324,13 @@ with tab2:
                 if st.button("🔄 Guardar Nuevo Estado", key="btn_guardar_estado_tab2", use_container_width=True):
                     df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
                     df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                    mensaje_notificacion = f"✅ Venta ID {id_venta} actualizada.\nNuevo Estado: {nuevo_estado}"
-                    enviar_telegram(mensaje_notificacion)
-                    st.success(f"✅ El estado de la venta ha sido actualizado a '{nuevo_estado}' y se ha enviado la notificación.")
+                    st.success(f"✅ El estado de la venta ha sido actualizado a '{nuevo_estado}'.")
                     st.rerun()
         else:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
         st.info("Aún no hay base de datos creada. Registra una venta primero.")
-        if venta_seleccionada:
-                id_venta = int(venta_seleccionada.split(" - ")[0])
-                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
-                
-                st.info(f"📌 Estado Actual: **{estado_actual}**")
-                
+
 # 1. Función definida al inicio (fuera de cualquier 'with' o 'if')
 def enviar_telegram(mensaje):
     TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" 
