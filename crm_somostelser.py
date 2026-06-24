@@ -83,6 +83,9 @@ with st.form("registro_full", clear_on_submit=True):
         st.subheader("📊 Estado y Plan")
         estado = st.selectbox("Estado del Proceso:", ["En proceso de firma", "Enviado", "Ingreso de pedido", "Instalacion y aprovisionamiento", "Instalado", "Activado", "Cancelado", "Anulado"])
         
+        # NUEVA BITÁCORA COLABORATIVA
+        bitacora = st.text_area("📝 Notas / Bitácora de seguimiento:")
+        
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Cantidad / Líneas:", min_value=1, value=1)
@@ -119,6 +122,7 @@ if guardar:
             'REP_LEGAL': nom_rep, 'CC_REP': cc_rep, 'MAIL_REP': mail_rep, 
             'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'ESTADO': estado,
             'ESTADO_FINANCIERO': estado_financiero,
+            'BITACORA': bitacora, # Se guarda la nota aquí
             'ASESOR_REGISTRO': st.session_state.correo_asesor
         }])
         
