@@ -115,22 +115,21 @@ if guardar:
 st.markdown("---")
 st.subheader("📊 Dashboard de Rendimiento de Ventas")
 
+# Verificamos si el archivo existe y tiene datos
 if os.path.exists("crm_sistema_maestro.csv"):
     df_ventas = pd.read_csv("crm_sistema_maestro.csv")
     
-    # Creamos dos columnas para los gráficos
-    col_g1, col_g2 = st.columns(2)
-    
-    with col_g1:
-        st.write("### Ventas por División")
-        # Agrupamos los datos para el gráfico de pastel
-        data_division = df_ventas['DIVISION'].value_counts()
-        st.bar_chart(data_division) # Histograma simple y claro
+    if not df_ventas.empty:
+        col_g1, col_g2 = st.columns(2)
         
-    with col_g2:
-        st.write("### Distribución por Estado Financiero")
-        # Agrupamos por estado financiero
-        data_estado = df_ventas['ESTADO_FINANCIERO'].value_counts()
-        st.bar_chart(data_estado)
+        with col_g1:
+            st.write("### Ventas por División")
+            st.bar_chart(df_ventas['DIVISION'].value_counts())
+            
+        with col_g2:
+            st.write("### Auditoría Financiera")
+            st.bar_chart(df_ventas['ESTADO_FINANCIERO'].value_counts())
+    else:
+        st.warning("⚠️ El archivo de datos está vacío. Realiza tu primera venta para visualizar el dashboard.")
 else:
-    st.info("ℹ️ Aún no hay datos suficientes para generar gráficos.")
+    st.info("ℹ️ Sistema listo: Realiza la primera venta para generar el Dashboard de rendimiento.")
