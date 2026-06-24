@@ -341,7 +341,7 @@ with tab2:
 def enviar_telegram(mensaje):
     TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" 
     # REEMPLAZA EL ID DE ABAJO POR TU ID NUMÉRICO REAL (sin @)
-    CHAT_ID = "3015704518" 
+    CHAT_ID = "1415966548" 
     
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     params = {"chat_id": CHAT_ID, "text": mensaje}
