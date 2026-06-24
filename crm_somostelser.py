@@ -310,14 +310,6 @@ with tab1:
 # ------------------------------------------
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ------------------------------------------
-        guardar = st.button(
-            "💾 Guardar Venta",
-            key="btn_guardar_venta_tab2",
-            use_container_width=True
-        )
-
-        if guardar:
-            if n_doc and nombre:
 
                 carpeta_documentos = "documentos_clientes"
 
@@ -367,9 +359,6 @@ with tab1:
 
                 st.success("✅ Venta registrada correctamente.")
                 st.rerun()
-
-            else:
-                st.error("⚠️ Faltan datos obligatorios.")
 
 # ------------------------------------------
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
