@@ -339,18 +339,23 @@ with tab2:
                 
 # 1. Función definida al inicio (fuera de cualquier 'with' o 'if')
 def enviar_telegram(mensaje):
-    TOKEN = "TU_NUEVO_TOKEN_AQUI" # Pega aquí el token recién generado
+    # Asegúrate de poner el token nuevo que generaste tras revocar el anterior
+    TOKEN = "8942591199:AAGQp9uUO890p_YWPufpxKbKGVwUvrrVjnI" 
     CHAT_ID = "3015704518"
+    
+    # AQUÍ ESTÁ EL SECRETO: f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    
     params = {"chat_id": CHAT_ID, "text": mensaje}
+    
     try:
         respuesta = requests.get(url, params=params)
         if respuesta.status_code == 200:
             st.success("✅ ¡Mensaje enviado!")
         else:
-            st.error(f"❌ Error {respuesta.status_code}: {respuesta.json().get('description')}")
+            st.error(f"❌ Error {respuesta.status_code}: {respuesta.text}")
     except Exception as e:
-        st.error(f"❌ Falló la conexión: {e}")
+        st.error(f"❌ Error: {e}")
 
 # 2. El botón de prueba (Colócalo en la Pestaña 2)
 with tab2:
