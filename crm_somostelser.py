@@ -210,29 +210,19 @@ with st.form("registro_full", clear_on_submit=True):
 
 
 
+# ... (Todo tu código anterior permanece igual) ...
+
 if guardar:
-
     if n_doc and nombre:
-
         archivo = "crm_sistema_maestro.csv"
-
         df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
-
         nueva_fila = pd.DataFrame([{
-
             'ID_VENTA': len(df_ex) + 1, 'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre,
-
-            'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'BITACORA': bitacora,
-
-            'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
-
+            'SERVICIO': servicio, 'VALOR_TOTAL': (PLANES_MOVIL if div == "Móvil" else PLANES_FIJO)[servicio] * lineas,
+            'BITACORA': bitacora
         }])
-
         pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
-
         st.success("✅ Venta registrada correctamente.")
-
+        st.rerun() # <--- AGREGA ESTA LÍNEA PARA REFRESCO AUTOMÁTICO
     else:
-
-        st.error("⚠️ Faltan datos obligatorios.") 
-
+        st.error("⚠️ Faltan datos obligatorios.")
