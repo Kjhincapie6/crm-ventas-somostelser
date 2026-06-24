@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # ==========================================
-# 1. PORTAFOLIO Y DATOS (JUNIO 2026)
+# 1. PORTAFOLIO Y DATOS
 # ==========================================
 PLANES_MOVIL = {
     "Pospago Negocios 4.9 Plus+ (60 GB)": 44900.0,
@@ -42,10 +42,10 @@ with st.sidebar:
         st.rerun()
 
 st.title("🏢 Gestión Integral de Contratos B2B")
-div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
+div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_seleccion", horizontal=True)
 
 # ==========================================
-# 3. INTERFAZ Y AGENTE FINANCIERO
+# 3. FORMULARIO Y AGENTE FINANCIERO (NODO FINAL)
 # ==========================================
 with st.form("registro_full", clear_on_submit=True):
     c1, c2 = st.columns(2)
@@ -66,84 +66,35 @@ with st.form("registro_full", clear_on_submit=True):
         mail_rep = st.text_input("Correo Rep. Legal:")
         tel_rep = st.text_input("Móvil Rep. Legal:")
         st.subheader("📊 Estado y Plan")
-        estado = st.selectbox("Estado del Proceso:", ["En proceso de firma", "Enviado", "Ingreso de pedido", "Instalacion y aprovisionamiento", "Instalado", "Activado", "Cancelado", "Anulado"])
+        estado = st.selectbox("Estado del Proceso:", [
+            "En proceso de firma", "Enviado", "Ingreso de pedido", 
+            "Instalacion y aprovisionamiento", "Instalado", "Activado", "Cancelado", "Anulado"
+        ])
         
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Cantidad / Líneas:", min_value=1, value=1)
 
-    # Lógica de Agente Financiero
-    dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
-    valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
-    umbral = 35000.0
-    
-    # NUEVA VALIDACIÓN: Solo validamos si hay datos suficientes
-    if n_doc and nombre and valor > 0:
-        es_rentable = valor >= umbral
-        if es_rentable:
-            st.success("✅ Venta financieramente saludable.")
-        else:
-            st.warning("⚠️ Alerta: Rentabilidad baja, requiere aprobación gerencial.")
-    else:
-        # Mensaje neutro mientras se digita
-        st.info("ℹ️ Complete los datos del cliente para auditar la rentabilidad.")
-        
-    st.info(f"💰 **Resumen:** {div} | {servicio} | Dcto: {dcto}% | **Total: ${valor:,.0f} COP**")
-    
-    # Botón siempre visible
-    guardar = st.form_submit_button("💾 Guardar Venta Completa")
-
-if guardar:
-    nueva_fila = pd.DataFrame([{
-        'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'DIRECCION': dir, 
-        'BARRIO': barrio, 'MUNICIPIO': muni, 'EMAIL': email_cli, 'MOVIL': movil_cli,
-        'REP_LEGAL': nom_rep, 'CC_REP': cc_rep, 'MAIL_REP': mail_rep, 
-        'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'ESTADO': estado,
-        'ASESOR_REGISTRO': st.session_state.correo_asesor
-    }])
-    archivo = "crm_sistema_maestro.csv"
-    pd.concat([pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame(), nueva_fila]).to_csv(archivo, index=False)
-    st.success("✅ Venta registrada correctamente.")
-
-# ... (Tu código de configuración y formulario anterior) ...
-
-    # 1. CÁLCULO (INPUT DEL AGENTE)
+    # Cálculo preliminar
     dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
     valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
     
-    # 2. BOTÓN DE GUARDAR
+    # Botón único de guardado
     submitted = st.form_submit_button("💾 Guardar Venta Completa")
 
-# ==========================================
-# 3. INTERFAZ Y AGENTE FINANCIERO
-# ==========================================
-st.title("🏢 Gestión Integral de Contratos B2B")
-div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
-
-# Definimos el formulario
-with st.form("registro_full", clear_on_submit=True):
-    # ... (Tus campos de columnas c1, c2 aquí) ...
-    
-    # Cálculo interno del formulario
-    dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
-    valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
-    
-    # Botón de envío
-    submitted = st.form_submit_button("💾 Guardar Venta Completa")
-
-    # --- NODO DE DECISIÓN (DENTRO DEL FORMULARIO) ---
+    # --- NODO DE DECISIÓN (EL AGENTE FINANCIERO AL FINAL) ---
     if submitted:
         if n_doc and nombre:
             umbral = 35000.0
-            # Nodo Financiero
-            if valor >= umbral:
-                estado_financiero = "APROBADO"
-                st.success(f"✅ Venta procesada. Estado: {estado_financiero}")
-            else:
-                estado_financiero = "REVISION"
-                st.warning(f"⚠️ Alerta: Rentabilidad baja. Estado: {estado_financiero}.")
+            estado_financiero = "APROBADO" if valor >= umbral else "REVISION"
             
-            # Nodo de registro
+            # Mensaje del Agente
+            if estado_financiero == "APROBADO":
+                st.success("✅ Venta procesada. Estado: APROBADO")
+            else:
+                st.warning("⚠️ Alerta: Rentabilidad baja. Estado: REVISION. Requiere aprobación gerencial.")
+            
+            # Nodo de Registro (Persistencia)
             nueva_fila = pd.DataFrame([{
                 'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 
                 'VALOR_TOTAL': valor, 'ESTADO_FINANCIERO': estado_financiero,
@@ -151,7 +102,6 @@ with st.form("registro_full", clear_on_submit=True):
             }])
             
             archivo = "crm_sistema_maestro.csv"
-            # Guardado
             pd.concat([pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame(), nueva_fila]).to_csv(archivo, index=False)
         else:
-            st.error("⚠️ Faltan datos obligatorios para el registro.")
+            st.error("⚠️ Error en el nodo de entrada: Faltan datos obligatorios (NIT/Nombre).")
