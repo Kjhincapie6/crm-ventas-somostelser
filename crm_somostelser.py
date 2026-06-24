@@ -62,7 +62,6 @@ if st.session_state.correo_asesor is None:
             
     st.stop() 
 
-
 # --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
 with st.sidebar:
     if os.path.exists("logo_somostelser.png"):
