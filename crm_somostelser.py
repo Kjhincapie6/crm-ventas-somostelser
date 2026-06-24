@@ -280,7 +280,7 @@ if guardar:
         st.dataframe(df_final)
         
         st.success(f"✅ Venta registrada. Total filas actuales: {len(df_final)}")
-        if st.button("Recargar para ver en Dashboard", key="btn_recargar_dashboard"):
+        if st.button("Recargar para ver en Dashboard"):
             st.rerun()
     else:
         st.error("⚠️ Faltan datos obligatorios.")
