@@ -237,15 +237,13 @@ with tab1:
      if archivo_subido:
             st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
 
-        # Esta línea debe tener la misma indentación que 'if archivo_subido:'
+        # Esta línea debe tener el mismo nivel de indentación que 'if archivo_subido:'
         guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
 
-# Esta parte debe estar alineada al borde izquierdo (o al mismo nivel de 'with tab1:')
-if guardar
+# (Esto debe estar ALINEADO A LA IZQUIERDA, fuera de 'with tab1:')
+if guardar:
     if n_doc and nombre:
-
         carpeta_documentos = "documentos_clientes"
-
         if not os.path.exists(carpeta_documentos):
             os.makedirs(carpeta_documentos)
 
