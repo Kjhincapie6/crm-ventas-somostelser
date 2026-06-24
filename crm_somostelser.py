@@ -8,6 +8,7 @@ from datetime import date
 # ==========================================
 # TELEGRAM
 # ==========================================
+# 1. Función definida al inicio (fuera de cualquier 'with' o 'if')
 def enviar_telegram(mensaje):
     TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" 
     # REEMPLAZA EL ID DE ABAJO POR TU ID NUMÉRICO REAL (sin @)
@@ -34,7 +35,6 @@ with tab2:
         enviar_telegram("¡Hola! La integración con Somos Telser funciona correctamente.")
 
     # ... tu código existente de selectbox y ventas ..
-
 
 # --- DEFINICIÓN SEGURA INICIAL (ESTO VA DE PRIMERO) ---
 if 'correo_asesor' not in st.session_state:
