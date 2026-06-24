@@ -286,20 +286,21 @@ if guardar:
         st.error("⚠️ Faltan datos obligatorios.")
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ------------------------------------------
+# ------------------------------------------
+# PESTAÑA 2: ACTUALIZAR EL ESTADO
+# ------------------------------------------
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
     
     if os.path.exists("crm_sistema_maestro.csv"):
         df_update = pd.read_csv("crm_sistema_maestro.csv")
         
-        # --- PARCHES DE SEGURIDAD PARA CSV ANTIGUOS ---
-        if 'ESTADO' not in df_update.columns:
-            df_update['ESTADO'] = "En proceso de firma"
-        if 'ID_VENTA' not in df_update.columns:
-            df_update['ID_VENTA'] = range(1, len(df_update) + 1)
-        if 'CLIENTE' not in df_update.columns:
-            df_update['CLIENTE'] = "Cliente Desconocido"
-            
+        # Parches de seguridad
+        if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "En proceso de firma"
+        if 'ID_VENTA' not in df_update.columns: df_update['ID_VENTA'] = range(1, len(df_update) + 1)
+        if 'CLIENTE' not in df_update.columns: df_update['CLIENTE'] = "Cliente Desconocido"
+        
+        # Filtrar por asesor si no es admin
         if not es_admin and 'ASESOR' in df_update.columns:
             df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
         else:
@@ -307,59 +308,35 @@ with tab2:
             
         if not df_mis_ventas.empty:
             opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
-            venta_seleccionada = st.selectbox("Selecciona la venta que deseas actualizar:", opciones_ventas.tolist())
+            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist())
             
             if venta_seleccionada:
+                # Obtenemos el ID y buscamos la fila real
                 id_venta = int(venta_seleccionada.split(" - ")[0])
-                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
+                fila_idx = df_update.index[df_update['ID_VENTA'] == id_venta][0]
+                estado_actual = df_update.at[fila_idx, 'ESTADO']
+                nombre_cliente = df_update.at[fila_idx, 'CLIENTE']
                 
                 st.info(f"📌 Estado Actual: **{estado_actual}**")
                 
                 nuevo_estado = st.selectbox(
                     "Cambiar estado a:", 
-                    ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"]
+                    ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
+                    key="select_nuevo_estado"
                 )
                 
-                if st.button("🔄 Guardar Nuevo Estado", key="btn_guardar_estado_tab2", use_container_width=True):
-                    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
+                if st.button("🔄 Guardar Nuevo Estado", key="btn_guardar_estado_tab2"):
+                    # 1. Actualizamos el DataFrame usando los índices correctos
+                    df_update.at[fila_idx, 'ESTADO'] = nuevo_estado
                     df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                    st.success(f"✅ El estado de la venta ha sido actualizado a '{nuevo_estado}'.")
+                    
+                    # 2. Notificación a Telegram
+                    mensaje = f"✅ Venta {id_venta} ({nombre_cliente}) actualizada a: {nuevo_estado}"
+                    enviar_telegram(mensaje)
+                    
+                    st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
                     st.rerun()
         else:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
-        st.info("Aún no hay base de datos creada. Registra una venta primero.")
-
-# 1. Función definida al inicio (fuera de cualquier 'with' o 'if')
-def enviar_telegram(mensaje):
-    TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" 
-    # REEMPLAZA EL ID DE ABAJO POR TU ID NUMÉRICO REAL (sin @)
-    CHAT_ID = "1415966548" 
-    
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    params = {"chat_id": CHAT_ID, "text": mensaje}
-    
-    try:
-        respuesta = requests.get(url, params=params)
-        if respuesta.status_code == 200:
-            st.success("✅ ¡Mensaje enviado!")
-        else:
-            st.error(f"❌ Error {respuesta.status_code}: {respuesta.text}")
-    except Exception as e:
-        st.error(f"❌ Error: {e}")
-
-# 2. El botón de prueba (Colócalo en la Pestaña 2)
-if st.button("Guardar Cambios"):
-    # 1. ACTUALIZA EL CSV
-    # (Aquí va tu lógica actual que ya tienes, por ejemplo:)
-    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = estado_nuevo
-    df_update.to_csv("crm_sistema_maestro.csv", index=False)
-    
-    # 2. ENVÍA LA NOTIFICACIÓN AUTOMÁTICA
-    # Asegúrate de usar los nombres de variables exactos que definiste arriba
-    mensaje = f"✅ Venta actualizada.\nCliente: {cliente_seleccionado}\nNuevo Estado: {estado_nuevo}"
-    
-    # Llama a la función que ya creamos al inicio del archivo
-    enviar_telegram(mensaje)
-    
-    st.success("¡Venta actualizada y notificada!")
+        st.info("Aún no hay base de datos creada.")
