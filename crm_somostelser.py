@@ -341,11 +341,10 @@ with tab2:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
         st.info("Aún no hay base de datos creada.")
-        # --- 1. DEFINICIÓN DE LA FUNCIÓN (AL PRINCIPIO DE TODO) ---
-# --- FUNCIÓN DEFINIDA AL PRINCIPIO ---
+# 1. Función definida al inicio (fuera de cualquier 'with' o 'if')
 def enviar_telegram(mensaje):
-    TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg"
-    # AQUÍ PONEMOS TU ID REAL:
+    TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" 
+    # REEMPLAZA EL ID DE ABAJO POR TU ID NUMÉRICO REAL (sin @)
     CHAT_ID = "1415966548" 
     
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -358,4 +357,14 @@ def enviar_telegram(mensaje):
         else:
             st.error(f"❌ Error {respuesta.status_code}: {respuesta.text}")
     except Exception as e:
-        st.error(f"❌ Error técnico: {e}")
+        st.error(f"❌ Error: {e}")
+
+# 2. El botón de prueba (Colócalo en la Pestaña 2)
+with tab2:
+    st.subheader("🔄 Actualizar Seguimiento de Venta")
+    
+    # Botón de prueba fijo en la pestaña 2
+    if st.button("Enviar mensaje de prueba a Telegram", key="btn_test_telegram"):
+        enviar_telegram("¡Hola! La integración con Somos Telser funciona correctamente.")
+
+    # ... tu código existente de selectbox y ventas ..
