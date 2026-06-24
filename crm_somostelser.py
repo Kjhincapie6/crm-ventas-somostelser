@@ -43,7 +43,9 @@ if st.session_state.correo_asesor is None:
         "", 
         "ADMIN@SOMOSTELSER.COM", 
         "ASESOR1@SOMOSTELSER.COM", 
-        "ASESOR2@SOMOSTELSER.COM"
+        "ASESOR2@SOMOSTELSER.COM",
+        "ASESOR3@SOMOSTELSER.COM",
+        "ASESOR4@SOMOSTELSER.COM"
     ])
     
     if st.button("Ingresar al Portal") and usuario_seleccionado != "":
@@ -51,10 +53,26 @@ if st.session_state.correo_asesor is None:
         st.rerun()
     st.stop()
 
+
 # --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
 with st.sidebar:
     if os.path.exists("logo_somostelser.png"):
         st.image("logo_somostelser.png", use_container_width=True)
+
+
+# --- TAREAS PENDIENTES ---
+    st.markdown("---")
+    st.subheader("🔔 Tareas Pendientes")
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_tasks = pd.read_csv("crm_sistema_maestro.csv")
+        if 'FECHA_SEGUIMIENTO' in df_tasks.columns:
+            df_tasks['FECHA_SEGUIMIENTO'] = pd.to_datetime(df_tasks['FECHA_SEGUIMIENTO'])
+            hoy = pd.Timestamp(date.today())
+            pendientes = df_tasks[(df_tasks['FECHA_SEGUIMIENTO'] <= hoy) & (~df_tasks['ESTADO'].isin(['Activado', 'Anulado']))]
+            if not es_admin: pendientes = pendientes[pendientes['ASESOR'] == st.session_state.correo_asesor]
+            for _, row in pendientes.iterrows(): st.warning(f"📞 {row['CLIENTE']} | {row['TIPO_SEGUIMIENTO']}")
+            else: st.success("¡Todo al día!")
+                
     
     # Identificador de rol
     es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
@@ -142,7 +160,7 @@ with tab1:
         tel_rep = st.text_input("Móvil Rep. Legal:")
         
         st.subheader("📊 Estado y Plan")
-        estado = st.selectbox("Estado:", ["En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
         bitacora = st.text_area("📝 Notas / Bitácora:")
         
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
