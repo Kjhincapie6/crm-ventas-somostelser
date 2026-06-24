@@ -57,7 +57,8 @@ with st.sidebar:
         st.image("logo_somostelser.png", use_container_width=True)
     
     # Identificador de rol
-    rol = "👑 Admin" if st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM" else "👤 Asesor"
+    es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
+    rol = "👑 Admin" if es_admin else "👤 Asesor"
     st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
     
     if st.button("🚪 Cerrar Sesión"):
@@ -84,7 +85,6 @@ with st.sidebar:
             df = pd.read_csv("crm_sistema_maestro.csv")
             
             # --- FILTRO POR ROL ---
-            es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
             if not es_admin and 'ASESOR' in df.columns:
                 df = df[df['ASESOR'] == st.session_state.correo_asesor]
                 
@@ -111,79 +111,65 @@ with st.sidebar:
 # ==========================================
 st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
-div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
 
-# Se eliminó st.form para que el cálculo se haga en tiempo real al cambiar las líneas
-c1, c2 = st.columns(2)
+# --- PESTAÑAS PARA CREAR Y ACTUALIZAR ---
+tab1, tab2 = st.tabs(["📝 Registrar Nueva Venta", "🔄 Actualizar Seguimiento"])
 
-with c1:
-    st.subheader("🏢 Datos del Cliente")
-    t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
-    n_doc = st.text_input("Número de Documento:")
-    nombre = st.text_input("Razón Social o Nombre:")
-    dir = st.text_input("Dirección:")
-    barrio = st.text_input("Barrio:")
-    muni = st.text_input("Municipio:")
-    email_cli = st.text_input("Departamento:")
-    movil_cli = st.text_input("Contacto autorizado:")
-    tel_contacto = st.text_input("Móvil Contacto autorizado:")
+# ------------------------------------------
+# PESTAÑA 1: CREAR VENTA NUEVA
+# ------------------------------------------
+with tab1:
+    div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
 
-with c2:
-    st.subheader("👤 Representante Legal")
-    nom_rep = st.text_input("Nombre Rep. Legal:")
-    cc_rep = st.text_input("Cédula Rep. Legal:")
-    mail_rep = st.text_input("Correo Rep. Legal:")
-    tel_rep = st.text_input("Móvil Rep. Legal:")
-    
-    st.subheader("📊 Estado y Plan")
-    estado = st.selectbox("Estado:", ["En proceso de firma", "Ingreso de pedido", "Activado"])
-    bitacora = st.text_area("📝 Notas / Bitácora:")
-    
-    tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
-    servicio = st.selectbox("Servicio:", list(tarifas.keys()))
-    lineas = st.number_input("Líneas:", min_value=1, value=1)
-    
-    # CÁLCULO FINANCIERO DINÁMICO (EN VIVO)
-    dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
-    valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
-    
-    # --- NUEVO PANEL DE VALOR COMERCIAL ---
-    frases = [
-        "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
-        "💎 La calidad de tu servicio es nuestra mayor ventaja.",
-        "📈 ¡A superar la meta de ventas de este mes!",
-        "🤝 Cada cliente cuenta, ¡haz que esta venta sea memorable!",
-        "🎯 ¡Enfocados en el objetivo, gran gestión!"
-    ]
-    
-    # Si hay venta, muestra el total, si no, muestra una frase motivadora
-    if valor > 0:
-        st.markdown(f"""
-        <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
-            <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
-            <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    guardar = st.button("💾 Guardar Venta", use_container_width=True)
+    c1, c2 = st.columns(2)
 
-if guardar:
-    if n_doc and nombre:
-        archivo = "crm_sistema_maestro.csv"
-        df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
-        nueva_fila = pd.DataFrame([{
-            'ID_VENTA': len(df_ex) + 1, 
-            'ASESOR': st.session_state.correo_asesor, # <-- Guarda quién la hizo
-            'DIVISION': div, 
-            'NIT': n_doc, 
-            'CLIENTE': nombre,
-            'SERVICIO': servicio, 
-            'VALOR_TOTAL': valor, 
-            'BITACORA': bitacora,
-            'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
-        }])
-        pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
-        st.success("✅ Venta registrada correctamente.")
-        st.rerun()
-    else:
-        st.error("⚠️ Faltan datos obligatorios.")
+    with c1:
+        st.subheader("🏢 Datos del Cliente")
+        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
+        n_doc = st.text_input("Número de Documento:")
+        nombre = st.text_input("Razón Social o Nombre:")
+        dir = st.text_input("Dirección:")
+        barrio = st.text_input("Barrio:")
+        muni = st.text_input("Municipio:")
+        email_cli = st.text_input("Departamento:")
+        movil_cli = st.text_input("Contacto autorizado:")
+        tel_contacto = st.text_input("Móvil Contacto autorizado:")
+
+    with c2:
+        st.subheader("👤 Representante Legal")
+        nom_rep = st.text_input("Nombre Rep. Legal:")
+        cc_rep = st.text_input("Cédula Rep. Legal:")
+        mail_rep = st.text_input("Correo Rep. Legal:")
+        tel_rep = st.text_input("Móvil Rep. Legal:")
+        
+        st.subheader("📊 Estado y Plan")
+        # El estado inicial se fija en "En proceso de firma" para no confundir al inicio
+        estado_inicial = st.selectbox("Estado:", ["En proceso de firma"])
+        bitacora = st.text_area("📝 Notas / Bitácora:")
+        
+        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
+        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
+        lineas = st.number_input("Líneas:", min_value=1, value=1)
+        
+        # CÁLCULO FINANCIERO DINÁMICO (EN VIVO)
+        dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
+        valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
+        
+        # --- NUEVO PANEL DE VALOR COMERCIAL ---
+        frases = [
+            "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
+            "💎 La calidad de tu servicio es nuestra mayor ventaja.",
+            "📈 ¡A superar la meta de ventas de este mes!",
+            "🤝 Cada cliente cuenta, ¡haz que esta venta sea memorable!",
+            "🎯 ¡Enfocados en el objetivo, gran gestión!"
+        ]
+        
+        if valor > 0:
+            st.markdown(f"""
+            <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
+                <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
+                <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        guardar = st.button("💾 Guardar Venta", use_container_width=True)
