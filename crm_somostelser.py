@@ -3,7 +3,6 @@ import pandas as pd
 import os
 import random
 
-
 # ==========================================
 # 1. PORTAFOLIO Y DATOS
 # ==========================================
@@ -38,7 +37,7 @@ if 'correo_asesor' not in st.session_state:
 # --- PANTALLA DE ACCESO ---
 if st.session_state.correo_asesor is None:
     st.title("🔐 Acceso al CRM Somos Telser")
-    st.write("Por favor, selecciona tu perfil e ingresa la contraseña:")
+    st.write("Por favor, selecciona tu perfil para ingresar:")
     
     usuario_seleccionado = st.selectbox("Usuario:", [
         "", 
@@ -47,35 +46,19 @@ if st.session_state.correo_asesor is None:
         "ASESOR2@SOMOSTELSER.COM",
         "ASESOR3@SOMOSTELSER.COM",
         "ASESOR4@SOMOSTELSER.COM"
-    ], key="select_usuario")
+    ])
     
-    password = st.text_input("Contraseña:", type="password", key="pass_input")
-    
-    # Botón de Login único
-    if st.button("Ingresar al Portal", key="btn_login"):
-        if usuario_seleccionado != "" and password == "Telser2026":
-            st.session_state.correo_asesor = usuario_seleccionado
-            st.rerun()
-        elif usuario_seleccionado == "":
-            st.warning("Por favor, selecciona un usuario.")
-        else:
-            st.error("Contraseña incorrecta.")
-            
-    st.stop() 
+    if st.button("Ingresar al Portal") and usuario_seleccionado != "":
+        st.session_state.correo_asesor = usuario_seleccionado
+        st.rerun()
+    st.stop()
 
-# --- DEFINIR ROL ---
-es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
 
 # --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
 with st.sidebar:
     if os.path.exists("logo_somostelser.png"):
         st.image("logo_somostelser.png", use_container_width=True)
-    
-    # Identificador de rol
-    rol = "👑 Admin" if es_admin else "👤 Asesor"
-    st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
-    
-    # Aquí siguen tus Tareas Pendientes...
+
 
 # --- TAREAS PENDIENTES ---
     st.markdown("---")
@@ -327,4 +310,4 @@ with tab2:
         else:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
-        st.info("Aún no hay base de datos creada. Registra una venta primero.")
+        st.info("Aún no hay base de datos creada. Registra una venta primero.")"Aún no hay base de datos creada. Registra una venta primero.")
