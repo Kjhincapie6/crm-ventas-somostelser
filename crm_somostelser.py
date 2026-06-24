@@ -237,8 +237,7 @@ with tab1:
         if archivo_subido:
             st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
 
-        guardar = st.button("💾 Guardar Venta", use_container_width=True)
-
+       guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
 if guardar:
     if n_doc and nombre:
 
