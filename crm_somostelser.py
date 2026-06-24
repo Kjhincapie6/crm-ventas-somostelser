@@ -3,6 +3,27 @@ import pandas as pd
 import os
 
 # ==========================================
+# 0. SEGURIDAD (AUTENTICACIÓN)
+# ==========================================
+def check_password():
+    def password_entered():
+        if st.session_state["password"] == "TELSER2026":
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        st.text_input("🔑 Ingresa contraseña de acceso:", type="password", on_change=password_entered, key="password")
+        return False
+    elif not st.session_state["password_correct"]:
+        st.text_input("🔑 Ingresa contraseña de acceso:", type="password", on_change=password_entered, key="password")
+        st.error("❌ Contraseña incorrecta")
+        return False
+    else:
+        return True
+
+# ==========================================
 # 1. PORTAFOLIO Y DATOS
 # ==========================================
 PLANES_MOVIL = {
@@ -30,6 +51,9 @@ PLANES_FIJO = {
 # ==========================================
 st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
+if not check_password():
+    st.stop()
+
 if 'correo_asesor' not in st.session_state:
     st.session_state.correo_asesor = "ASESOR.B2B@SOMOSTELSER.COM"
 
@@ -38,20 +62,16 @@ with st.sidebar:
         st.image("logo_somostelser.png", use_container_width=True)
     st.markdown(f"👤 **Asesor:** `{st.session_state.correo_asesor}`")
     if st.button("🚪 Cerrar Sesión"):
-        st.session_state.correo_asesor = None
+        st.session_state.password_correct = False
         st.rerun()
 
-   # ASISTENTE DE OFERTAS
+    # ASISTENTE DE OFERTAS
     st.markdown("---")
     st.subheader("🤖 Asistente de Ofertas")
-    
-    # Buscador simple
     busqueda = st.text_input("Buscar plan:", placeholder="Ej: 500Mbps, 60GB")
-    
     if busqueda:
         portafolio = {**PLANES_MOVIL, **PLANES_FIJO}
         res = {k: v for k, v in portafolio.items() if busqueda.lower() in k.lower()}
-        
         if res:
             opcion = st.selectbox("Resultados:", list(res.keys()))
             st.metric(label="Precio Sugerido", value=f"${res[opcion]:,.0f} COP")
