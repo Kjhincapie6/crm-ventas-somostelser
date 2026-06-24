@@ -358,23 +358,31 @@ with tab2:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
         st.info("Aún no hay base de datos creada. Registra una venta primero.")
-# ==========================================
-# PESTAÑA 2: ACTUALIZAR EL ESTADO
-# ==========================================
-if st.button("🔄 Guardar Nuevo Estado", key="btn_guardar_estado_tab2", use_container_width=True):
-
-    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
-    df_update.to_csv("crm_sistema_maestro.csv", index=False)
-
-    mensaje = (
-        f"✅ Venta {id_venta} actualizada.\n"
-        f"Nuevo estado: {nuevo_estado}"
-    )
-
-    enviar_telegram(mensaje)
-
-    st.success(
-        f"✅ El estado de la venta ha sido actualizado a '{nuevo_estado}'."
-    )
-
-    st.rerun()
+with tab2:
+    st.subheader("🔄 Actualizar Seguimiento de Venta")
+    
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_update = pd.read_csv("crm_sistema_maestro.csv")
+        # ... (aquí tus parches de seguridad igual que antes) ...
+        
+        if not df_mis_ventas.empty:
+            opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
+            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist())
+            
+            if venta_seleccionada:
+                id_venta = int(venta_seleccionada.split(" - ")[0])
+                nuevo_estado = st.selectbox("Cambiar estado a:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+                
+                # UNIFICAMOS TODO AQUÍ
+                if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2"):
+                    # 1. Guardar en CSV
+                    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
+                    df_update.to_csv("crm_sistema_maestro.csv", index=False)
+                    
+                    # 2. Notificar Telegram
+                    mensaje = f"✅ Venta {id_venta} actualizada.\nNuevo estado: {nuevo_estado}"
+                    enviar_telegram(mensaje)
+                    
+                    # 3. Éxito
+                    st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
+                    st.rerun()
