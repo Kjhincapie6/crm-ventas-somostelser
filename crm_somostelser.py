@@ -68,7 +68,7 @@ with st.sidebar:
         if 'FECHA_SEGUIMIENTO' in df_tasks.columns:
             df_tasks['FECHA_SEGUIMIENTO'] = pd.to_datetime(df_tasks['FECHA_SEGUIMIENTO'])
             hoy = pd.Timestamp(date.today())
-            pendientes = df_tasks[(df_tasks['FECHA_SEGUIMIENTO'] <= hoy) & (~df_tasks['ESTADO'].isin(['Activado', 'Anulado']))]
+            pendientes = df_tasks[(df_tasks['FECHA_SEGUIMIENTO'] <= hoy) & (~df_tasks['ESTADO'].isin(['Cotizado', 'Anulado']))]
             if not es_admin: pendientes = pendientes[pendientes['ASESOR'] == st.session_state.correo_asesor]
             for _, row in pendientes.iterrows(): st.warning(f"📞 {row['CLIENTE']} | {row['TIPO_SEGUIMIENTO']}")
             else: st.success("¡Todo al día!")
@@ -289,7 +289,7 @@ with tab2:
                 
                 nuevo_estado = st.selectbox(
                     "Cambiar estado a:", 
-                    ["En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"]
+                    ["Cotizdo", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"]
                 )
                 
                 if st.button("🔄 Guardar Nuevo Estado", use_container_width=True):
