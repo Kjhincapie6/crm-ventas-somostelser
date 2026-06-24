@@ -26,14 +26,6 @@ def enviar_telegram(mensaje):
     except Exception as e:
         st.error(f"❌ Error: {e}")
 
-# 2. El botón de prueba (Colócalo en la Pestaña 2)
-with tab2:
-    st.subheader("🔄 Actualizar Seguimiento de Venta")
-    
-    # Botón de prueba fijo en la pestaña 2
-    if st.button("Enviar mensaje de prueba a Telegram", key="btn_test_telegram"):
-        enviar_telegram("¡Hola! La integración con Somos Telser funciona correctamente.")
-
     # ... tu código existente de selectbox y ventas ..
 
 # --- DEFINICIÓN SEGURA INICIAL (ESTO VA DE PRIMERO) ---
