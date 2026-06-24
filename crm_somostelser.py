@@ -26,14 +26,6 @@ PLANES_FIJO = {
     "Internet Full Tigo Business 1000 Mbps": 274000.0
 }
 
-FRASES_MOTIVACIONALES = [
-    "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
-    "💎 La calidad de tu servicio es nuestra mayor ventaja.",
-    "📈 ¡A superar la meta de ventas de este mes!",
-    "🤝 Cada cliente cuenta, ¡haz que esta venta sea memorable!",
-    "🎯 ¡Enfocados en el objetivo, gran gestión!"
-]
-
 # ==========================================
 # 2. CONFIGURACIÓN E IDENTIDAD
 # ==========================================
@@ -80,21 +72,22 @@ with st.sidebar:
 # ==========================================
 st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
-div = st.radio("Seleccione División:", ["Móvil", "Fijo"], horizontal=True)
+div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
 
-# Al quitar el st.form, habilitamos el cálculo en vivo
+# Se eliminó st.form para que el cálculo se haga en tiempo real al cambiar las líneas
 c1, c2 = st.columns(2)
 
 with c1:
     st.subheader("🏢 Datos del Cliente")
-    t_doc = st.selectbox("Tipo Doc:", ["NIT", "Cédula", "CE", "PPT"])
+    t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
     n_doc = st.text_input("Número de Documento:")
     nombre = st.text_input("Razón Social o Nombre:")
     dir = st.text_input("Dirección:")
     barrio = st.text_input("Barrio:")
     muni = st.text_input("Municipio:")
-    email_cli = st.text_input("Correo Cliente:")
-    movil_cli = st.text_input("Móvil Cliente:")
+    email_cli = st.text_input("Departamento:")
+    movil_cli = st.text_input("Contacto autorizado:")
+    tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
 with c2:
     st.subheader("👤 Representante Legal")
@@ -111,22 +104,30 @@ with c2:
     servicio = st.selectbox("Servicio:", list(tarifas.keys()))
     lineas = st.number_input("Líneas:", min_value=1, value=1)
     
-    # CÁLCULO FINANCIERO DINÁMICO (AHORA 100% EN TIEMPO REAL)
+    # CÁLCULO FINANCIERO DINÁMICO (EN VIVO)
     dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
     valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
     
-    # BANNER MOTIVACIONAL Y DE VALOR
-    st.markdown(f"""
-    <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
-        <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
-        <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #0277bd;"><i>{random.choice(FRASES_MOTIVACIONALES)}</i></p>
-    </div>
-    """, unsafe_allow_html=True)
+    # --- NUEVO PANEL DE VALOR COMERCIAL ---
+    frases = [
+        "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
+        "💎 La calidad de tu servicio es nuestra mayor ventaja.",
+        "📈 ¡A superar la meta de ventas de este mes!",
+        "🤝 Cada cliente cuenta, ¡haz que esta venta sea memorable!",
+        "🎯 ¡Enfocados en el objetivo, gran gestión!"
+    ]
     
-    # Botón regular (reemplaza al form_submit_button)
+    # Si hay venta, muestra el total, si no, muestra una frase motivadora
+    if valor > 0:
+        st.markdown(f"""
+        <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
+            <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
+            <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
+        </div>
+        """, unsafe_allow_html=True)
+    
     guardar = st.button("💾 Guardar Venta", use_container_width=True)
 
-# Lógica de guardado
 if guardar:
     if n_doc and nombre:
         archivo = "crm_sistema_maestro.csv"
@@ -138,6 +139,6 @@ if guardar:
         }])
         pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
         st.success("✅ Venta registrada correctamente.")
-        st.rerun() # Limpia los campos después de guardar exitosamente
+        st.rerun()
     else:
-        st.error("⚠️ Faltan datos obligatorios (Documento y Nombre).")
+        st.error("⚠️ Faltan datos obligatorios.")
