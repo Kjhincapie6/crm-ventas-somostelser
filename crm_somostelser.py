@@ -369,17 +369,20 @@ with tab2:
     else:
         st.info("Aún no hay base de datos creada.")
 # 1. Función definida al inicio (fuera de cualquier 'with' o 'if')
-    with tab2:
+   with tab2:
+
     st.subheader("🔄 Actualizar Seguimiento de Venta")
 
     if st.button(
-        "📨 Probar Telegram",
+        "📨 Enviar mensaje de prueba a Telegram",
         key="btn_test_telegram"
     ):
         enviar_telegram(
-            "Prueba de integración CRM Somos Telser"
+            "✅ Prueba de integración CRM Somos Telser realizada correctamente."
         )
 
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_update = pd.read_csv("crm_sistema_maestro.csv")
     # resto de tu código
  
 
