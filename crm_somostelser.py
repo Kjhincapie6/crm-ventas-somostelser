@@ -30,13 +30,29 @@ PLANES_FIJO = {
 # ==========================================
 st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
-# Barra Lateral
+if 'correo_asesor' not in st.session_state:
+    st.session_state.correo_asesor = "ASESOR.B2B@SOMOSTELSER.COM"
+
 with st.sidebar:
     if os.path.exists("logo_somostelser.png"):
         st.image("logo_somostelser.png", use_container_width=True)
-    st.markdown(f"👤 **Asesor:** `ASESOR.B2B@SOMOSTELSER.COM`")
+    st.markdown(f"👤 **Asesor:** `{st.session_state.correo_asesor}`")
     if st.button("🚪 Cerrar Sesión"):
+        st.session_state.correo_asesor = None
         st.rerun()
+
+    st.markdown("---")
+    st.subheader("🤖 Asistente de Ofertas")
+    consulta = st.text_input("Buscar precio:", placeholder="Ej: 500Mbps, 60GB")
+    
+    if consulta:
+        portafolio = {**PLANES_MOVIL, **PLANES_FIJO}
+        res = {k: v for k, v in portafolio.items() if consulta.lower() in k.lower()}
+        if res:
+            seleccion = st.selectbox("Resultados:", list(res.keys()))
+            st.metric(label="Precio Sugerido", value=f"${res[seleccion]:,.0f} COP")
+        else:
+            st.warning("Sin resultados.")
 
     st.markdown("---")
     st.subheader("📊 Dashboard")
@@ -45,7 +61,10 @@ with st.sidebar:
             df = pd.read_csv("crm_sistema_maestro.csv")
             if 'DIVISION' in df.columns and not df.empty:
                 st.bar_chart(df['DIVISION'].value_counts())
-        except: st.caption("Cargando...")
+            else:
+                st.caption("Esperando ventas...")
+        except: 
+            st.caption("Cargando...")
 
 # ==========================================
 # 3. INTERFAZ Y AGENTE FINANCIERO
@@ -53,10 +72,9 @@ with st.sidebar:
 st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
 div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
-tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
 
-# FORMULARIO ÚNICO (Key única para evitar el error de duplicidad)
-with st.form(key="registro_ventas_b2b_final", clear_on_submit=True):
+# Clave única para el formulario (evita StreamlitAPIException)
+with st.form(key="registro_full_v2", clear_on_submit=True):
     c1, c2 = st.columns(2)
     
     with c1:
@@ -81,17 +99,17 @@ with st.form(key="registro_ventas_b2b_final", clear_on_submit=True):
         estado = st.selectbox("Estado:", ["En proceso de firma", "Ingreso de pedido", "Activado"])
         bitacora = st.text_area("📝 Notas / Bitácora:")
         
+        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
         
-        # CÁLCULO DINÁMICO
+        # CÁLCULO FINANCIERO DINÁMICO
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         
         st.info(f"💰 **Total: ${valor:,.0f} COP** (Dcto: {dcto}%)")
         guardar = st.form_submit_button("💾 Guardar Venta")
 
-# Lógica de guardado fuera del form
 if guardar:
     if n_doc and nombre:
         archivo = "crm_sistema_maestro.csv"
