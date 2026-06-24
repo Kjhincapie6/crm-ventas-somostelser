@@ -289,7 +289,7 @@ with tab2:
                 
                 nuevo_estado = st.selectbox(
                     "Cambiar estado a:", 
-                    ["Cotizdo", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"]
+                    ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"]
                 )
                 
                 if st.button("🔄 Guardar Nuevo Estado", use_container_width=True):
