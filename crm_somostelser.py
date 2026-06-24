@@ -227,7 +227,7 @@ if guardar:
                 archivos_guardados.append(nombre_archivo)
 
         archivo = "crm_sistema_maestro.csv"
-             df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
+        df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
 
         nueva_fila = pd.DataFrame([{
             'ID_VENTA': len(df_ex) + 1,
@@ -240,17 +240,21 @@ if guardar:
             'VALOR_TOTAL': valor,
             'BITACORA': bitacora,
             'DOCUMENTOS': ";".join(archivos_guardados),
-            'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
+            'ESTADO_FINANCIERO': (
+                "APROBADO" if valor >= 35000 else "REVISION"
+            )
         }])
 
-        pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
+        pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(
+            archivo,
+            index=False
+        )
 
         st.success("✅ Venta registrada correctamente.")
         st.rerun()
 
     else:
         st.error("⚠️ Faltan datos obligatorios.")
-
 # ------------------------------------------
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ------------------------------------------
