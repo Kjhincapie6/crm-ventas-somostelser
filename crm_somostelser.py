@@ -236,53 +236,60 @@ with tab1:
         if archivo_subido:
             st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
 
-        guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
+    guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
 
-if guardar:
-    if n_doc and nombre:
-        carpeta_documentos = "documentos_clientes"
-        if not os.path.exists(carpeta_documentos):
-            os.makedirs(carpeta_documentos)
+    if guardar:
+        if n_doc and nombre:
 
-        archivos_guardados = []
-        if archivo_subido:
-            for archivo_doc in archivo_subido:
-                nombre_archivo = f"{n_doc}_{archivo_doc.name}"
-                ruta_archivo = os.path.join(carpeta_documentos, nombre_archivo)
-                with open(ruta_archivo, "wb") as f:
-                    f.write(archivo_doc.getbuffer())
-                archivos_guardados.append(nombre_archivo)
+            carpeta_documentos = "documentos_clientes"
 
-        archivo = "crm_sistema_maestro.csv"
-        df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
+            if not os.path.exists(carpeta_documentos):
+                os.makedirs(carpeta_documentos)
 
-        nueva_fila = pd.DataFrame([{
-            'ID_VENTA': len(df_ex) + 1,
-            'ASESOR': st.session_state.correo_asesor,
-            'ESTADO': estado,
-            'DIVISION': div,
-            'NIT': n_doc,
-            'CLIENTE': nombre,
-            'SERVICIO': servicio,
-            'VALOR_TOTAL': valor,
-            'BITACORA': bitacora,
-            'DOCUMENTOS': ";".join(archivos_guardados),
-            'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
-        }])
+            archivos_guardados = []
 
-        # --- NUEVA VERSIÓN DE PRUEBA ---
-        df_final = pd.concat([df_ex, nueva_fila], ignore_index=True)
-        df_final.to_csv(archivo, index=False)
-        
-        # Muestra una tabla rápida para ver si se guardó en memoria
-        st.write("Datos guardados en memoria:")
-        st.dataframe(df_final)
-        
-        st.success(f"✅ Venta registrada. Total filas actuales: {len(df_final)}")
-        if st.button("Recargar para ver en Dashboard"):
+            if archivo_subido:
+                for archivo_doc in archivo_subido:
+                    nombre_archivo = f"{n_doc}_{archivo_doc.name}"
+                    ruta_archivo = os.path.join(
+                        carpeta_documentos,
+                        nombre_archivo
+                    )
+
+                    with open(ruta_archivo, "wb") as f:
+                        f.write(archivo_doc.getbuffer())
+
+                    archivos_guardados.append(nombre_archivo)
+
+            archivo = "crm_sistema_maestro.csv"
+            df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
+
+            nueva_fila = pd.DataFrame([{
+                'ID_VENTA': len(df_ex) + 1,
+                'ASESOR': st.session_state.correo_asesor,
+                'ESTADO': estado,
+                'DIVISION': div,
+                'NIT': n_doc,
+                'CLIENTE': nombre,
+                'SERVICIO': servicio,
+                'VALOR_TOTAL': valor,
+                'BITACORA': bitacora,
+                'DOCUMENTOS': ";".join(archivos_guardados),
+                'ESTADO_FINANCIERO': (
+                    "APROBADO" if valor >= 35000 else "REVISION"
+                )
+            }])
+
+            pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(
+                archivo,
+                index=False
+            )
+
+            st.success("✅ Venta registrada correctamente.")
             st.rerun()
-    else:
-        st.error("⚠️ Faltan datos obligatorios.")
+
+        else:
+            st.error("⚠️ Faltan datos obligatorios.")
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ------------------------------------------
 # ------------------------------------------
