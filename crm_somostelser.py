@@ -117,9 +117,12 @@ if guardar:
 # ==========================================
 st.markdown("---")
 st.subheader("📊 Dashboard de Rendimiento de Ventas")
+
 if os.path.exists("crm_sistema_maestro.csv"):
     df_ventas = pd.read_csv("crm_sistema_maestro.csv")
-    if not df_ventas.empty:
+    
+    # Validamos que las columnas existan antes de graficar
+    if not df_ventas.empty and 'DIVISION' in df_ventas.columns and 'ESTADO_FINANCIERO' in df_ventas.columns:
         col_g1, col_g2 = st.columns(2)
         with col_g1:
             st.write("### Ventas por División")
@@ -128,6 +131,7 @@ if os.path.exists("crm_sistema_maestro.csv"):
             st.write("### Auditoría Financiera")
             st.bar_chart(df_ventas['ESTADO_FINANCIERO'].value_counts())
     else:
-        st.warning("⚠️ El archivo de datos está vacío.")
+        st.warning("⚠️ El archivo de datos existe pero no tiene el formato correcto (faltan columnas). Por favor, borra el archivo CSV o realiza una nueva venta.")
 else:
+    st.info("ℹ️ Sistema listo: Realiza la primera venta para generar el Dashboard.")
     st.info("ℹ️ Sistema listo: Realiza la primera venta para generar el Dashboard.")
