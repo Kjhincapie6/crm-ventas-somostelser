@@ -340,7 +340,7 @@ with tab2:
 # 1. Función definida al inicio (fuera de cualquier 'with' o 'if')
 def enviar_telegram(mensaje):
     # Asegúrate de poner el token nuevo que generaste tras revocar el anterior
-    TOKEN = "8942591199:AAGQp9uUO890p_YWPufpxKbKGVwUvrrVjnI" 
+    TOKEN = "8942591199:AAF8CLBH9dBowNxj4SHRr0pIiFyuIyX6zR4" 
     CHAT_ID = "3015704518"
     
     # AQUÍ ESTÁ EL SECRETO: f"https://api.telegram.org/bot{TOKEN}/sendMessage"
