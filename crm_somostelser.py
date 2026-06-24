@@ -356,11 +356,13 @@ def enviar_telegram(mensaje):
         st.error(f"❌ Error: {e}")
 
 # 2. El botón de prueba (Colócalo en la Pestaña 2)
-with tab2:
-    st.subheader("🔄 Actualizar Seguimiento de Venta")
+# Busca esta parte en tu código (donde guardas la información)
+if st.button("Guardar Cambios"):
+    # ... aquí está tu lógica para actualizar el CSV o la base de datos ...
+    df_update.to_csv("crm_sistema_maestro.csv", index=False)
     
-    # Botón de prueba fijo en la pestaña 2
-    if st.button("Enviar mensaje de prueba a Telegram", key="btn_test_telegram"):
-        enviar_telegram("¡Hola! La integración con Somos Telser funciona correctamente.")
-
-    # ... tu código existente de selectbox y ventas ...
+    # AGREGA ESTO JUSTO AQUÍ DEBAJO:
+    mensaje_notificacion = f"✅ Venta actualizada correctamente.\nCliente: {nombre_cliente}\nEstado: {nuevo_estado}"
+    enviar_telegram(mensaje_notificacion)
+    
+    st.success("¡Venta actualizada y notificada!")
