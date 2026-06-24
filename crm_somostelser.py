@@ -62,8 +62,6 @@ if st.session_state.correo_asesor is None:
             
     st.stop() 
 
-# --- DEFINIR ROL ---
-es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
 
 # --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
 with st.sidebar:
