@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import random
+import requests
 from datetime import date
 
 # --- DEFINICIÓN SEGURA INICIAL (ESTO VA DE PRIMERO) ---
@@ -284,6 +285,7 @@ if guardar:
             st.rerun()
     else:
         st.error("⚠️ Faltan datos obligatorios.")
+        
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ------------------------------------------
 with tab2:
@@ -329,3 +331,18 @@ with tab2:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
         st.info("Aún no hay base de datos creada. Registra una venta primero.")
+        if venta_seleccionada:
+                id_venta = int(venta_seleccionada.split(" - ")[0])
+                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
+                
+                st.info(f"📌 Estado Actual: **{estado_actual}**")
+                
+                # PEGA EL CÓDIGO AQUÍ:
+                nombre_cliente_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'CLIENTE'].values[0]
+                mensaje_soporte = f"Hola, necesito asistencia con la venta del cliente {nombre_cliente_actual} (ID: {id_venta})."
+                url_soporte = f"https://t.me/TuUsuarioDeTelegram?text={mensaje_soporte.replace(' ', '%20')}"
+                st.link_button("📩 Consultar al Admin por Telegram", url_soporte, use_container_width=True)
+                
+                # Luego sigue el resto de tu código de actualización...
+                nuevo_estado = st.selectbox(...)
+
