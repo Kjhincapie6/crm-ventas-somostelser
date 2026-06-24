@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # ==========================================
-# 1. PORTAFOLIO Y DATOS (JUNIO 2026)
+# 1. PORTAFOLIO Y DATOS
 # ==========================================
 PLANES_MOVIL = {
     "Pospago Negocios 4.9 Plus+ (60 GB)": 44900.0,
@@ -26,81 +26,38 @@ PLANES_FIJO = {
 }
 
 # ==========================================
-# 2. CONFIGURACIÓN E IDENTIDAD
+# 2. CONFIGURACIÓN
 # ==========================================
-st.set_page_config(page_title="CRM Somos Telser - Junio 2026", layout="wide")
+st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="centered")
 
-if 'correo_asesor' not in st.session_state:
-    st.session_state.correo_asesor = "ASESOR.B2B@SOMOSTELSER.COM"
+st.title("📡 Portal de Ventas Somos Telser")
+st.subheader("Gestión de Contratos B2B")
 
-with st.sidebar:
-    if os.path.exists("logo_somostelser.png"):
-        st.image("logo_somostelser.png", use_container_width=True)
-    st.markdown(f"👤 **Asesor:** `{st.session_state.correo_asesor}`")
-    if st.button("🚪 Cerrar Sesión"):
-        st.session_state.correo_asesor = None
-        st.rerun()
-
-st.title("🏢 Gestión Integral de Contratos B2B")
-div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
+div = st.radio("División:", ["Móvil", "Fijo"], horizontal=True)
+tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
 
 # ==========================================
-# 3. INTERFAZ Y AGENTE FINANCIERO
+# 3. FORMULARIO DE REGISTRO
 # ==========================================
-with st.form("registro_full", clear_on_submit=True):
-    c1, c2 = st.columns(2)
-    with c1:
-        st.subheader("🏢 Datos del Cliente")
-        t_doc = st.selectbox("Tipo Doc:", ["NIT", "Cédula", "CE", "PPT"])
-        n_doc = st.text_input("Número de Documento:")
-        nombre = st.text_input("Razón Social o Nombre:")
-        dir = st.text_input("Dirección de instalación:")
-        barrio = st.text_input("Barrio:")
-        muni = st.text_input("Municipio / Departamento:")
-        email_cli = st.text_input("Correo Electrónico del Cliente:")
-        movil_cli = st.text_input("Móvil de Contacto:")
-    with c2:
-        st.subheader("👤 Representante Legal")
-        nom_rep = st.text_input("Nombre del Rep. Legal:")
-        cc_rep = st.text_input("Cédula Rep. Legal:")
-        mail_rep = st.text_input("Correo Rep. Legal:")
-        tel_rep = st.text_input("Móvil Rep. Legal:")
-        st.subheader("📊 Estado y Plan")
-        estado = st.selectbox("Estado del Proceso:", ["En proceso de firma", "Enviado", "Ingreso de pedido", "Instalacion y aprovisionamiento", "Instalado", "Activado", "Cancelado", "Anulado"])
-        
-        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
-        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
-        lineas = st.number_input("Cantidad / Líneas:", min_value=1, value=1)
-
-    # Lógica de Agente Financiero
-    dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
-    valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
-    umbral = 35000.0
+with st.form("registro", clear_on_submit=True):
+    n_doc = st.text_input("NIT / Documento:")
+    nombre = st.text_input("Razón Social o Nombre:")
+    servicio = st.selectbox("Plan:", list(tarifas.keys()))
+    lineas = st.number_input("Cantidad / Líneas:", min_value=1, value=1)
     
-    # NUEVA VALIDACIÓN: Solo validamos si hay datos suficientes
-    if n_doc and nombre and valor > 0:
-        es_rentable = valor >= umbral
-        if es_rentable:
-            st.success("✅ Venta financieramente saludable.")
-        else:
-            st.warning("⚠️ Alerta: Rentabilidad baja, requiere aprobación gerencial.")
-    else:
-        # Mensaje neutro mientras se digita
-        st.info("ℹ️ Complete los datos del cliente para auditar la rentabilidad.")
-        
-    st.info(f"💰 **Resumen:** {div} | {servicio} | Dcto: {dcto}% | **Total: ${valor:,.0f} COP**")
+    valor_final = tarifas[servicio] * lineas
+    st.info(f"💰 **Total: ${valor_final:,.0f} COP**")
     
-    # Botón siempre visible
-    guardar = st.form_submit_button("💾 Guardar Venta Completa")
+    guardar = st.form_submit_button("💾 Guardar Venta")
 
 if guardar:
-    nueva_fila = pd.DataFrame([{
-        'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'DIRECCION': dir, 
-        'BARRIO': barrio, 'MUNICIPIO': muni, 'EMAIL': email_cli, 'MOVIL': movil_cli,
-        'REP_LEGAL': nom_rep, 'CC_REP': cc_rep, 'MAIL_REP': mail_rep, 
-        'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'ESTADO': estado,
-        'ASESOR_REGISTRO': st.session_state.correo_asesor
-    }])
-    archivo = "crm_sistema_maestro.csv"
-    pd.concat([pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame(), nueva_fila]).to_csv(archivo, index=False)
-    st.success("✅ Venta registrada correctamente.")
+    if n_doc and nombre:
+        archivo = "crm_sistema_maestro.csv"
+        df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
+        nueva_fila = pd.DataFrame([{
+            'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 'VALOR': valor_final
+        }])
+        pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
+        st.success("✅ Venta registrada.")
+    else:
+        st.error("⚠️ Faltan datos.")
