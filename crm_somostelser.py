@@ -55,17 +55,24 @@ with st.sidebar:
         else:
             st.warning("Sin resultados.")
 
-    # DASHBOARD
+   # DASHBOARD Y VENTAS RECIENTES
     st.markdown("---")
-    st.subheader("📊 Dashboard")
+    st.subheader("📊 Control de Gestión")
+    
     if os.path.exists("crm_sistema_maestro.csv"):
-        try:
-            df = pd.read_csv("crm_sistema_maestro.csv")
-            if 'DIVISION' in df.columns and not df.empty:
+        df = pd.read_csv("crm_sistema_maestro.csv")
+        if not df.empty:
+            # Gráfico de barras
+            if 'DIVISION' in df.columns:
                 st.bar_chart(df['DIVISION'].value_counts())
-            else:
-                st.caption("Esperando ventas...")
-        except: st.caption("Cargando...")
+            
+            # Tabla pequeña de las últimas 3 ventas (¡Esto aporta mucho valor!)
+            st.markdown("**Últimas ventas:**")
+            st.table(df[['CLIENTE', 'SERVICIO', 'VALOR_TOTAL']].tail(3))
+        else:
+            st.caption("Esperando ventas...")
+    else:
+        st.caption("Sistema listo.")
 
 # ==========================================
 # 3. INTERFAZ Y AGENTE FINANCIERO
