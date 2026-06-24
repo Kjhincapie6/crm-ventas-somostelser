@@ -358,37 +358,12 @@ with tab2:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
         st.info("Aún no hay base de datos creada. Registra una venta primero.")
- # ==========================================
+# ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
-if st.button(
-    "🔄 Guardar Nuevo Estado",
-    key="btn_guardar_estado_tab2",
-    use_container_width=True
-):
+mensaje = (
+    f"✅ Venta {id_venta} actualizada.\n"
+    f"Nuevo estado: {nuevo_estado}"
+)
 
-    df_update.loc[
-        df_update['ID_VENTA'] == id_venta,
-        'ESTADO'
-    ] = nuevo_estado
-
-    df_update.to_csv(
-        "crm_sistema_maestro.csv",
-        index=False
-    )
-
-    mensaje = (
-        f"📢 ACTUALIZACIÓN DE VENTA\n\n"
-        f"ID Venta: {id_venta}\n"
-        f"Cliente: {venta_seleccionada}\n"
-        f"Nuevo Estado: {nuevo_estado}\n"
-        f"Asesor: {st.session_state.correo_asesor}"
-    )
-
-    enviar_telegram(mensaje)
-
-    st.success(
-        f"✅ Estado actualizado a '{nuevo_estado}' y notificado por Telegram."
-    )
-
-    st.rerun()
+enviar_telegram(mensaje)
