@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # ==========================================
-# 1. PORTAFOLIO Y DATOS (JUNIO 2026)
+# 1. PORTAFOLIO Y DATOS
 # ==========================================
 PLANES_MOVIL = {
     "Pospago Negocios 4.9 Plus+ (60 GB)": 44900.0,
@@ -77,7 +77,7 @@ with st.form("registro_full", clear_on_submit=True):
     valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
     umbral = 35000.0
     
-    # NUEVA VALIDACIÓN: Solo validamos si hay datos suficientes
+    # Validaciones visuales (Sin mover tus elementos de sitio)
     if n_doc and nombre and valor > 0:
         es_rentable = valor >= umbral
         if es_rentable:
@@ -85,26 +85,16 @@ with st.form("registro_full", clear_on_submit=True):
         else:
             st.warning("⚠️ Alerta: Rentabilidad baja, requiere aprobación gerencial.")
     else:
-# Cálculo Agente Financiero
-    dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
-    valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
-    umbral = 35000.0
-    es_rentable = valor >= umbral
-    
-    # Auditoría en tiempo real
-    if n_doc and nombre:
-        if es_rentable:
-            st.success("✅ Auditoría: Venta financieramente saludable.")
-        else:
-            st.warning("⚠️ Auditoría: Rentabilidad baja, requiere aprobación gerencial.")
-    
+        st.info("ℹ️ Complete los datos del cliente para auditar la rentabilidad.")
+        
     st.info(f"💰 **Resumen:** {div} | {servicio} | Dcto: {dcto}% | **Total: ${valor:,.0f} COP**")
     
     guardar = st.form_submit_button("💾 Guardar Venta Completa")
 
+# Lógica de guardado fuera del form
 if guardar:
     if n_doc and nombre:
-        estado_financiero = "APROBADO" if es_rentable else "REVISION"
+        estado_financiero = "APROBADO" if valor >= umbral else "REVISION"
         nueva_fila = pd.DataFrame([{
             'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'DIRECCION': dir, 
             'BARRIO': barrio, 'MUNICIPIO': muni, 'EMAIL': email_cli, 'MOVIL': movil_cli,
@@ -115,25 +105,6 @@ if guardar:
         }])
         archivo = "crm_sistema_maestro.csv"
         pd.concat([pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame(), nueva_fila]).to_csv(archivo, index=False)
-        st.success(f"✅ Venta registrada con estado: {estado_financiero}")
+        st.success("✅ Venta registrada correctamente.")
     else:
         st.error("⚠️ Error: Debe ingresar el Documento y el Nombre del Cliente.")
-        # Mensaje neutro mientras se digita
-        st.info("ℹ️ Complete los datos del cliente para auditar la rentabilidad.")
-        
-    st.info(f"💰 **Resumen:** {div} | {servicio} | Dcto: {dcto}% | **Total: ${valor:,.0f} COP**")
-    
-    # Botón siempre visible
-    guardar = st.form_submit_button("💾 Guardar Venta Completa")
-
-if guardar:
-    nueva_fila = pd.DataFrame([{
-        'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'DIRECCION': dir, 
-        'BARRIO': barrio, 'MUNICIPIO': muni, 'EMAIL': email_cli, 'MOVIL': movil_cli,
-        'REP_LEGAL': nom_rep, 'CC_REP': cc_rep, 'MAIL_REP': mail_rep, 
-        'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'ESTADO': estado,
-        'ASESOR_REGISTRO': st.session_state.correo_asesor
-    }])
-    archivo = "crm_sistema_maestro.csv"
-    pd.concat([pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame(), nueva_fila]).to_csv(archivo, index=False)
-    st.success("✅ Venta registrada correctamente.")
