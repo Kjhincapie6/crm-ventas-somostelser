@@ -2,36 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import random
-# 1. Leer el archivo original con toda la estructura de la empresa
-df_original = pd.read_csv("Somostelser.csv")
 
-# 2. Convertir los nombres de las columnas a MAYÚSCULAS para evitar errores de código
-df_original.columns = [col.upper() for col in df_original.columns]
-
-# 3. Crear los campos obligatorios del CRM si no existen
-if 'ASESOR' not in df_original.columns:
-    # Por defecto, asignamos el registro al usuario que lo creó originalmente en el CSV
-    df_original['ASESOR'] = df_original['CREADO_POR'].fillna('SISTEMA_CORE').str.split('@').str[0].str.upper()
-
-if 'COMENTARIOS' not in df_original.columns:
-    df_original['COMENTARIOS'] = 'Registro histórico migrado del sistema core.'
-
-# 4. Exportar la base maestra que usará el CRM en la nube
-df_original.to_csv("crm_sistema_maestro.csv", index=False)
-print("✅ Fase 1 Completada: El archivo 'crm_sistema_maestro.csv' se generó con éxito con las 37 columnas finales.")
-🛠️ Tu primer paso ahora mismo:
-1.	Ejecuta ese código en Colab.
-2.	Ve a la sección de archivos (📁) a la izquierda de Colab, busca el archivo generado crm_sistema_maestro.csv y descárgalo en tu computadora.
-En cuanto lo tengas descargado en tu equipo, dime: "Listo el CSV maestro, ¿cuál es el código del CRM?" y pasamos de inmediato a la Fase 2. ¡Vamos con toda!
-Fase 2: El Script de la Aplicación y Control de Dependencias.
-Crearemos el "cerebro" del CRM (crm_somostelser.py) y la lista de librerías (requirements.txt).
-🛠️ Paso 1: Generar el archivo del CRM en Google Colab
-Crea una celda de código completamente limpia en tu Google Colab, pega este bloque completo y dale Play:
-Python
-import streamlit as st
-import pandas as pd
-import os
-import random
 
 # ==========================================
 # 1. PORTAFOLIO Y DATOS
