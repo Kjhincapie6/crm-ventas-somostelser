@@ -35,6 +35,7 @@ st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 if 'correo_asesor' not in st.session_state:
     st.session_state.correo_asesor = None
 
+# --- PANTALLA DE ACCESO ---
 if st.session_state.correo_asesor is None:
     st.title("🔐 Acceso al CRM Somos Telser")
     usuario_seleccionado = st.selectbox("Usuario:", ["", "ADMIN@SOMOSTELSER.COM", "ASESOR1@SOMOSTELSER.COM", "ASESOR2@SOMOSTELSER.COM"])
@@ -43,6 +44,7 @@ if st.session_state.correo_asesor is None:
         st.rerun()
     st.stop()
 
+# --- SIDEBAR ---
 with st.sidebar:
     es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
     st.markdown(f"**{'👑 Admin' if es_admin else '👤 Asesor'}:** `{st.session_state.correo_asesor}`")
@@ -61,8 +63,11 @@ with st.sidebar:
             if not es_admin:
                 pendientes = pendientes[pendientes['ASESOR'] == st.session_state.correo_asesor]
             
-            for _, row in pendientes.iterrows():
-                st.warning(f"📞 {row['CLIENTE']} ({row['TIPO_SEGUIMIENTO']})")
+            if not pendientes.empty:
+                for _, row in pendientes.iterrows():
+                    st.warning(f"📞 {row['CLIENTE']} | {row['TIPO_SEGUIMIENTO']}")
+            else:
+                st.success("¡Todo al día!")
 
 # ==========================================
 # 3. INTERFAZ Y AGENTE FINANCIERO
@@ -70,8 +75,7 @@ with st.sidebar:
 st.title("📡 Portal de Ventas Somos Telser")
 tab1, tab2 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Seguimiento"])
 
-lista_estados = ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"]
-
+# --- PESTAÑA 1 ---
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], horizontal=True)
     c1, c2 = st.columns(2)
@@ -79,7 +83,8 @@ with tab1:
         n_doc = st.text_input("Número de Documento:")
         nombre = st.text_input("Razón Social o Nombre:")
     with c2:
-        estado = st.selectbox("Estado:", lista_estados)
+        # AGREGAMOS "Cotizado" A LA LISTA
+        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
         fecha_seg = st.date_input("📅 Fecha de Seguimiento:", value=date.today())
         tipo_seg = st.selectbox("Tipo de Acción:", ["Llamada", "Visita Presencial", "Envío Correo", "Seguimiento WhatsApp"])
         
@@ -91,32 +96,33 @@ with tab1:
         guardar = st.button("💾 Guardar Venta", use_container_width=True)
 
     if guardar:
-        archivo = "crm_sistema_maestro.csv"
-        df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
-        nueva_fila = pd.DataFrame([{
-            'ID_VENTA': len(df_ex) + 1, 'ASESOR': st.session_state.correo_asesor, 'ESTADO': estado,
-            'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg, 'DIVISION': div, 
-            'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 'VALOR_TOTAL': valor, 
-            'BITACORA': "", 'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
-        }])
-        pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
-        st.success("✅ Venta registrada.")
-        st.rerun()
+        if n_doc and nombre:
+            archivo = "crm_sistema_maestro.csv"
+            df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
+            nueva_fila = pd.DataFrame([{
+                'ID_VENTA': len(df_ex) + 1, 'ASESOR': st.session_state.correo_asesor, 'ESTADO': estado,
+                'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg, 'DIVISION': div, 
+                'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 'VALOR_TOTAL': valor, 
+                'BITACORA': "", 'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
+            }])
+            pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
+            st.success("✅ Venta registrada.")
+            st.rerun()
 
+# --- PESTAÑA 2 ---
 with tab2:
     if os.path.exists("crm_sistema_maestro.csv"):
         df_up = pd.read_csv("crm_sistema_maestro.csv")
         if not es_admin: df_up = df_up[df_up['ASESOR'] == st.session_state.correo_asesor]
         
-        venta_idx = st.selectbox("Selecciona venta:", df_up['ID_VENTA'].astype(str) + " - " + df_up['CLIENTE'])
-        id_v = int(venta_idx.split(" - ")[0])
-        
-        nuevo_est = st.selectbox("Cambiar estado a:", lista_estados)
-        nueva_fecha = st.date_input("Nueva fecha seguimiento:")
-        
-        if st.button("🔄 Actualizar Registro"):
-            df_up.loc[df_up['ID_VENTA'] == id_v, 'ESTADO'] = nuevo_est
-            df_up.loc[df_up['ID_VENTA'] == id_v, 'FECHA_SEGUIMIENTO'] = nueva_fecha
-            df_up.to_csv("crm_sistema_maestro.csv", index=False)
-            st.success("✅ Registro actualizado.")
-            st.rerun()
+        if not df_up.empty:
+            venta_idx = st.selectbox("Selecciona venta:", df_up['ID_VENTA'].astype(str) + " - " + df_up['CLIENTE'])
+            id_v = int(venta_idx.split(" - ")[0])
+            
+            # AGREGAMOS "Cotizado" AQUÍ TAMBIÉN
+            nuevo_est = st.selectbox("Cambiar estado a:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+            if st.button("🔄 Actualizar"):
+                df_up.loc[df_up['ID_VENTA'] == id_v, 'ESTADO'] = nuevo_est
+                df_up.to_csv("crm_sistema_maestro.csv", index=False)
+                st.success("✅ Actualizado.")
+                st.rerun()
