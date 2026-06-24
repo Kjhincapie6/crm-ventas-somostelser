@@ -407,7 +407,7 @@ with tab3:
                 
             with col2:
                 st.markdown("#### 📊 Ventas por Frente")
-                # Contamos cuántos hay por frente (B2B / B2C)
+                # Contamos cuántos hay por frente (FIJO / MOVIL)
                 frente_counts = df['FRENTE'].value_counts()
                 st.bar_chart(frente_counts)
             
