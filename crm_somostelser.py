@@ -76,6 +76,14 @@ with st.sidebar:
     
     # Identificador de rol
 
+      es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
+    rol = "👑 Admin" if es_admin else "👤 Asesor"
+    st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
+    
+       if st.button("🚪 Cerrar Sesión"):
+        st.session_state.correo_asesor = None
+        st.rerun()
+
     st.markdown("---")
     st.subheader("🤖 Asistente de Ofertas")
     consulta = st.text_input("Buscar precio:", placeholder="Ej: 500Mbps, 60GB")
@@ -95,13 +103,7 @@ with st.sidebar:
         try:
             df = pd.read_csv("crm_sistema_maestro.csv")
 
-     es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
-    rol = "👑 Admin" if es_admin else "👤 Asesor"
-    st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
-    
-       if st.button("🚪 Cerrar Sesión"):
-        st.session_state.correo_asesor = None
-        st.rerun()
+   
             
             # --- FILTRO POR ROL ---
             if not es_admin and 'ASESOR' in df.columns:
