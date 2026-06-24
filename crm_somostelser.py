@@ -180,12 +180,12 @@ with tab1:
             "🎯 ¡Enfocados en el objetivo, gran gestión!"
         ] 
      if valor > 0:
-    st.markdown(f"""
-    <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
-        <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
-        <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
-    </div>
-    """, unsafe_allow_html=True)
+         st.markdown(f"""
+         <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
+             <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
+             <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
+         </div>
+         """, unsafe_allow_html=True)
 
 # ==========================================
 # DOCUMENTOS DEL CLIENTE
