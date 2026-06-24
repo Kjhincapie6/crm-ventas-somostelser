@@ -35,19 +35,14 @@ if 'correo_asesor' not in st.session_state:
     st.session_state.correo_asesor = None
 
 # --- PANTALLA DE ACCESO ---
+st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
+if not os.path.exists("documentos_ventas"): os.makedirs("documentos_ventas")
+
+if 'correo_asesor' not in st.session_state: st.session_state.correo_asesor = None
+
 if st.session_state.correo_asesor is None:
     st.title("🔐 Acceso al CRM Somos Telser")
-    st.write("Por favor, selecciona tu perfil para ingresar:")
-    
-    usuario_seleccionado = st.selectbox("Usuario:", [
-        "", 
-        "ADMIN@SOMOSTELSER.COM", 
-        "ASESOR1@SOMOSTELSER.COM", 
-        "ASESOR2@SOMOSTELSER.COM",
-        "ASESOR3@SOMOSTELSER.COM",
-        "ASESOR4@SOMOSTELSER.COM"
-    ])
-    
+    usuario_seleccionado = st.selectbox("Usuario:", ["", "ADMIN@SOMOSTELSER.COM", "ASESOR1@SOMOSTELSER.COM", "ASESOR2@SOMOSTELSER.COM", "ASESOR3@SOMOSTELSER.COM", "ASESOR4@SOMOSTELSER.COM"])
     if st.button("Ingresar al Portal") and usuario_seleccionado != "":
         st.session_state.correo_asesor = usuario_seleccionado
         st.rerun()
