@@ -364,3 +364,37 @@ with tab2:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
         st.info("Aún no hay base de datos creada.")
+# ==========================================
+# PESTAÑA 3: VISUALIZACIÓN DE LA DATA
+# ==========================================
+with tab3:
+    st.subheader("📊 Base de Datos Maestra")
+    
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_maestra = pd.read_csv("crm_sistema_maestro.csv")
+        
+        # Si NO es admin, solo ve sus propias ventas
+        if not es_admin and 'ASESOR' in df_maestra.columns:
+            df_maestra = df_maestra[df_maestra['ASESOR'] == st.session_state.correo_asesor]
+            
+        if not df_maestra.empty:
+            # 1. Tarjetas de Resumen
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Total de Ventas", len(df_maestra))
+            
+            if 'VALOR_TOTAL' in df_maestra.columns:
+                ingresos = df_maestra['VALOR_TOTAL'].sum()
+                c2.metric("Ingresos Totales", f"${ingresos:,.0f} COP")
+                
+            if 'ESTADO' in df_maestra.columns:
+                ventas_cerradas = len(df_maestra[df_maestra['ESTADO'] == "Activado"])
+                c3.metric("Ventas Activadas", ventas_cerradas)
+            
+            # 2. Muestra la tabla interactiva en pantalla
+            st.markdown("### 📋 Registro Detallado")
+            st.dataframe(df_maestra, use_container_width=True)
+            
+        else:
+            st.info("No hay datos para mostrar en este momento.")
+    else:
+        st.info("La base de datos aún no se ha creado. Registra la primera venta.")
