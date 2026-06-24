@@ -312,7 +312,7 @@ with tab1:
 # ------------------------------------------
         guardar = st.button(
             "💾 Guardar Venta",
-            key="btn_guardar_venta_tab1",
+            key="btn_guardar_venta_tab2",
             use_container_width=True
         )
 
