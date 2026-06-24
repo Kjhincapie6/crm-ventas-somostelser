@@ -107,7 +107,25 @@ with st.form(key="registro_full_v2", clear_on_submit=True):
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         
-        st.info(f"💰 **Total: ${valor:,.0f} COP** (Dcto: {dcto}%)")
+        # --- NUEVO PANEL DE VALOR COMERCIAL ---
+        import random
+        frases = [
+            "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
+            "💎 La calidad de tu servicio es nuestra mayor ventaja.",
+            "📈 ¡A superar la meta de ventas de este mes!",
+            "🤝 Cada cliente cuenta, ¡haz que esta venta sea memorable!",
+            "🎯 ¡Enfocados en el objetivo, gran gestión!"
+        ]
+        
+        # Si hay venta, muestra el total, si no, muestra una frase motivadora
+        if valor > 0:
+            st.markdown(f"""
+            <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1;">
+                <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
+                <p style="margin: 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
+            </div>
+            """, unsafe_allow_html=True)
+        
         guardar = st.form_submit_button("💾 Guardar Venta")
 
 if guardar:
