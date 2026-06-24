@@ -172,37 +172,37 @@ with tab1:
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         
         # PANEL DE VALOR COMERCIAL
-        frases = [
+              frases = [
             "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
             "💎 La calidad de tu servicio es nuestra mayor ventaja.",
             "📈 ¡A superar la meta de ventas de este mes!",
             "🤝 Cada cliente cuenta, ¡haz que esta venta sea memorable!",
             "🎯 ¡Enfocados en el objetivo, gran gestión!"
-        ] 
-     if valor > 0:
-         st.markdown(f"""
-         <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
-             <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
-             <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
-         </div>
-         """, unsafe_allow_html=True)
+        ]
 
-# ==========================================
-# DOCUMENTOS DEL CLIENTE
-# ==========================================
-st.subheader("📎 Documentos del Cliente")
+        if valor > 0:
+            st.markdown(f"""
+            <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
+                <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
+                <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
+            </div>
+            """, unsafe_allow_html=True)
 
-archivo_subido = st.file_uploader(
-    "Adjuntar documentos",
-    type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
-    accept_multiple_files=True
-)
+        # ==========================================
+        # DOCUMENTOS DEL CLIENTE
+        # ==========================================
+        st.subheader("📎 Documentos del Cliente")
 
-if archivo_subido:
-    st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
+        archivo_subido = st.file_uploader(
+            "Adjuntar documentos",
+            type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
+            accept_multiple_files=True
+        )
 
-guardar = st.button("💾 Guardar Venta", use_container_width=True)
+        if archivo_subido:
+            st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
 
+        guardar = st.button("💾 Guardar Venta", use_container_width=True)
    if guardar:
     if n_doc and nombre:
 
