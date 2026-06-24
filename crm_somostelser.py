@@ -35,32 +35,21 @@ if 'correo_asesor' not in st.session_state:
     st.session_state.correo_asesor = None
 
 # --- PANTALLA DE ACCESO ---
+# --- PANTALLA DE ACCESO ---
 if st.session_state.correo_asesor is None:
     st.title("🔐 Acceso al CRM Somos Telser")
-    st.write("Por favor, selecciona tu perfil para ingresar:")
-    
-    usuario_seleccionado = st.selectbox("Usuario:", [
-        "", 
-        "ADMIN@SOMOSTELSER.COM", 
-        "ASESOR1@SOMOSTELSER.COM", 
-        "ASESOR2@SOMOSTELSER.COM",
-        "ASESOR3@SOMOSTELSER.COM",
-        "ASESOR4@SOMOSTELSER.COM"
-    ])
-    
+    # ... tu código de usuario ...
     if st.button("Ingresar al Portal") and usuario_seleccionado != "":
         st.session_state.correo_asesor = usuario_seleccionado
         st.rerun()
     st.stop()
 
+# --- AQUÍ DEFINIMOS LA VARIABLE PARA QUE EL RESTO DEL CÓDIGO LA RECONOZCA ---
+es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
 
 # --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
 with st.sidebar:
-    # ... logo ...
-    
-    # Identificador de rol
-    rol = "👑 Admin" if es_admin else "👤 Asesor"
-    st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
+    # ... resto del código ...
 
 
 # --- TAREAS PENDIENTES ---
