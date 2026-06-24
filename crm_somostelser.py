@@ -337,21 +337,21 @@ with tab2:
                 
                 st.info(f"📌 Estado Actual: **{estado_actual}**")
                 
-                # PEGA EL CÓDIGO AQUÍ:
-
-def probar_bot():
+ def probar_bot():
     token = "8942591199:AAF8CLBH9dBowNxj4SHRr0pIiFyuIyX6zR4"
-    chat_id = "3015704518" # El que sacaste de @userinfobot
+    chat_id = "3015704518"
     mensaje = "¡Hola! Probando integración con CRM Somos Telser."
-    url = f"https://api.telegram.org/@SomosTelserAIbot/sendMessage?chat_id={chat_id}&text={mensaje}"
-    respuesta = requests.get(url)
+    
+    # CORRECCIÓN: La estructura correcta es /botTOKEN/sendMessage
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    params = {"chat_id": chat_id, "text": mensaje}
+    
+    respuesta = requests.get(url, params=params)
+    
     if respuesta.status_code == 200:
         st.success("✅ ¡Mensaje enviado con éxito!")
     else:
-        st.error("❌ Falló el envío. Revisa tu token o ID.")
+        st.error(f"❌ Falló el envío. Código: {respuesta.status_code} - {respuesta.text}")
 
 if st.button("Enviar mensaje de prueba a Telegram"):
     probar_bot()
-                # Luego sigue el resto de tu código de actualización...
-                nuevo_estado = st.selectbox(...)
-
