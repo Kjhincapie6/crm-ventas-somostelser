@@ -358,4 +358,15 @@ with tab2:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
         st.info("Aún no hay base de datos creada. Registra una venta primero.")
+ # ==========================================
+    # BOTÓN DE PRUEBA TELEGRAM
+    # ==========================================
+    if st.button(
+        "📨 Enviar mensaje de prueba a Telegram",
+        key="btn_test_telegram"
+    ):
+        enviar_telegram(
+            "✅ Prueba de integración CRM Somos Telser"
+        )
 
+    st.divider()
