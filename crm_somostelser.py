@@ -28,7 +28,7 @@ PLANES_FIJO = {
 }
 
 # ==========================================
-# 2. CONFIGURACIÓN E IDENTIDAD (SISTEMA DE LOGIN)
+# 2. CONFIGURACIÓN E IDENTIDAD
 # ==========================================
 st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
@@ -38,30 +38,16 @@ if 'correo_asesor' not in st.session_state:
 # --- PANTALLA DE ACCESO ---
 if st.session_state.correo_asesor is None:
     st.title("🔐 Acceso al CRM Somos Telser")
-    st.write("Por favor, selecciona tu perfil para ingresar:")
-    
-    usuario_seleccionado = st.selectbox("Usuario:", [
-        "", 
-        "ADMIN@SOMOSTELSER.COM", 
-        "ASESOR1@SOMOSTELSER.COM", 
-        "ASESOR2@SOMOSTELSER.COM"
-    ])
-    
+    usuario_seleccionado = st.selectbox("Usuario:", ["", "ADMIN@SOMOSTELSER.COM", "ASESOR1@SOMOSTELSER.COM", "ASESOR2@SOMOSTELSER.COM"])
     if st.button("Ingresar al Portal") and usuario_seleccionado != "":
         st.session_state.correo_asesor = usuario_seleccionado
         st.rerun()
     st.stop()
 
-# --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
+# --- SIDEBAR ---
 with st.sidebar:
-    if os.path.exists("logo_somostelser.png"):
-        st.image("logo_somostelser.png", use_container_width=True)
-    
-    # Identificador de rol
     es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
-    rol = "👑 Admin" if es_admin else "👤 Asesor"
-    st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
-    
+    st.markdown(f"**{'👑 Admin' if es_admin else '👤 Asesor'}:** `{st.session_state.correo_asesor}`")
     if st.button("🚪 Cerrar Sesión"):
         st.session_state.correo_asesor = None
         st.rerun()
@@ -73,9 +59,7 @@ with st.sidebar:
         if 'FECHA_SEGUIMIENTO' in df_tasks.columns:
             df_tasks['FECHA_SEGUIMIENTO'] = pd.to_datetime(df_tasks['FECHA_SEGUIMIENTO'])
             hoy = pd.Timestamp(date.today())
-            # Filtro: pendientes de hoy o vencidas, que no estén activadas o anuladas
-            pendientes = df_tasks[(df_tasks['FECHA_SEGUIMIENTO'] <= hoy) & 
-                                  (~df_tasks['ESTADO'].isin(['Activado', 'Anulado']))]
+            pendientes = df_tasks[(df_tasks['FECHA_SEGUIMIENTO'] <= hoy) & (~df_tasks['ESTADO'].isin(['Activado', 'Anulado']))]
             if not es_admin:
                 pendientes = pendientes[pendientes['ASESOR'] == st.session_state.correo_asesor]
             
@@ -85,44 +69,24 @@ with st.sidebar:
             else:
                 st.success("¡Todo al día!")
 
-    st.markdown("---")
-    st.subheader("📊 Dashboard")
-    if os.path.exists("crm_sistema_maestro.csv"):
-        try:
-            df = pd.read_csv("crm_sistema_maestro.csv")
-            if not es_admin and 'ASESOR' in df.columns:
-                df = df[df['ASESOR'] == st.session_state.correo_asesor]
-            if 'DIVISION' in df.columns and not df.empty:
-                st.metric("💰 Ingresos Totales", f"${df['VALOR_TOTAL'].sum():,.0f} COP")
-                st.bar_chart(df['DIVISION'].value_counts())
-                if es_admin:
-                    st.download_button("📥 Exportar CRM", data=df.to_csv(index=False).encode('utf-8'), file_name='CRM_Ventas.csv', mime='text/csv')
-        except: st.caption("Cargando...")
-
 # ==========================================
 # 3. INTERFAZ Y AGENTE FINANCIERO
 # ==========================================
 st.title("📡 Portal de Ventas Somos Telser")
 tab1, tab2 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Seguimiento"])
 
+# --- PESTAÑA 1 ---
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], horizontal=True)
     c1, c2 = st.columns(2)
     with c1:
-        st.subheader("🏢 Datos del Cliente")
-        t_doc, n_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"]), st.text_input("Número de Documento:")
+        n_doc = st.text_input("Número de Documento:")
         nombre = st.text_input("Razón Social o Nombre:")
-        dir, barrio, muni = st.text_input("Dirección:"), st.text_input("Barrio:"), st.text_input("Municipio:")
-        email_cli, movil_cli, tel_contacto = st.text_input("Departamento:"), st.text_input("Contacto autorizado:"), st.text_input("Móvil Contacto autorizado:")
     with c2:
-        st.subheader("👤 Representante Legal")
-        nom_rep, cc_rep = st.text_input("Nombre Rep. Legal:"), st.text_input("Cédula Rep. Legal:")
-        mail_rep, tel_rep = st.text_input("Correo Rep. Legal:"), st.text_input("Móvil Rep. Legal:")
-        st.subheader("📊 Estado, Plan y Seguimiento")
-        estado = st.selectbox("Estado:", ["En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+        # AGREGAMOS "Cotizado" A LA LISTA
+        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
         fecha_seg = st.date_input("📅 Fecha de Seguimiento:", value=date.today())
         tipo_seg = st.selectbox("Tipo de Acción:", ["Llamada", "Visita Presencial", "Envío Correo", "Seguimiento WhatsApp"])
-        bitacora = st.text_area("📝 Notas / Bitácora:")
         
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
@@ -139,13 +103,16 @@ with tab1:
                 'ID_VENTA': len(df_ex) + 1, 'ASESOR': st.session_state.correo_asesor, 'ESTADO': estado,
                 'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg, 'DIVISION': div, 
                 'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 'VALOR_TOTAL': valor, 
-                'BITACORA': bitacora, 'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
+                'BITACORA': "", 'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
             }])
             pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
             st.success("✅ Venta registrada.")
             st.rerun()
 
+# --- PESTAÑA 2 ---
 with tab2:
-    # ... (LOGICA DE ACTUALIZACIÓN DE TAB 2 IGUAL QUE EL CÓDIGO ANTERIOR) ...
-    # (Asegúrate de incluir la lógica de actualización aquí también)
-    st.write("Selecciona tu venta en la pestaña anterior para actualizar.")
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_up = pd.read_csv("crm_sistema_maestro.csv")
+        if not es_admin: df_up = df_up[df_up['ASESOR'] == st.session_state.correo_asesor]
+        
+        if not df_up
