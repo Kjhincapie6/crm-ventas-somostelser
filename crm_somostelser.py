@@ -85,8 +85,9 @@ with st.form(key="registro_full_v2", clear_on_submit=True):
         dir = st.text_input("Dirección:")
         barrio = st.text_input("Barrio:")
         muni = st.text_input("Municipio:")
-        email_cli = st.text_input("Correo Cliente:")
-        movil_cli = st.text_input("Móvil Cliente:")
+        email_cli = st.text_input("Departamento:")
+        movil_cli = st.text_input("Contacto autorizado:")
+        tel_rep = st.text_input("Móvil Contacto autorizado:")
     
     with c2:
         st.subheader("👤 Representante Legal")
