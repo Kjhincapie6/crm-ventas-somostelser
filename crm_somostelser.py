@@ -128,23 +128,20 @@ tab1, tab2 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Seguimiento"])
 # ------------------------------------------
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
-
     c1, c2 = st.columns(2)
-
     with c1:
         st.subheader("🏢 Datos del Cliente")
         t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
         n_doc = st.text_input("Número de Documento:")
         nombre = st.text_input("Razón Social o Nombre:")
-        # --- Campo de documento agregado ---
-        uploaded_file = st.file_uploader("📂 Adjuntar documento (PDF, JPG, PNG):", type=["pdf", "jpg", "jpeg", "png"])
+        # --- NUEVO: Botón de documentos ---
+        archivo_adjunto = st.file_uploader("📂 Adjuntar documento", type=["pdf", "jpg", "png"])
         dir = st.text_input("Dirección:")
         barrio = st.text_input("Barrio:")
         muni = st.text_input("Municipio:")
         email_cli = st.text_input("Departamento:")
         movil_cli = st.text_input("Contacto autorizado:")
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
-
     with c2:
         st.subheader("👤 Representante Legal")
         nom_rep = st.text_input("Nombre Rep. Legal:")
@@ -161,26 +158,22 @@ with tab1:
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
-        
-        # CÁLCULO FINANCIERO DINÁMICO
-        dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
-        valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
+        valor = (tarifas[servicio] * lineas) * (1 - (30 if lineas >= 9 else 25 if lineas >= 6 else 20 if lineas >= 3 else 10 if lineas == 2 else 0)/100)
         
         guardar = st.button("💾 Guardar Venta", use_container_width=True)
 
     if guardar:
         if n_doc and nombre:
-            # Lógica de archivo
-            ruta_archivo = "No aplica"
-            if uploaded_file:
-                ruta_archivo = f"documentos_ventas/{n_doc}_{uploaded_file.name}"
-                with open(ruta_archivo, "wb") as f: f.write(uploaded_file.getbuffer())
+            ruta_archivo = "No"
+            if archivo_adjunto:
+                ruta_archivo = f"documentos_ventas/{n_doc}_{archivo_adjunto.name}"
+                with open(ruta_archivo, "wb") as f: f.write(archivo_adjunto.getbuffer())
             
             archivo = "crm_sistema_maestro.csv"
             df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
             nueva_fila = pd.DataFrame([{
                 'ID_VENTA': len(df_ex) + 1, 'ASESOR': st.session_state.correo_asesor, 'ESTADO': estado,
-                'DOCUMENTO_RUTA': ruta_archivo, 'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg,
+                'DOCUMENTO': ruta_archivo, 'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg, 
                 'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 'VALOR_TOTAL': valor, 
                 'BITACORA': bitacora, 'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
             }])
@@ -193,9 +186,23 @@ with tab1:
 # ------------------------------------------
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
-    
     if os.path.exists("crm_sistema_maestro.csv"):
         df_update = pd.read_csv("crm_sistema_maestro.csv")
         # Parches para columnas nuevas
         if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "Cotizado"
-        if not es_admin: df_update = df_update[df_update['ASESOR'] ==
+        if not es_admin: 
+            df_update = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
+        
+        if not df_update.empty:
+            opciones_ventas = df_update['ID_VENTA'].astype(str) + " - " + df_update['CLIENTE']
+            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist())
+            id_venta = int(venta_seleccionada.split(" - ")[0])
+            
+            nuevo_estado = st.selectbox("Nuevo Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+            nueva_fecha = st.date_input("Nueva fecha seguimiento:")
+            
+            if st.button("🔄 Guardar Actualización", use_container_width=True):
+                df_update.loc[df_update['ID_VENTA'] == id_venta, ['ESTADO', 'FECHA_SEGUIMIENTO']] = [nuevo_estado, nueva_fecha]
+                df_update.to_csv("crm_sistema_maestro.csv", index=False)
+                st.success("✅ Actualizado.")
+                st.rerun()
