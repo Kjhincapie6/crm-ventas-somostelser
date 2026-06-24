@@ -217,9 +217,32 @@ with tab1:
 # ------------------------------------------
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
-    
     if os.path.exists("crm_sistema_maestro.csv"):
-        df_update = pd.read_csv("crm_sistema_maestro.csv")
+        df_up = pd.read_csv("crm_sistema_maestro.csv")
+        
+        # --- REPARACIÓN INMEDIATA ---
+        # Si las columnas no existen, las creamos para evitar el KeyError
+        if 'ID_VENTA' not in df_up.columns: df_up['ID_VENTA'] = range(1, len(df_up) + 1)
+        if 'CLIENTE' not in df_up.columns: df_up['CLIENTE'] = "Cliente Desconocido"
+        if 'ASESOR' not in df_up.columns: df_up['ASESOR'] = "Sin Asesor"
+        
+        # Ahora sí filtramos
+        if not es_admin: 
+            df_up = df_up[df_up['ASESOR'] == st.session_state.correo_asesor]
+        
+        if not df_up.empty:
+            opciones_ventas = df_up['ID_VENTA'].astype(str) + " - " + df_up['CLIENTE']
+            sel = st.selectbox("Selecciona la venta:", opciones_ventas.tolist())
+            id_v = int(sel.split(" - ")[0])
+            
+            nuevo_e = st.selectbox("Nuevo Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+            nueva_f = st.date_input("Nueva fecha seguimiento:")
+            
+            if st.button("🔄 Actualizar"):
+                df_up.loc[df_up['ID_VENTA'] == id_v, ['ESTADO', 'FECHA_SEGUIMIENTO']] = [nuevo_e, nueva_f]
+                df_up.to_csv("crm_sistema_maestro.csv", index=False)
+                st.success("✅ Actualizado.")
+                st.rerun()
         
         # --- PARCHES DE SEGURIDAD PARA CSV ANTIGUOS ---
         if 'ESTADO' not in df_update.columns:
