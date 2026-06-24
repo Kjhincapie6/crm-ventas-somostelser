@@ -41,18 +41,25 @@ with st.sidebar:
         st.session_state.correo_asesor = None
         st.rerun()
 
-    # ASISTENTE DE PRECIOS INTELIGENTE
+    # ASISTENTE DE PRECIOS (VERSIÓN LIMPIA)
     st.markdown("---")
-    st.subheader("🤖 Asistente de Precios")
-    consulta = st.text_input("¿Qué oferta buscas?")
+    st.subheader("🤖 Asistente de Ofertas")
+    consulta = st.text_input("Buscar precio (ej: 500Mbps, 60GB):", placeholder="Escribe aquí...")
+    
     if consulta:
         portafolio_total = {**PLANES_MOVIL, **PLANES_FIJO}
+        # Filtramos resultados
         resultados = {k: v for k, v in portafolio_total.items() if consulta.lower() in k.lower()}
+        
         if resultados:
+            st.success(f"Encontré {len(resultados)} opción(es):")
             for plan, precio in resultados.items():
-                st.write(f"✅ *{plan}*: **${precio:,.0f}**")
+                # Usamos un expander para que cada resultado sea un bloque limpio
+                with st.expander(plan[:25] + "..."): # Muestra solo un trozo del nombre
+                    st.write(f"**Plan completo:** {plan}")
+                    st.write(f"**Precio:** ${precio:,.0f} COP")
         else:
-            st.warning("No encontrado.")
+            st.warning("Sin resultados.")
 
     # DASHBOARD
     st.markdown("---")
