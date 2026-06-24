@@ -118,7 +118,7 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("🔔 Tareas Pendientes")
     if os.path.exists("crm_sistema_maestro.csv"):
-        df_tasks = pd.read_csv("crm_sistema_maestro.csv")
+        df_tasks = pd.read_csv("crm_sistema_maestro.csv", encoding='latin-1', on_bad_lines='skip')
         if 'FECHA_SEGUIMIENTO' in df_tasks.columns:
             df_tasks['FECHA_SEGUIMIENTO'] = pd.to_datetime(df_tasks['FECHA_SEGUIMIENTO'])
             hoy = pd.Timestamp(date.today())
