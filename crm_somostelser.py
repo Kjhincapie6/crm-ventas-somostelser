@@ -161,6 +161,19 @@ with tab1:
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
+
+        if guardar:
+        ruta_archivo = "No aplica"
+        if archivo_adjunto:
+            ruta_archivo = f"documentos_ventas/{n_doc}_{archivo_adjunto.name}"
+            with open(ruta_archivo, "wb") as f: f.write(archivo_adjunto.getbuffer())
+        
+        archivo = "crm_sistema_maestro.csv"
+        df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
+        nueva_fila = pd.DataFrame([{'ID_VENTA': len(df_ex)+1, 'ASESOR': st.session_state.correo_asesor, 'ESTADO': estado, 'CLIENTE': nombre, 'DIVISION': div, 'VALOR_TOTAL': valor, 'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg, 'RUTA_DOC': ruta_archivo}])
+        pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
+        st.success("✅ Guardado.")
+        st.rerun()
         
         # CÁLCULO FINANCIERO DINÁMICO
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
