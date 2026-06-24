@@ -420,4 +420,4 @@ with tab3:
         else:
             st.warning("El archivo CSV no tiene datos.")
     else:
-        st.error(f"Error al leer el archivo: {e}. Por favor revisa el formato del CSV.")
+        st.error(f"No se encuentra el archivo {archivo}.")
