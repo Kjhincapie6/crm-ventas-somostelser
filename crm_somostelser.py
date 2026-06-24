@@ -312,7 +312,3 @@ with tab1:
 
         else:
             st.error("⚠️ Faltan datos obligatorios.")
-
-if guardar:
-...
-else:
