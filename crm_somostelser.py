@@ -90,7 +90,26 @@ with st.form("registro_full"):
     # Cálculo del valor con descuento
     dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
     valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
+
+    # --- AGENTE FINANCIERO INTELIGENTE ---
+def calcular_rentabilidad_y_validar(valor_final, lineas):
+    # Definimos un umbral de rentabilidad mínima (ejemplo: 35.000 COP)
+    umbral_minimo = 35000.0
     
+    # Lógica de Auditoría: ¿Es rentable la venta?
+    es_rentable = valor_final >= umbral_minimo
+    mensaje = "✅ Venta financieramente saludable." if es_rentable else "⚠️ Alerta: Rentabilidad baja, requiere aprobación."
+    
+    return es_rentable, mensaje
+
+# En tu formulario, después del cálculo del 'valor':
+es_rentable, mensaje_auditoria = calcular_rentabilidad_y_validar(valor, lineas)
+
+# Mostrar el diagnóstico en tiempo real
+if es_rentable:
+    st.success(mensaje_auditoria)
+else:
+    st.warning(mensaje_auditoria)
     # Resumen visual mejorado
     st.info(f"💰 **Resumen:** División: **{div}** | Servicio: **{servicio}** | Descuento: **{dcto}%** | **Total: ${valor:,.0f} COP**")
     
