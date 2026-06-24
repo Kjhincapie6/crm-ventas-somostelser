@@ -234,13 +234,11 @@ with tab1:
             accept_multiple_files=True
         )
 
-     if archivo_subido:
+        if archivo_subido:
             st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
 
-        # Esta línea debe tener el mismo nivel de indentación que 'if archivo_subido:'
         guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
 
-# (Esto debe estar ALINEADO A LA IZQUIERDA, fuera de 'with tab1:')
 if guardar:
     if n_doc and nombre:
         carpeta_documentos = "documentos_clientes"
@@ -248,20 +246,12 @@ if guardar:
             os.makedirs(carpeta_documentos)
 
         archivos_guardados = []
-
         if archivo_subido:
             for archivo_doc in archivo_subido:
-
                 nombre_archivo = f"{n_doc}_{archivo_doc.name}"
-
-                ruta_archivo = os.path.join(
-                    carpeta_documentos,
-                    nombre_archivo
-                )
-
+                ruta_archivo = os.path.join(carpeta_documentos, nombre_archivo)
                 with open(ruta_archivo, "wb") as f:
                     f.write(archivo_doc.getbuffer())
-
                 archivos_guardados.append(nombre_archivo)
 
         archivo = "crm_sistema_maestro.csv"
@@ -278,19 +268,12 @@ if guardar:
             'VALOR_TOTAL': valor,
             'BITACORA': bitacora,
             'DOCUMENTOS': ";".join(archivos_guardados),
-            'ESTADO_FINANCIERO': (
-                "APROBADO" if valor >= 35000 else "REVISION"
-            )
+            'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
         }])
 
-        pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(
-            archivo,
-            index=False
-        )
-
+        pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
         st.success("✅ Venta registrada correctamente.")
         st.rerun()
-
     else:
         st.error("⚠️ Faltan datos obligatorios.")
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
