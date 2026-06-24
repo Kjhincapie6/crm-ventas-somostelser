@@ -16,11 +16,14 @@ def enviar_telegram(mensaje):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     params = {"chat_id": CHAT_ID, "text": mensaje}
 
-    try:
+       try:
         respuesta = requests.get(url, params=params)
-        return respuesta.status_code == 200
-    except:
-        return False
+        if respuesta.status_code == 200:
+            st.success("✅ ¡Mensaje enviado!")
+        else:
+            st.error(f"❌ Error {respuesta.status_code}: {respuesta.text}")
+    except Exception as e:
+        st.error(f"❌ Error: {e}")
 
 # --- DEFINICIÓN SEGURA INICIAL (ESTO VA DE PRIMERO) ---
 if 'correo_asesor' not in st.session_state:
@@ -364,13 +367,6 @@ with tab2:
         st.info("Aún no hay base de datos creada.")
 # 1. Función definida al inicio (fuera de cualquier 'with' o 'if')
     
-    try:
-        respuesta = requests.get(url, params=params)
-        if respuesta.status_code == 200:
-            st.success("✅ ¡Mensaje enviado!")
-        else:
-            st.error(f"❌ Error {respuesta.status_code}: {respuesta.text}")
-    except Exception as e:
-        st.error(f"❌ Error: {e}")
+ 
 
 
