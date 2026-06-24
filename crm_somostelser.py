@@ -79,7 +79,7 @@ with st.form(key="registro_full_v2", clear_on_submit=True):
     
     with c1:
         st.subheader("🏢 Datos del Cliente")
-        t_doc = st.selectbox("Tipo Doc:", ["NIT", "Cédula", "CE", "PPT"])
+        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
         n_doc = st.text_input("Número de Documento:")
         nombre = st.text_input("Razón Social o Nombre:")
         dir = st.text_input("Dirección:")
