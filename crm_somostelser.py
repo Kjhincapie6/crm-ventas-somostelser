@@ -341,7 +341,7 @@ with tab2:
 # Asegúrate de definir esto una sola vez en tu archivo
 def enviar_telegram(mensaje):
     TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" # Usa tu token nuevo
-    CHAT_ID = "3015704518"
+    CHAT_ID = "@SomosTelserAlbot"
     
     # URL ÚNICA Y CLARA
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
