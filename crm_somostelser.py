@@ -343,16 +343,19 @@ with tab2:
         st.info("Aún no hay base de datos creada.")
         # --- 1. DEFINICIÓN DE LA FUNCIÓN (AL PRINCIPIO DE TODO) ---
 # --- FUNCIÓN DEFINIDA AL PRINCIPIO ---
-# --- 1. DEFINICIÓN DE LA FUNCIÓN (AL PRINCIPIO DE TODO) ---
 def enviar_telegram(mensaje):
-    TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" 
+    TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg"
+    # AQUÍ PONEMOS TU ID REAL:
     CHAT_ID = "1415966548" 
+    
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     params = {"chat_id": CHAT_ID, "text": mensaje}
+    
     try:
-        requests.get(url, params=params)
+        respuesta = requests.get(url, params=params)
+        if respuesta.status_code == 200:
+            st.success("✅ ¡Mensaje enviado!")
+        else:
+            st.error(f"❌ Error {respuesta.status_code}: {respuesta.text}")
     except Exception as e:
-        st.error(f"Error en Telegram: {e}")
-
-# --- 2. RESTO DE TU CÓDIGO (Login, Portafolio, etc.) ---
-# ... (aquí va todo lo demás)
+        st.error(f"❌ Error técnico: {e}")
