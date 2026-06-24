@@ -357,15 +357,16 @@ def enviar_telegram(mensaje):
 
 # 2. El botón de prueba (Colócalo en la Pestaña 2)
 if st.button("Guardar Cambios"):
-    # 1. Primero, obtenemos los valores de los selectbox o inputs
-    nombre_cliente = variable_donde_esta_el_nombre # <--- REEMPLAZA ESTO POR EL NOMBRE DE TU VARIABLE
-    nuevo_estado = variable_donde_esta_el_estado   # <--- REEMPLAZA ESTO POR EL NOMBRE DE TU VARIABLE
-    
-    # 2. Luego guardamos en el CSV
+    # 1. ACTUALIZA EL CSV
+    # (Aquí va tu lógica actual que ya tienes, por ejemplo:)
+    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = estado_nuevo
     df_update.to_csv("crm_sistema_maestro.csv", index=False)
     
-    # 3. Y finalmente enviamos el mensaje
-    mensaje_notificacion = f"✅ Venta actualizada correctamente.\nCliente: {nombre_cliente}\nEstado: {nuevo_estado}"
-    enviar_telegram(mensaje_notificacion)
+    # 2. ENVÍA LA NOTIFICACIÓN AUTOMÁTICA
+    # Asegúrate de usar los nombres de variables exactos que definiste arriba
+    mensaje = f"✅ Venta actualizada.\nCliente: {cliente_seleccionado}\nNuevo Estado: {estado_nuevo}"
+    
+    # Llama a la función que ya creamos al inicio del archivo
+    enviar_telegram(mensaje)
     
     st.success("¡Venta actualizada y notificada!")
