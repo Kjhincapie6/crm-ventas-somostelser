@@ -35,16 +35,29 @@ if 'correo_asesor' not in st.session_state:
     st.session_state.correo_asesor = None
 
 # --- PANTALLA DE ACCESO ---
-# --- PANTALLA DE ACCESO ---
 if st.session_state.correo_asesor is None:
     st.title("🔐 Acceso al CRM Somos Telser")
-    # ... tu código de usuario ...
-    if st.button("Ingresar al Portal") and usuario_seleccionado != "":
-        st.session_state.correo_asesor = usuario_seleccionado
-        st.rerun()
-    st.stop()
+    st.write("Por favor, selecciona tu perfil para ingresar:")
+    
+    # Definimos la variable ANTES de usarla
+    usuario_seleccionado = st.selectbox("Usuario:", [
+        "", 
+        "ADMIN@SOMOSTELSER.COM", 
+        "ASESOR1@SOMOSTELSER.COM", 
+        "ASESOR2@SOMOSTELSER.COM",
+        "ASESOR3@SOMOSTELSER.COM",
+        "ASESOR4@SOMOSTELSER.COM"
+    ], key="select_usuario") # Agregamos una 'key' única
+    
+    if st.button("Ingresar al Portal"):
+        if usuario_seleccionado != "":
+            st.session_state.correo_asesor = usuario_seleccionado
+            st.rerun()
+        else:
+            st.warning("Por favor, selecciona un usuario válido.")
+    st.stop() # Detiene la ejecución aquí hasta que el usuario ingrese
 
-# --- AQUÍ DEFINIMOS LA VARIABLE PARA QUE EL RESTO DEL CÓDIGO LA RECONOZCA ---
+# --- SI PASA EL STOP, YA SABEMOS QUE EL CORREO EXISTE ---
 es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
 
 # --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
