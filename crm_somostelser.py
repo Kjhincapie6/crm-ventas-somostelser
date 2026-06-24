@@ -361,11 +361,7 @@ with tab2:
 # ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
-if st.button(
-    "🔄 Guardar Nuevo Estado",
-    key="btn_guardar_estado_tab2_v2",
-    use_container_width=True
-):
+if st.button("🔄 Guardar Nuevo Estado", key="btn_guardar_estado_tab2", use_container_width=True):
 
     df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
     df_update.to_csv("crm_sistema_maestro.csv", index=False)
