@@ -12,6 +12,11 @@ es_admin = False
 if st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM":
     es_admin = True
 
+# --- CONFIGURACIÓN E IDENTIDAD ---
+st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
+
+# ... (Aquí sigue el resto de tu código de login, sidebar, etc.)
+
 # ==========================================
 # 1. PORTAFOLIO Y DATOS
 # ==========================================
