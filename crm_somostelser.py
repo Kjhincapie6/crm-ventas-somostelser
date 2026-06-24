@@ -28,7 +28,7 @@ PLANES_FIJO = {
 # ==========================================
 # 2. CONFIGURACIÓN E IDENTIDAD
 # ==========================================
-st.set_page_config(page_title="CRM Somos Telser - Junio 2026", layout="wide")
+st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
 if 'correo_asesor' not in st.session_state:
     st.session_state.correo_asesor = "ASESOR.B2B@SOMOSTELSER.COM"
@@ -54,7 +54,9 @@ with st.sidebar:
     else:
         st.info("Sistema listo.")
 
-st.title("🏢 Gestión Integral de Contratos B2B")
+# TÍTULOS CON IDENTIDAD
+st.title("📡 Portal de Ventas Somos Telser")
+st.subheader("Gestión Inteligente de Contratos B2B")
 div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
 
 # ==========================================
