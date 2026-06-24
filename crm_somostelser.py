@@ -1,214 +1,113 @@
 import streamlit as st
-
 import pandas as pd
-
 import os
 
-
-
 # ==========================================
-
 # 0. SEGURIDAD (AUTENTICACIÓN)
-
 # ==========================================
-
 def check_password():
-
     if "pw" not in st.session_state:
-
         st.text_input("🔑 Acceso al Portal:", type="password", key="pw")
-
         return False
-
     return st.session_state["pw"] == "TELSER2026"
 
-
-
 if not check_password():
-
     st.stop()
 
-
-
 # ==========================================
-
 # 1. PORTAFOLIO Y DATOS
-
 # ==========================================
-
 PLANES_MOVIL = {
-
     "Pospago Negocios 4.9 Plus+ (60 GB)": 44900.0,
-
     "Pospago Negocios 5.4 Plus+ (100 GB)": 53900.0,
-
     "Pospago 5.3 Empresarial (Ilim GB)": 113900.0,
-
     "Plan Datos Tigo Empresarial 6.9 (30 GB)": 38300.0,
-
     "Plan Datos Tigo Empresarial 6.10 (60 GB)": 47900.0,
-
     "Plan Datos Tigo Empresarial 6.11 (110 GB)": 57900.0,
-
     "Plan Datos Tigo Empresarial 6.12 (Ilim GB)": 113900.0,
-
     "Plan Datos Tigo Empresarial 6.8 FULL TIGO (Ilim GB)": 54900.0
-
 }
-
-
 
 PLANES_FIJO = {
-
     "Internet Business 300 Mbps (HFC/FTTx)": 88880.0,
-
     "Internet Business 500 Mbps (HFC/FTTx)": 115000.0,
-
     "Internet Business 700 Mbps (HFC/FTTx)": 180001.0,
-
     "Internet Full Tigo Business 500 Mbps": 144000.0,
-
     "Internet Full Tigo Business 700 Mbps": 174000.0,
-
     "Internet Full Tigo Business 1000 Mbps": 274000.0
-
 }
 
-
-
 # ==========================================
-
 # 2. CONFIGURACIÓN E IDENTIDAD
-
 # ==========================================
-
 st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
-
-
 if 'correo_asesor' not in st.session_state:
-
     st.session_state.correo_asesor = "ASESOR.B2B@SOMOSTELSER.COM"
 
-
-
 with st.sidebar:
-
     if os.path.exists("logo_somostelser.png"):
-
         st.image("logo_somostelser.png", use_container_width=True)
-
     st.markdown(f"👤 **Asesor:** `{st.session_state.correo_asesor}`")
-
     
-
-    # ASISTENTE DE OFERTAS
-
     st.markdown("---")
-
     st.subheader("🤖 Asistente de Ofertas")
-
     consulta = st.text_input("Buscar precio:", placeholder="Ej: 500Mbps, 60GB")
-
     if consulta:
-
         portafolio = {**PLANES_MOVIL, **PLANES_FIJO}
-
         res = {k: v for k, v in portafolio.items() if consulta.lower() in k.lower()}
-
         if res:
-
             seleccion = st.selectbox("Resultados:", list(res.keys()))
-
             st.metric(label="Precio Sugerido", value=f"${res[seleccion]:,.0f} COP")
-
         else:
-
             st.warning("Sin resultados.")
 
-
-
-    # DASHBOARD Y VENTAS RECIENTES
-
     st.markdown("---")
-
     st.subheader("📊 Control de Gestión")
-
     if os.path.exists("crm_sistema_maestro.csv"):
-
         try:
-
             df = pd.read_csv("crm_sistema_maestro.csv")
-
             if not df.empty:
-
                 if 'DIVISION' in df.columns:
-
                     st.bar_chart(df['DIVISION'].value_counts())
-
                 columnas_deseadas = ['CLIENTE', 'SERVICIO', 'VALOR_TOTAL']
-
                 if all(col in df.columns for col in columnas_deseadas):
-
                     st.markdown("**Últimas ventas:**")
-
                     st.table(df[columnas_deseadas].tail(3))
-
         except: st.caption("Cargando...")
-
     else:
-
         st.caption("Esperando ventas...")
 
-
-
 # ==========================================
-
 # 3. INTERFAZ Y REGISTRO
-
 # ==========================================
-
 st.title("📡 Portal de Ventas Somos Telser")
-
 st.subheader("Gestión Inteligente de Contratos B2B")
-
 div = st.radio("Seleccione División:", ["Móvil", "Fijo"], horizontal=True)
 
-
+# Definir tarifas según selección
+tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
 
 with st.form("registro_full", clear_on_submit=True):
-
     c1, c2 = st.columns(2)
-
     with c1:
-
         st.subheader("🏢 Datos del Cliente")
-
         t_doc = st.selectbox("Tipo Doc:", ["NIT", "Cédula", "CE", "PPT"])
-
         n_doc = st.text_input("Número de Documento:")
-
         nombre = st.text_input("Razón Social o Nombre:")
-
         dir = st.text_input("Dirección:")
-
         email_cli = st.text_input("Correo Cliente:")
-
     with c2:
-
         st.subheader("📊 Estado y Plan")
-
-        servicio = st.selectbox("Servicio:", list(PLANES_MOVIL.keys() if div == "Móvil" else PLANES_FIJO.keys()))
-
+        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
-
         bitacora = st.text_area("📝 Notas / Bitácora:")
-
+        
+        # CÁLCULO DINÁMICO DEL VALOR TOTAL
+        valor_final = tarifas[servicio] * lineas
+        st.info(f"💰 **Total Estimado: ${valor_final:,.0f} COP**")
+        
         guardar = st.form_submit_button("💾 Guardar Venta")
-
-
-
-# ... (Todo tu código anterior permanece igual) ...
 
 if guardar:
     if n_doc and nombre:
@@ -216,11 +115,10 @@ if guardar:
         df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
         nueva_fila = pd.DataFrame([{
             'ID_VENTA': len(df_ex) + 1, 'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre,
-            'SERVICIO': servicio, 'VALOR_TOTAL': (PLANES_MOVIL if div == "Móvil" else PLANES_FIJO)[servicio] * lineas,
-            'BITACORA': bitacora
+            'SERVICIO': servicio, 'VALOR_TOTAL': valor_final, 'BITACORA': bitacora
         }])
         pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
         st.success("✅ Venta registrada correctamente.")
-        st.rerun() # <--- AGREGA ESTA LÍNEA PARA REFRESCO AUTOMÁTICO
+        st.rerun() 
     else:
         st.error("⚠️ Faltan datos obligatorios.")
