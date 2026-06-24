@@ -48,11 +48,9 @@ if st.session_state.correo_asesor is None:
         "ASESOR4@SOMOSTELSER.COM"
     ], key="select_usuario")
     
-    # Campo para la contraseña (oculto)
     password = st.text_input("Contraseña:", type="password", key="pass_input")
     
     if st.button("Ingresar al Portal"):
-        # Validación: usuario seleccionado y contraseña maestra "Telser2026"
         if usuario_seleccionado != "" and password == "Telser2026":
             st.session_state.correo_asesor = usuario_seleccionado
             st.rerun()
@@ -61,14 +59,17 @@ if st.session_state.correo_asesor is None:
         else:
             st.error("Contraseña incorrecta.")
             
-    st.stop() # Detiene la ejecución aquí hasta que el usuario ingrese correctamente
+    st.stop() 
+
+# --- DEFINIR ROL (Esto se ejecuta SIEMPRE que alguien haya iniciado sesión) ---
+es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
 
 # --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
 with st.sidebar:
     if os.path.exists("logo_somostelser.png"):
         st.image("logo_somostelser.png", use_container_width=True)
     
-    # Identificador de rol
+    # Ahora 'es_admin' existe y no dará error
     rol = "👑 Admin" if es_admin else "👤 Asesor"
     st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
     
@@ -77,8 +78,7 @@ with st.sidebar:
         st.rerun()
 
     st.markdown("---")
-    st.subheader("🔔 Tareas Pendientes")
-    # ... resto de tu código de tareas ...
+    # ... resto del código ...
 
 # --- TAREAS PENDIENTES ---
     st.markdown("---")
