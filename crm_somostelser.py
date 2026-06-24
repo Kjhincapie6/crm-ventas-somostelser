@@ -234,12 +234,14 @@ with tab1:
             accept_multiple_files=True
         )
 
-        if archivo_subido:
+     if archivo_subido:
             st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
 
-       guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
+        # Esta línea debe tener la misma indentación que 'if archivo_subido:'
+        guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
 
-if guardar:
+# Esta parte debe estar alineada al borde izquierdo (o al mismo nivel de 'with tab1:')
+if guardar
     if n_doc and nombre:
 
         carpeta_documentos = "documentos_clientes"
