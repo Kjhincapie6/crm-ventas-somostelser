@@ -41,16 +41,17 @@ with st.sidebar:
         st.session_state.correo_asesor = None
         st.rerun()
 
-    # ASISTENTE DE OFERTAS (VERSIÓN LIMPIA)
+   # ASISTENTE DE OFERTAS (VERSION PROFESIONAL Y LIMPIA)
     st.markdown("---")
     st.subheader("🤖 Asistente de Ofertas")
-    consulta = st.text_input("Buscar precio:", placeholder="Ej: 500Mbps, 60GB")
+    consulta = st.text_input("Buscar precio (ej: 500Mbps):", placeholder="Escribe aquí...")
     
     if consulta:
         portafolio = {**PLANES_MOVIL, **PLANES_FIJO}
         res = {k: v for k, v in portafolio.items() if consulta.lower() in k.lower()}
         if res:
-            seleccion = st.selectbox("Resultados:", list(res.keys()))
+            # ESTO ES LO QUE DEBE APARECER:
+            seleccion = st.selectbox("Resultados encontrados:", list(res.keys()))
             st.metric(label="Precio Sugerido", value=f"${res[seleccion]:,.0f} COP")
         else:
             st.warning("Sin resultados.")
