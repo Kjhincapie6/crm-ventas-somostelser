@@ -27,17 +27,39 @@ PLANES_FIJO = {
 }
 
 # ==========================================
-# 2. CONFIGURACIÓN E IDENTIDAD
+# 2. CONFIGURACIÓN E IDENTIDAD (SISTEMA DE LOGIN)
 # ==========================================
 st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
 if 'correo_asesor' not in st.session_state:
-    st.session_state.correo_asesor = "ASESOR.B2B@SOMOSTELSER.COM"
+    st.session_state.correo_asesor = None
 
+# --- PANTALLA DE ACCESO ---
+if st.session_state.correo_asesor is None:
+    st.title("🔐 Acceso al CRM Somos Telser")
+    st.write("Por favor, selecciona tu perfil para ingresar:")
+    
+    usuario_seleccionado = st.selectbox("Usuario:", [
+        "", 
+        "ADMIN@SOMOSTELSER.COM", 
+        "ASESOR1@SOMOSTELSER.COM", 
+        "ASESOR2@SOMOSTELSER.COM"
+    ])
+    
+    if st.button("Ingresar al Portal") and usuario_seleccionado != "":
+        st.session_state.correo_asesor = usuario_seleccionado
+        st.rerun()
+    st.stop() # Detiene la app aquí si no han iniciado sesión
+
+# --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
 with st.sidebar:
     if os.path.exists("logo_somostelser.png"):
         st.image("logo_somostelser.png", use_container_width=True)
-    st.markdown(f"👤 **Asesor:** `{st.session_state.correo_asesor}`")
+    
+    # Identificador de rol
+    rol = "👑 Admin" if st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM" else "👤 Asesor"
+    st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
+    
     if st.button("🚪 Cerrar Sesión"):
         st.session_state.correo_asesor = None
         st.rerun()
@@ -60,10 +82,27 @@ with st.sidebar:
     if os.path.exists("crm_sistema_maestro.csv"):
         try:
             df = pd.read_csv("crm_sistema_maestro.csv")
+            
+            # --- FILTRO POR ROL ---
+            es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
+            if not es_admin and 'ASESOR' in df.columns:
+                df = df[df['ASESOR'] == st.session_state.correo_asesor]
+                
             if 'DIVISION' in df.columns and not df.empty:
+                # Sumatoria de ingresos para el perfil actual
+                st.metric("💰 Ingresos Totales", f"${df['VALOR_TOTAL'].sum():,.0f} COP")
                 st.bar_chart(df['DIVISION'].value_counts())
+                
+                # --- EXPORTAR SOLO PARA ADMIN ---
+                if es_admin:
+                    st.download_button(
+                        label="📥 Exportar CRM a Excel",
+                        data=df.to_csv(index=False).encode('utf-8'),
+                        file_name='CRM_Ventas_SomosTelser.csv',
+                        mime='text/csv'
+                    )
             else:
-                st.caption("Esperando ventas...")
+                st.caption("Aún no hay ventas registradas.")
         except: 
             st.caption("Cargando...")
 
@@ -133,8 +172,14 @@ if guardar:
         archivo = "crm_sistema_maestro.csv"
         df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
         nueva_fila = pd.DataFrame([{
-            'ID_VENTA': len(df_ex) + 1, 'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre,
-            'SERVICIO': servicio, 'VALOR_TOTAL': valor, 'BITACORA': bitacora,
+            'ID_VENTA': len(df_ex) + 1, 
+            'ASESOR': st.session_state.correo_asesor, # <-- Guarda quién la hizo
+            'DIVISION': div, 
+            'NIT': n_doc, 
+            'CLIENTE': nombre,
+            'SERVICIO': servicio, 
+            'VALOR_TOTAL': valor, 
+            'BITACORA': bitacora,
             'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
         }])
         pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
