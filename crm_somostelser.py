@@ -50,7 +50,8 @@ if st.session_state.correo_asesor is None:
     
     password = st.text_input("Contraseña:", type="password", key="pass_input")
     
-    if st.button("Ingresar al Portal"):
+    # Botón de Login único
+    if st.button("Ingresar al Portal", key="btn_login"):
         if usuario_seleccionado != "" and password == "Telser2026":
             st.session_state.correo_asesor = usuario_seleccionado
             st.rerun()
@@ -61,24 +62,23 @@ if st.session_state.correo_asesor is None:
             
     st.stop() 
 
-# --- DEFINIR ROL (Esto se ejecuta SIEMPRE que alguien haya iniciado sesión) ---
+# --- DEFINIR ROL ---
 es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
 
-# --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
+# --- SIDEBAR ---
 with st.sidebar:
     if os.path.exists("logo_somostelser.png"):
         st.image("logo_somostelser.png", use_container_width=True)
     
-    # Ahora 'es_admin' existe y no dará error
     rol = "👑 Admin" if es_admin else "👤 Asesor"
     st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
     
-    if st.button("🚪 Cerrar Sesión"):
+    # Botón de cierre de sesión con clave única
+    if st.button("🚪 Cerrar Sesión", key="btn_cerrar_sesion"):
         st.session_state.correo_asesor = None
         st.rerun()
 
     st.markdown("---")
-    # ... resto del código ...
 
 # --- TAREAS PENDIENTES ---
     st.markdown("---")
