@@ -102,9 +102,6 @@ with st.sidebar:
                 
     
         # Identificador de rol
-    es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
-    rol = "👑 Admin" if es_admin else "👤 Asesor"
-    st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
     
     if st.button("🚪 Cerrar Sesión"):
         st.session_state.correo_asesor = None
