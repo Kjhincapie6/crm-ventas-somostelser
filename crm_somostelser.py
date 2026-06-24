@@ -371,7 +371,7 @@ with tab3:
     st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
     
     # Asegúrate de usar el nombre de archivo correcto (el optimizado)
-    archivo = "CRM_Somostelser_Optimizado.csv"
+    archivo = "crm_sistema_maestro.csv"
     
     if os.path.exists(archivo):
         # Leemos el archivo optimizado
