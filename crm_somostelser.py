@@ -15,7 +15,6 @@ def enviar_telegram(mensaje):
     
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     params = {"chat_id": CHAT_ID, "text": mensaje}
-
        try:
         respuesta = requests.get(url, params=params)
         if respuesta.status_code == 200:
