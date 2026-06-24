@@ -5,6 +5,22 @@ import random
 import requests
 from datetime import date
 
+# ==========================================
+# TELEGRAM
+# ==========================================
+def enviar_telegram(mensaje):
+    TOKEN = "..."
+    CHAT_ID = "..."
+
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    params = {"chat_id": CHAT_ID, "text": mensaje}
+
+    try:
+        respuesta = requests.get(url, params=params)
+        return respuesta.status_code == 200
+    except:
+        return False
+
 # --- DEFINICIÓN SEGURA INICIAL (ESTO VA DE PRIMERO) ---
 if 'correo_asesor' not in st.session_state:
     st.session_state.correo_asesor = None
@@ -427,12 +443,4 @@ def enviar_telegram(mensaje):
     except Exception as e:
         st.error(f"❌ Error: {e}")
 
-# 2. El botón de prueba (Colócalo en la Pestaña 2)
-with tab2:
-    st.subheader("🔄 Actualizar Seguimiento de Venta")
-    
-    # Botón de prueba fijo en la pestaña 2
-    if st.button("Enviar mensaje de prueba a Telegram", key="btn_test_telegram"):
-        enviar_telegram("¡Hola! La integración con Somos Telser funciona correctamente.")
 
-    # ... tu código existente de selectbox y ventas ..
