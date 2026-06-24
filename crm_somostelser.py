@@ -74,13 +74,12 @@ with st.sidebar:
             else: st.success("¡Todo al día!")
                 
     
-    # Identificador de rol
-
-      es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
+        # Identificador de rol
+    es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
     rol = "👑 Admin" if es_admin else "👤 Asesor"
     st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
     
-       if st.button("🚪 Cerrar Sesión"):
+    if st.button("🚪 Cerrar Sesión"):
         st.session_state.correo_asesor = None
         st.rerun()
 
@@ -102,9 +101,7 @@ with st.sidebar:
     if os.path.exists("crm_sistema_maestro.csv"):
         try:
             df = pd.read_csv("crm_sistema_maestro.csv")
-
-   
-            
+        
             # --- FILTRO POR ROL ---
             if not es_admin and 'ASESOR' in df.columns:
                 df = df[df['ASESOR'] == st.session_state.correo_asesor]
