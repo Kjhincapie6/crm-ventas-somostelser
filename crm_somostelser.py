@@ -102,11 +102,18 @@ with st.form("registro_full", clear_on_submit=True):
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
         
-        # CÁLCULO FINANCIERO DINÁMICO
+        # --- CÁLCULO FINANCIERO DINÁMICO MEJORADO ---
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         
-        st.info(f"💰 **Total: ${valor:,.0f} COP** (Dcto: {dcto}%)")
+        # Nota mejorada: Diseño más limpio y profesional
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 10px; border-radius: 10px; border-left: 5px solid #1f77b4;">
+            <p style="margin: 0; font-size: 1.1em;">💰 <b>Total a Pagar:</b> ${valor:,.0f} COP</p>
+            <p style="margin: 0; font-size: 0.9em; color: #555;">Incluye descuento por volumen ({dcto}%)</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
         guardar = st.form_submit_button("💾 Guardar Venta")
 
 if guardar:
