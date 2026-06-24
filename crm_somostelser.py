@@ -41,20 +41,23 @@ with st.sidebar:
         st.session_state.correo_asesor = None
         st.rerun()
 
-   # ASISTENTE DE OFERTAS (VERSION PROFESIONAL Y LIMPIA)
+   # ASISTENTE DE OFERTAS (VERSION FORZADA)
     st.markdown("---")
     st.subheader("🤖 Asistente de Ofertas")
-    consulta = st.text_input("Buscar precio (ej: 500Mbps):", placeholder="Escribe aquí...")
     
-    if consulta:
-        portafolio = {**PLANES_MOVIL, **PLANES_FIJO}
-        res = {k: v for k, v in portafolio.items() if consulta.lower() in k.lower()}
-        if res:
-            # ESTO ES LO QUE DEBE APARECER:
-            seleccion = st.selectbox("Resultados encontrados:", list(res.keys()))
-            st.metric(label="Precio Sugerido", value=f"${res[seleccion]:,.0f} COP")
+    # Usamos una clave única para que Streamlit sepa que es un elemento nuevo
+    busqueda = st.text_input("Buscar precio:", key="input_busqueda_v2")
+    
+    if busqueda:
+        portafolio_combinado = {**PLANES_MOVIL, **PLANES_FIJO}
+        resultados = {k: v for k, v in portafolio_combinado.items() if busqueda.lower() in k.lower()}
+        
+        if resultados:
+            # Forzamos un selectbox nuevo
+            opcion = st.selectbox("Selecciona una opción:", list(resultados.keys()), key="select_resultados_v2")
+            st.metric(label="Precio:", value=f"${resultados[opcion]:,.0f} COP")
         else:
-            st.warning("Sin resultados.")
+            st.warning("Sin resultados para esa búsqueda.")
 
     # DASHBOARD
     st.markdown("---")
