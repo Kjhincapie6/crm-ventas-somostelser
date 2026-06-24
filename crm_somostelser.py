@@ -103,7 +103,9 @@ with st.form(key="registro_full_v2", clear_on_submit=True):
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
         
-        
+        # CÁLCULO FINANCIERO DINÁMICO
+        dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
+        valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         
         # --- NUEVO PANEL DE VALOR COMERCIAL ---
         import random
