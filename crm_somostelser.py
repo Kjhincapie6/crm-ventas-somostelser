@@ -162,18 +162,52 @@ with tab1:
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
 
-        if guardar:
+       if guardar:
+        # 1. Manejo del documento adjunto
         ruta_archivo = "No aplica"
         if archivo_adjunto:
             ruta_archivo = f"documentos_ventas/{n_doc}_{archivo_adjunto.name}"
-            with open(ruta_archivo, "wb") as f: f.write(archivo_adjunto.getbuffer())
+            with open(ruta_archivo, "wb") as f: 
+                f.write(archivo_adjunto.getbuffer())
         
+        # 2. Preparación del DataFrame
         archivo = "crm_sistema_maestro.csv"
-        df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
-        nueva_fila = pd.DataFrame([{'ID_VENTA': len(df_ex)+1, 'ASESOR': st.session_state.correo_asesor, 'ESTADO': estado, 'CLIENTE': nombre, 'DIVISION': div, 'VALOR_TOTAL': valor, 'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg, 'RUTA_DOC': ruta_archivo}])
-        pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
-        st.success("✅ Guardado.")
+        
+        if os.path.exists(archivo):
+            try:
+                df_ex = pd.read_csv(archivo)
+                # Asegurar que el ID sea el siguiente
+                nuevo_id = df_ex['ID_VENTA'].max() + 1 if 'ID_VENTA' in df_ex.columns and not df_ex.empty else 1
+            except:
+                df_ex = pd.DataFrame()
+                nuevo_id = 1
+        else:
+            df_ex = pd.DataFrame()
+            nuevo_id = 1
+
+        # 3. Creación de la fila
+        nueva_fila = pd.DataFrame([{
+            'ID_VENTA': nuevo_id, 
+            'ASESOR': st.session_state.correo_asesor, 
+            'ESTADO': estado, 
+            'CLIENTE': nombre, 
+            'DIVISION': div, 
+            'VALOR_TOTAL': valor, 
+            'FECHA_SEGUIMIENTO': fecha_seg, 
+            'TIPO_SEGUIMIENTO': tipo_seg, 
+            'RUTA_DOC': ruta_archivo
+        }])
+
+        # 4. Guardado
+        if not df_ex.empty:
+            df_final = pd.concat([df_ex, nueva_fila], ignore_index=True)
+        else:
+            df_final = nueva_fila
+            
+        df_final.to_csv(archivo, index=False)
+        st.success("✅ Venta registrada correctamente.")
         st.rerun()
+           
         
         # CÁLCULO FINANCIERO DINÁMICO
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
