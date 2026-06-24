@@ -255,7 +255,6 @@ if guardar:
 
     else:
         st.error("⚠️ Faltan datos obligatorios.")
-# ------------------------------------------
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ------------------------------------------
 with tab2:
