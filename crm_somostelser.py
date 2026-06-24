@@ -340,3 +340,16 @@ with tab2:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
         st.info("Aún no hay base de datos creada.")
+        # --- 1. DEFINICIÓN DE LA FUNCIÓN (AL PRINCIPIO DE TODO) ---
+def enviar_telegram(mensaje):
+    TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" 
+    CHAT_ID = "1415966548" 
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    params = {"chat_id": CHAT_ID, "text": mensaje}
+    try:
+        requests.get(url, params=params)
+    except Exception as e:
+        st.error(f"Error en Telegram: {e}")
+
+# --- 2. RESTO DE TU CÓDIGO (Login, Portafolio, etc.) ---
+# ... (aquí va todo lo demás)
