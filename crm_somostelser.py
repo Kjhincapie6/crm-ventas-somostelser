@@ -46,9 +46,8 @@ if st.session_state.correo_asesor is None:
         st.rerun()
     st.stop()
 
-# --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
+# --- SIDEBAR ---
 with st.sidebar:
-    if os.path.exists("logo_somostelser.png"): st.image("logo_somostelser.png", use_container_width=True)
     es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
     st.markdown(f"**{'👑 Admin' if es_admin else '👤 Asesor'}:** `{st.session_state.correo_asesor}`")
     if st.button("🚪 Cerrar Sesión"):
@@ -68,7 +67,7 @@ with st.sidebar:
             else: st.success("¡Todo al día!")
 
 # ==========================================
-# 3. INTERFAZ Y AGENTE FINANCIERO
+# 3. INTERFAZ
 # ==========================================
 st.title("📡 Portal de Ventas Somos Telser")
 tab1, tab2 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Seguimiento"])
@@ -78,54 +77,51 @@ with tab1:
     c1, c2 = st.columns(2)
     with c1:
         st.subheader("🏢 Datos del Cliente")
-        t_doc, n_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"]), st.text_input("Número de Documento:")
+        n_doc = st.text_input("Número de Documento:")
         nombre = st.text_input("Razón Social o Nombre:")
-        # BOTÓN PARA DOCUMENTOS
-        uploaded_file = st.file_uploader("📂 Adjuntar documento (PDF, JPG, PNG):", type=["pdf", "jpg", "jpeg", "png"])
+        # --- Campo de documento ---
+        uploaded_file = st.file_uploader("📂 Adjuntar documento:", type=["pdf", "jpg", "png"])
     with c2:
         st.subheader("📊 Estado, Plan y Seguimiento")
         estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
         fecha_seg = st.date_input("📅 Fecha de Seguimiento:", value=date.today())
         tipo_seg = st.selectbox("Tipo de Acción:", ["Llamada", "Visita Presencial", "Envío Correo", "Seguimiento WhatsApp"])
-        bitacora = st.text_area("📝 Notas / Bitácora:")
         
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
         valor = (tarifas[servicio] * lineas) * (1 - (30 if lineas >= 9 else 25 if lineas >= 6 else 20 if lineas >= 3 else 10 if lineas == 2 else 0)/100)
-        
         guardar = st.button("💾 Guardar Venta", use_container_width=True)
 
     if guardar:
-        if n_doc and nombre:
-            ruta_archivo = "No adjunto"
-            if uploaded_file:
-                ruta_archivo = f"documentos_ventas/{n_doc}_{uploaded_file.name}"
-                with open(ruta_archivo, "wb") as f: f.write(uploaded_file.getbuffer())
-            
-            archivo = "crm_sistema_maestro.csv"
-            df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
-            nueva_fila = pd.DataFrame([{
-                'ID_VENTA': len(df_ex) + 1, 'ASESOR': st.session_state.correo_asesor, 'ESTADO': estado,
-                'DOCUMENTO_RUTA': ruta_archivo, 'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg,
-                'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 'VALOR_TOTAL': valor, 
-                'BITACORA': bitacora, 'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
-            }])
-            pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
-            st.success("✅ Venta registrada.")
-            st.rerun()
+        ruta_archivo = "No aplica"
+        if uploaded_file:
+            ruta_archivo = f"documentos_ventas/{n_doc}_{uploaded_file.name}"
+            with open(ruta_archivo, "wb") as f: f.write(uploaded_file.getbuffer())
+        
+        archivo = "crm_sistema_maestro.csv"
+        df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
+        nueva_fila = pd.DataFrame([{
+            'ID_VENTA': len(df_ex) + 1, 'ASESOR': st.session_state.correo_asesor, 'ESTADO': estado,
+            'DOCUMENTO_RUTA': ruta_archivo, 'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg,
+            'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 'VALOR_TOTAL': valor, 
+            'BITACORA': "", 'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
+        }])
+        pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
+        st.success("✅ Venta registrada.")
+        st.rerun()
 
 with tab2:
-    st.subheader("🔄 Actualizar Seguimiento")
     if os.path.exists("crm_sistema_maestro.csv"):
         df_up = pd.read_csv("crm_sistema_maestro.csv")
         if not es_admin: df_up = df_up[df_up['ASESOR'] == st.session_state.correo_asesor]
+        
         if not df_up.empty:
             venta_idx = st.selectbox("Selecciona venta:", df_up['ID_VENTA'].astype(str) + " - " + df_up['CLIENTE'])
             id_v = int(venta_idx.split(" - ")[0])
-            nuevo_est = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
-            nueva_fecha = st.date_input("Nueva fecha:")
+            nuevo_est = st.selectbox("Cambiar estado a:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
             if st.button("🔄 Actualizar"):
-                df_up.loc[df_up['ID_VENTA'] == id_v, ['ESTADO', 'FECHA_SEGUIMIENTO']] = [nuevo_est, nueva_fecha]
+                df_up.loc[df_up['ID_VENTA'] == id_v, 'ESTADO'] = nuevo_est
                 df_up.to_csv("crm_sistema_maestro.csv", index=False)
+                st.success("✅ Actualizado.")
                 st.rerun()
