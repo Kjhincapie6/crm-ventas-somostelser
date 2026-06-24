@@ -5,6 +5,18 @@ import random
 import requests
 from datetime import date
 
+# 1. PEGA LA FUNCIÓN AQUÍ, AL PRINCIPIO
+def enviar_telegram(mensaje):
+    TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg"
+    CHAT_ID = "1415966548"
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    params = {"chat_id": CHAT_ID, "text": mensaje}
+    try:
+        requests.get(url, params=params)
+    except:
+        pass
+
+# ... (Luego sigue todo tu código de configuración, login, etc.)
 # --- DEFINICIÓN SEGURA INICIAL (ESTO VA DE PRIMERO) ---
 if 'correo_asesor' not in st.session_state:
     st.session_state.correo_asesor = None
@@ -342,29 +354,13 @@ with tab2:
     else:
         st.info("Aún no hay base de datos creada.")
 # 1. Función definida al inicio (fuera de cualquier 'with' o 'if')
-def enviar_telegram(mensaje):
-    TOKEN = "8942591199:AAFi8vkAvNyL4LLkUPO9TXKhC2bjukEDmcg" 
-    # REEMPLAZA EL ID DE ABAJO POR TU ID NUMÉRICO REAL (sin @)
-    CHAT_ID = "1415966548" 
+if st.button("🔄 Guardar Nuevo Estado", key="btn_guardar_estado_tab2"):
+    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
+    df_update.to_csv("crm_sistema_maestro.csv", index=False)
     
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    params = {"chat_id": CHAT_ID, "text": mensaje}
+    # Define 'mensaje' ANTES de llamarlo
+    mensaje = f"✅ Venta {id_venta} actualizada a: {nuevo_estado}"
+    enviar_telegram(mensaje) # Ahora sí funcionará
     
-    try:
-        respuesta = requests.get(url, params=params)
-        if respuesta.status_code == 200:
-            st.success("✅ ¡Mensaje enviado!")
-        else:
-            st.error(f"❌ Error {respuesta.status_code}: {respuesta.text}")
-    except Exception as e:
-        st.error(f"❌ Error: {e}")
-
-# 2. El botón de prueba (Colócalo en la Pestaña 2)
-with tab2:
-    st.subheader("🔄 Actualizar Seguimiento de Venta")
-    
-    # Botón de prueba fijo en la pestaña 2
-    if st.button("Enviar mensaje de prueba a Telegram", key="btn_test_telegram"):
-        enviar_telegram("¡Hola! La integración con Somos Telser funciona correctamente.")
-
-    # ... tu código existente de selectbox y ventas ..
+    st.success("¡Venta actualizada!")
+    st.rerun()
