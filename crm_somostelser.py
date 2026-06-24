@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import random
+from datetime import date
 
 # ==========================================
 # 1. PORTAFOLIO Y DATOS
@@ -148,6 +149,47 @@ with tab1:
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
+
+        if guardar:
+        if n_doc and nombre:
+            ruta_archivo = "No aplica"
+            if uploaded_file:
+                ruta_archivo = f"documentos_ventas/{n_doc}_{uploaded_file.name}"
+                with open(ruta_archivo, "wb") as f: f.write(uploaded_file.getbuffer())
+            
+            archivo = "crm_sistema_maestro.csv"
+            df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
+            nueva_fila = pd.DataFrame([{
+                'ID_VENTA': len(df_ex) + 1, 'ASESOR': st.session_state.correo_asesor, 'ESTADO': estado,
+                'DOCUMENTO_RUTA': ruta_archivo, 'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg,
+                'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 'VALOR_TOTAL': valor, 
+                'BITACORA': "", 'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
+            }])
+            pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
+            st.success("✅ Venta registrada.")
+            st.rerun()
+
+        with tab2:
+    st.subheader("🔄 Actualizar Seguimiento")
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_up = pd.read_csv("crm_sistema_maestro.csv")
+        # PARCHE: Crear columnas si no existen
+        if 'ID_VENTA' not in df_up.columns: df_up['ID_VENTA'] = range(1, len(df_up)+1)
+        if 'CLIENTE' not in df_up.columns: df_up['CLIENTE'] = "Cliente"
+        
+        if not es_admin:
+            df_up = df_up[df_up['ASESOR'] == st.session_state.correo_asesor]
+        
+        if not df_up.empty:
+            opciones = df_up['ID_VENTA'].astype(str) + " - " + df_up['CLIENTE']
+            venta_idx = st.selectbox("Selecciona venta:", opciones.tolist())
+            id_v = int(venta_idx.split(" - ")[0])
+            nuevo_est = st.selectbox("Cambiar estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+            if st.button("🔄 Actualizar"):
+                df_up.loc[df_up['ID_VENTA'] == id_v, 'ESTADO'] = nuevo_est
+                df_up.to_csv("crm_sistema_maestro.csv", index=False)
+                st.success("✅ Actualizado.")
+                st.rerun()
         
         # CÁLCULO FINANCIERO DINÁMICO
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
