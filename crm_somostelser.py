@@ -44,6 +44,7 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("🤖 Asistente de Ofertas")
     consulta = st.text_input("Buscar precio:", placeholder="Ej: 500Mbps, 60GB")
+    
     if consulta:
         portafolio = {**PLANES_MOVIL, **PLANES_FIJO}
         res = {k: v for k, v in portafolio.items() if consulta.lower() in k.lower()}
@@ -58,9 +59,12 @@ with st.sidebar:
     if os.path.exists("crm_sistema_maestro.csv"):
         try:
             df = pd.read_csv("crm_sistema_maestro.csv")
-            if not df.empty and 'DIVISION' in df.columns:
+            if 'DIVISION' in df.columns and not df.empty:
                 st.bar_chart(df['DIVISION'].value_counts())
-        except: st.caption("Cargando...")
+            else:
+                st.caption("Esperando ventas...")
+        except: 
+            st.caption("Cargando...")
 
 # ==========================================
 # 3. INTERFAZ Y AGENTE FINANCIERO
@@ -68,10 +72,10 @@ with st.sidebar:
 st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
 div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
-tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
 
 with st.form("registro_full", clear_on_submit=True):
     c1, c2 = st.columns(2)
+    
     with c1:
         st.subheader("🏢 Datos del Cliente")
         t_doc = st.selectbox("Tipo Doc:", ["NIT", "Cédula", "CE", "PPT"])
@@ -80,19 +84,28 @@ with st.form("registro_full", clear_on_submit=True):
         dir = st.text_input("Dirección:")
         barrio = st.text_input("Barrio:")
         muni = st.text_input("Municipio:")
+        email_cli = st.text_input("Correo Cliente:")
+        movil_cli = st.text_input("Móvil Cliente:")
+    
     with c2:
         st.subheader("👤 Representante Legal")
         nom_rep = st.text_input("Nombre Rep. Legal:")
         cc_rep = st.text_input("Cédula Rep. Legal:")
+        mail_rep = st.text_input("Correo Rep. Legal:")
+        tel_rep = st.text_input("Móvil Rep. Legal:")
+        
         st.subheader("📊 Estado y Plan")
         estado = st.selectbox("Estado:", ["En proceso de firma", "Ingreso de pedido", "Activado"])
         bitacora = st.text_area("📝 Notas / Bitácora:")
+        
+        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
         
-        # Cálculo financiero dinámico
+        # CÁLCULO FINANCIERO DINÁMICO
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
+        
         st.info(f"💰 **Total: ${valor:,.0f} COP** (Dcto: {dcto}%)")
         guardar = st.form_submit_button("💾 Guardar Venta")
 
