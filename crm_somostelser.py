@@ -356,12 +356,15 @@ def enviar_telegram(mensaje):
         st.error(f"❌ Error: {e}")
 
 # 2. El botón de prueba (Colócalo en la Pestaña 2)
-# Busca esta parte en tu código (donde guardas la información)
 if st.button("Guardar Cambios"):
-    # ... aquí está tu lógica para actualizar el CSV o la base de datos ...
+    # 1. Primero, obtenemos los valores de los selectbox o inputs
+    nombre_cliente = variable_donde_esta_el_nombre # <--- REEMPLAZA ESTO POR EL NOMBRE DE TU VARIABLE
+    nuevo_estado = variable_donde_esta_el_estado   # <--- REEMPLAZA ESTO POR EL NOMBRE DE TU VARIABLE
+    
+    # 2. Luego guardamos en el CSV
     df_update.to_csv("crm_sistema_maestro.csv", index=False)
     
-    # AGREGA ESTO JUSTO AQUÍ DEBAJO:
+    # 3. Y finalmente enviamos el mensaje
     mensaje_notificacion = f"✅ Venta actualizada correctamente.\nCliente: {nombre_cliente}\nEstado: {nuevo_estado}"
     enviar_telegram(mensaje_notificacion)
     
