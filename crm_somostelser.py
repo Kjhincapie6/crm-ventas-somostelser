@@ -368,57 +368,56 @@ with tab2:
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ==========================================
 with tab3:
-    st.subheader("📊 Dashboard y Base de Datos Maestra")
+    st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
     
     archivo = "Somostelser.csv"
     
     if os.path.exists(archivo):
-        df_maestra = pd.read_csv(archivo)
+        # Leemos el archivo real
+        df = pd.read_csv(archivo)
         
-        # --- FILTRO DESACTIVADO TEMPORALMENTE ---
-        # Para que puedas ver toda la data y los gráficos sin importar tu usuario.
-        # if not es_admin and 'CREADO_POR' in df_maestra.columns:
-        #     df_maestra = df_maestra[df_maestra['CREADO_POR'] == st.session_state.correo_asesor]
+        # --- FILTRO DESACTIVADO PARA VISUALIZACIÓN ---
+        # Si quieres volver a filtrar por asesor, descomenta las líneas de abajo:
+        # if not es_admin and 'CREADO_POR' in df.columns:
+        #     df = df[df['CREADO_POR'] == st.session_state.correo_asesor]
             
-        if not df_maestra.empty:
-            # --- 1. TARJETAS DE MÉTRICAS CLAVE ---
+        if not df.empty:
+            # 1. Métricas Rápidas
             c1, c2, c3 = st.columns(3)
-            c1.metric("Total de Ventas (Histórico)", len(df_maestra))
+            c1.metric("Total Registros", len(df))
             
-            if 'ESTADO' in df_maestra.columns:
-                ventas_exitosas = len(df_maestra[df_maestra['ESTADO'] == "Instalado"])
-                c2.metric("Ventas Instaladas", ventas_exitosas)
-                
-            if 'PORTAFOLIO' in df_maestra.columns:
-                ventas_fijas = len(df_maestra[df_maestra['PORTAFOLIO'] == "FIJO"])
-                c3.metric("Servicios Fijos", ventas_fijas)
-                
+            # Contar ventas instaladas (usando tu columna ESTADO)
+            instaladas = len(df[df['ESTADO'] == 'Instalado'])
+            c2.metric("Ventas Instaladas", instaladas)
+            
+            # Contar portafolio FIJO
+            fijos = len(df[df['PORTAFOLIO'] == 'FIJO'])
+            c3.metric("Portafolio FIJO", fijos)
+            
             st.divider()
             
-            # --- 2. ZONA DE GRÁFICOS ---
-            col_graf1, col_graf2 = st.columns(2)
+            # 2. Gráficos basados en tus columnas reales
+            col1, col2 = st.columns(2)
             
-            with col_graf1:
-                st.markdown("#### 📈 Distribución por Estado")
-                if 'ESTADO' in df_maestra.columns:
-                    # Cuenta cuántos hay de cada estado y grafica
-                    resumen_estado = df_maestra['ESTADO'].value_counts()
-                    st.bar_chart(resumen_estado)
-                    
-            with col_graf2:
-                st.markdown("#### 📊 Portafolio (Fijo vs Móvil)")
-                if 'PORTAFOLIO' in df_maestra.columns:
-                    # Cuenta cuántos hay de cada portafolio y grafica
-                    resumen_portafolio = df_maestra['PORTAFOLIO'].value_counts()
-                    st.bar_chart(resumen_portafolio)
-                    
+            with col1:
+                st.markdown("#### 📈 Ventas por Estado")
+                # Contamos cuántos hay por estado
+                estado_counts = df['ESTADO'].value_counts()
+                st.bar_chart(estado_counts)
+                
+            with col2:
+                st.markdown("#### 📊 Ventas por Frente")
+                # Contamos cuántos hay por frente (B2B / B2C)
+                frente_counts = df['FRENTE'].value_counts()
+                st.bar_chart(frente_counts)
+            
             st.divider()
             
-            # --- 3. TABLA COMPLETA ---
-            st.markdown("### 📋 Registro Detallado")
-            st.dataframe(df_maestra, use_container_width=True)
+            # 3. Dataframe interactivo (para que el Admin vea todo)
+            st.markdown("### 📋 Base de Datos Somostelser")
+            st.dataframe(df, use_container_width=True)
             
         else:
-            st.info("El archivo CSV está completamente vacío.")
+            st.warning("El archivo CSV no tiene datos.")
     else:
-        st.info("La base de datos aún no se ha creado. Asegúrate de que 'Somostelser.csv' esté en la misma carpeta.")
+        st.error(f"No se encuentra el archivo {archivo}. Asegúrate de subirlo al servidor.")
