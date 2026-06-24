@@ -337,18 +337,27 @@ with tab2:
                 
                 st.info(f"📌 Estado Actual: **{estado_actual}**")
                 
-def probar_bot():
-    token = "8942591199:AAF8CLBH9dBowNxj4SHRr0pIiFyuIyX6zR4"
-    chat_id = "3015704518"
-    mensaje = "¡Hola! Probando integración con CRM Somos Telser."
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    params = {"chat_id": chat_id, "text": mensaje}
+# 1. Función definida al inicio (fuera de cualquier 'with' o 'if')
+def enviar_telegram(mensaje):
+    TOKEN = "TU_NUEVO_TOKEN_AQUI" # Pega aquí el token recién generado
+    CHAT_ID = "3015704518"
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    params = {"chat_id": CHAT_ID, "text": mensaje}
+    try:
+        respuesta = requests.get(url, params=params)
+        if respuesta.status_code == 200:
+            st.success("✅ ¡Mensaje enviado!")
+        else:
+            st.error(f"❌ Error {respuesta.status_code}: {respuesta.json().get('description')}")
+    except Exception as e:
+        st.error(f"❌ Falló la conexión: {e}")
+
+# 2. El botón de prueba (Colócalo en la Pestaña 2)
+with tab2:
+    st.subheader("🔄 Actualizar Seguimiento de Venta")
     
-    respuesta = requests.get(url, params=params)
-    
-    if respuesta.status_code == 200:
-        st.success("✅ ¡Mensaje enviado con éxito!")
-    else:
-        # AQUÍ VEMOS EL ERROR REAL
-        st.error(f"❌ Falló el envío. Código: {respuesta.status_code}")
-        st.write("Detalle del error:", respuesta.json())
+    # Botón de prueba fijo en la pestaña 2
+    if st.button("Enviar mensaje de prueba a Telegram", key="btn_test_telegram"):
+        enviar_telegram("¡Hola! La integración con Somos Telser funciona correctamente.")
+
+    # ... tu código existente de selectbox y ventas ...
