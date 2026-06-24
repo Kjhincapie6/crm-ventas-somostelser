@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import random
+from datetime import date
 
 # ==========================================
 # 1. PORTAFOLIO Y DATOS
@@ -66,17 +67,23 @@ with st.sidebar:
         st.rerun()
 
     st.markdown("---")
-    st.subheader("🤖 Asistente de Ofertas")
-    consulta = st.text_input("Buscar precio:", placeholder="Ej: 500Mbps, 60GB")
-    
-    if consulta:
-        portafolio = {**PLANES_MOVIL, **PLANES_FIJO}
-        res = {k: v for k, v in portafolio.items() if consulta.lower() in k.lower()}
-        if res:
-            seleccion = st.selectbox("Resultados:", list(res.keys()))
-            st.metric(label="Precio Sugerido", value=f"${res[seleccion]:,.0f} COP")
-        else:
-            st.warning("Sin resultados.")
+    st.subheader("🔔 Tareas Pendientes")
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_tasks = pd.read_csv("crm_sistema_maestro.csv")
+        if 'FECHA_SEGUIMIENTO' in df_tasks.columns:
+            df_tasks['FECHA_SEGUIMIENTO'] = pd.to_datetime(df_tasks['FECHA_SEGUIMIENTO'])
+            hoy = pd.Timestamp(date.today())
+            # Filtro: pendientes de hoy o vencidas, que no estén activadas o anuladas
+            pendientes = df_tasks[(df_tasks['FECHA_SEGUIMIENTO'] <= hoy) & 
+                                 (~df_tasks['ESTADO'].isin(['Activado', 'Anulado']))]
+            if not es_admin:
+                pendientes = pendientes[pendientes['ASESOR'] == st.session_state.correo_asesor]
+            
+            if not pendientes.empty:
+                for _, row in pendientes.iterrows():
+                    st.warning(f"📞 {row['CLIENTE']} | {row['TIPO_SEGUIMIENTO']}")
+            else:
+                st.success("¡Todo al día!")
 
     st.markdown("---")
     st.subheader("📊 Dashboard")
@@ -112,16 +119,14 @@ st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
 
 # --- LAS PESTAÑAS ---
-tab1, tab2 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de Venta"])
+tab1, tab2 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Seguimiento"])
 
 # ------------------------------------------
-# PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
+# PESTAÑA 1
 # ------------------------------------------
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
-
     c1, c2 = st.columns(2)
-
     with c1:
         st.subheader("🏢 Datos del Cliente")
         t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
@@ -133,7 +138,6 @@ with tab1:
         email_cli = st.text_input("Departamento:")
         movil_cli = st.text_input("Contacto autorizado:")
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
-
     with c2:
         st.subheader("👤 Representante Legal")
         nom_rep = st.text_input("Nombre Rep. Legal:")
@@ -141,34 +145,16 @@ with tab1:
         mail_rep = st.text_input("Correo Rep. Legal:")
         tel_rep = st.text_input("Móvil Rep. Legal:")
         
-        st.subheader("📊 Estado y Plan")
-        estado = st.selectbox("Estado:", ["En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+        st.subheader("📊 Estado, Plan y Seguimiento")
+        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+        fecha_seg = st.date_input("📅 Fecha de Seguimiento:", value=date.today())
+        tipo_seg = st.selectbox("Tipo de Acción:", ["Llamada", "Visita Presencial", "Envío Correo", "Seguimiento WhatsApp"])
         bitacora = st.text_area("📝 Notas / Bitácora:")
         
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
-        
-        # CÁLCULO FINANCIERO DINÁMICO
-        dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
-        valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
-        
-        # PANEL DE VALOR COMERCIAL
-        frases = [
-            "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
-            "💎 La calidad de tu servicio es nuestra mayor ventaja.",
-            "📈 ¡A superar la meta de ventas de este mes!",
-            "🤝 Cada cliente cuenta, ¡haz que esta venta sea memorable!",
-            "🎯 ¡Enfocados en el objetivo, gran gestión!"
-        ]
-        
-        if valor > 0:
-            st.markdown(f"""
-            <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
-                <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
-                <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
-            </div>
-            """, unsafe_allow_html=True)
+        valor = (tarifas[servicio] * lineas) * (1 - (30 if lineas >= 9 else 25 if lineas >= 6 else 20 if lineas >= 3 else 10 if lineas == 2 else 0)/100)
         
         guardar = st.button("💾 Guardar Venta", use_container_width=True)
 
@@ -177,66 +163,36 @@ with tab1:
             archivo = "crm_sistema_maestro.csv"
             df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
             nueva_fila = pd.DataFrame([{
-                'ID_VENTA': len(df_ex) + 1, 
-                'ASESOR': st.session_state.correo_asesor, 
-                'ESTADO': estado, # <-- SE GUARDA EL ESTADO QUE ELEGISTE
-                'DIVISION': div, 
-                'NIT': n_doc, 
-                'CLIENTE': nombre,
-                'SERVICIO': servicio, 
-                'VALOR_TOTAL': valor, 
-                'BITACORA': bitacora,
-                'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
+                'ID_VENTA': len(df_ex) + 1, 'ASESOR': st.session_state.correo_asesor, 'ESTADO': estado,
+                'FECHA_SEGUIMIENTO': fecha_seg, 'TIPO_SEGUIMIENTO': tipo_seg, 'DIVISION': div, 
+                'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 'VALOR_TOTAL': valor, 
+                'BITACORA': bitacora, 'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
             }])
             pd.concat([df_ex, nueva_fila]).to_csv(archivo, index=False)
             st.success("✅ Venta registrada correctamente.")
             st.rerun()
-        else:
-            st.error("⚠️ Faltan datos obligatorios.")
 
 # ------------------------------------------
-# PESTAÑA 2: ACTUALIZAR EL ESTADO
+# PESTAÑA 2
 # ------------------------------------------
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
-    
     if os.path.exists("crm_sistema_maestro.csv"):
         df_update = pd.read_csv("crm_sistema_maestro.csv")
+        # Parches para columnas nuevas
+        if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "Cotizado"
+        if not es_admin: df_update = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
         
-        # --- PARCHES DE SEGURIDAD PARA CSV ANTIGUOS ---
-        if 'ESTADO' not in df_update.columns:
-            df_update['ESTADO'] = "En proceso de firma"
-        if 'ID_VENTA' not in df_update.columns:
-            df_update['ID_VENTA'] = range(1, len(df_update) + 1)
-        if 'CLIENTE' not in df_update.columns:
-            df_update['CLIENTE'] = "Cliente Desconocido"
+        if not df_update.empty:
+            opciones_ventas = df_update['ID_VENTA'].astype(str) + " - " + df_update['CLIENTE']
+            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist())
+            id_venta = int(venta_seleccionada.split(" - ")[0])
             
-        if not es_admin and 'ASESOR' in df_update.columns:
-            df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
-        else:
-            df_mis_ventas = df_update
+            nuevo_estado = st.selectbox("Nuevo Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+            nueva_fecha = st.date_input("Nueva fecha seguimiento:")
             
-        if not df_mis_ventas.empty:
-            opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
-            venta_seleccionada = st.selectbox("Selecciona la venta que deseas actualizar:", opciones_ventas.tolist())
-            
-            if venta_seleccionada:
-                id_venta = int(venta_seleccionada.split(" - ")[0])
-                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
-                
-                st.info(f"📌 Estado Actual: **{estado_actual}**")
-                
-                nuevo_estado = st.selectbox(
-                    "Cambiar estado a:", 
-                    ["En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"]
-                )
-                
-                if st.button("🔄 Guardar Nuevo Estado", use_container_width=True):
-                    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
-                    df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                    st.success(f"✅ El estado de la venta ha sido actualizado a '{nuevo_estado}'.")
-                    st.rerun()
-        else:
-            st.warning("No tienes ventas registradas para actualizar.")
-    else:
-        st.info("Aún no hay base de datos creada. Registra una venta primero.")
+            if st.button("🔄 Guardar Actualización", use_container_width=True):
+                df_update.loc[df_update['ID_VENTA'] == id_venta, ['ESTADO', 'FECHA_SEGUIMIENTO']] = [nuevo_estado, nueva_fecha]
+                df_update.to_csv("crm_sistema_maestro.csv", index=False)
+                st.success("✅ Actualizado.")
+                st.rerun()
