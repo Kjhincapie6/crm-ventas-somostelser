@@ -359,14 +359,119 @@ with tab2:
     else:
         st.info("Aún no hay base de datos creada. Registra una venta primero.")
  # ==========================================
-    # BOTÓN DE PRUEBA TELEGRAM
-    # ==========================================
-    if st.button(
-        "📨 Enviar mensaje de prueba a Telegram",
-        key="btn_test_telegram"
-    ):
-        enviar_telegram(
-            "✅ Prueba de integración CRM Somos Telser"
-        )
+# PESTAÑA 2: ACTUALIZAR EL ESTADO
+# ==========================================
+with tab2:
+    st.subheader("🔄 Actualizar Seguimiento de Venta")
 
-    st.divider()
+    if os.path.exists("crm_sistema_maestro.csv"):
+
+        df_update = pd.read_csv("crm_sistema_maestro.csv")
+
+        # --- PARCHES DE SEGURIDAD ---
+        if 'ESTADO' not in df_update.columns:
+            df_update['ESTADO'] = "En proceso de firma"
+
+        if 'ID_VENTA' not in df_update.columns:
+            df_update['ID_VENTA'] = range(1, len(df_update) + 1)
+
+        if 'CLIENTE' not in df_update.columns:
+            df_update['CLIENTE'] = "Cliente Desconocido"
+
+        # Filtrar por asesor si no es administrador
+        if not es_admin and 'ASESOR' in df_update.columns:
+            df_mis_ventas = df_update[
+                df_update['ASESOR'] == st.session_state.correo_asesor
+            ]
+        else:
+            df_mis_ventas = df_update
+
+        if not df_mis_ventas.empty:
+
+            opciones_ventas = (
+                df_mis_ventas['ID_VENTA'].astype(str)
+                + " - "
+                + df_mis_ventas['CLIENTE']
+            )
+
+            venta_seleccionada = st.selectbox(
+                "Selecciona la venta que deseas actualizar:",
+                opciones_ventas.tolist()
+            )
+
+            if venta_seleccionada:
+
+                id_venta = int(
+                    venta_seleccionada.split(" - ")[0]
+                )
+
+                estado_actual = df_update.loc[
+                    df_update['ID_VENTA'] == id_venta,
+                    'ESTADO'
+                ].values[0]
+
+                cliente_actual = df_update.loc[
+                    df_update['ID_VENTA'] == id_venta,
+                    'CLIENTE'
+                ].values[0]
+
+                st.info(
+                    f"📌 Estado Actual: **{estado_actual}**"
+                )
+
+                nuevo_estado = st.selectbox(
+                    "Cambiar estado a:",
+                    [
+                        "Cotizado",
+                        "En proceso de firma",
+                        "Ingreso de pedido",
+                        "Activado",
+                        "Anulado"
+                    ]
+                )
+
+                if st.button(
+                    "🔄 Guardar Nuevo Estado",
+                    key="btn_guardar_estado_tab2",
+                    use_container_width=True
+                ):
+
+                    # Actualizar estado
+                    df_update.loc[
+                        df_update['ID_VENTA'] == id_venta,
+                        'ESTADO'
+                    ] = nuevo_estado
+
+                    df_update.to_csv(
+                        "crm_sistema_maestro.csv",
+                        index=False
+                    )
+
+                    # ==========================================
+                    # NOTIFICACIÓN AUTOMÁTICA TELEGRAM
+                    # ==========================================
+                    mensaje = (
+                        f"📢 ACTUALIZACIÓN DE VENTA\n\n"
+                        f"🆔 ID Venta: {id_venta}\n"
+                        f"🏢 Cliente: {cliente_actual}\n"
+                        f"📌 Nuevo Estado: {nuevo_estado}\n"
+                        f"👤 Asesor: {st.session_state.correo_asesor}"
+                    )
+
+                    enviar_telegram(mensaje)
+
+                    st.success(
+                        f"✅ Estado actualizado a '{nuevo_estado}' y notificado por Telegram."
+                    )
+
+                    st.rerun()
+
+        else:
+            st.warning(
+                "No tienes ventas registradas para actualizar."
+            )
+
+    else:
+        st.info(
+            "Aún no hay base de datos creada. Registra una venta primero."
+        )
