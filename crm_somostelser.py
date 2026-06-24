@@ -3,8 +3,6 @@ import pandas as pd
 import os
 import random
 import requests
-import altair as alt
-import pandas as pd
 from datetime import date
 
 # ==========================================
@@ -118,7 +116,7 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("🔔 Tareas Pendientes")
     if os.path.exists("crm_sistema_maestro.csv"):
-        df_tasks = pd.read_csv("crm_sistema_maestro.csv", encoding='latin-1', on_bad_lines='skip')
+        df_tasks = pd.read_csv("crm_sistema_maestro.csv")
         if 'FECHA_SEGUIMIENTO' in df_tasks.columns:
             df_tasks['FECHA_SEGUIMIENTO'] = pd.to_datetime(df_tasks['FECHA_SEGUIMIENTO'])
             hoy = pd.Timestamp(date.today())
@@ -321,50 +319,49 @@ with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
     
     if os.path.exists("crm_sistema_maestro.csv"):
-        try:
-            # Leemos el archivo
-            df = pd.read_csv("crm_sistema_maestro.csv", encoding='utf-8', on_bad_lines='skip', engine='python')
-            df = df.dropna(how='all')
+        df_update = pd.read_csv("crm_sistema_maestro.csv")
+        
+        # Parches de seguridad
+        if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "En proceso de firma"
+        if 'ID_VENTA' not in df_update.columns: df_update['ID_VENTA'] = range(1, len(df_update) + 1)
+        if 'CLIENTE' not in df_update.columns: df_update['CLIENTE'] = "Cliente Desconocido"
+        
+        # Filtro de Asesor
+        if not es_admin and 'ASESOR' in df_update.columns:
+            df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
+        else:
+            df_mis_ventas = df_update
             
-            # Filtro de Asesor (Usamos CREADO_POR para identificar al dueño de la venta)
-            if not es_admin and 'CREADO_POR' in df.columns:
-                df_mis_ventas = df[df['CREADO_POR'] == st.session_state.correo_asesor]
-            else:
-                df_mis_ventas = df
+        if not df_mis_ventas.empty:
+            opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
+            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
+            
+            if venta_seleccionada:
+                id_venta = int(venta_seleccionada.split(" - ")[0])
+                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
                 
-            if not df_mis_ventas.empty:
-                # Creamos la lista de selección usando las columnas reales de tu CSV
-                opciones_ventas = df_mis_ventas['ID'].astype(str) + " - " + df_mis_ventas['NOMBRE_CLIENTE']
-                venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
+                st.info(f"📌 Estado Actual: **{estado_actual}**")
                 
-                if venta_seleccionada:
-                    id_venta = int(venta_seleccionada.split(" - ")[0])
-                    estado_actual = df.loc[df['ID'] == id_venta, 'ESTADO'].values[0]
-                    
-                    st.info(f"📌 Estado Actual: **{estado_actual}**")
-                    
-                    nuevo_estado = st.selectbox(
-                        "Cambiar estado a:", 
-                        ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Instalado", "Anulado"],
-                        key="select_nuevo_estado_tab2"
-                    )
-                    
-                    if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2"):
-                        # Actualizamos el dataframe maestro
-                        df.loc[df['ID'] == id_venta, 'ESTADO'] = nuevo_estado
-                        df.to_csv("crm_sistema_maestro.csv", index=False)
-                        
-                        # Notificar Telegram
-                        mensaje = f"✅ Venta {id_venta} actualizada.\nNuevo estado: {nuevo_estado}"
-                        enviar_telegram(mensaje)
-                        
-                        st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
-                        st.rerun()
-            else:
-                st.warning("No tienes ventas registradas para actualizar.")
+                nuevo_estado = st.selectbox(
+                    "Cambiar estado a:", 
+                    ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
+                    key="select_nuevo_estado_tab2"
+                )
                 
-        except Exception as e:
-            st.error(f"Error al leer el archivo: {e}")
+                if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2"):
+                    # 1. Guardar en CSV
+                    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
+                    df_update.to_csv("crm_sistema_maestro.csv", index=False)
+                    
+                    # 2. Notificar Telegram
+                    mensaje = f"✅ Venta {id_venta} actualizada.\nNuevo estado: {nuevo_estado}"
+                    enviar_telegram(mensaje)
+                    
+                    # 3. Éxito
+                    st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
+                    st.rerun()
+        else:
+            st.warning("No tienes ventas registradas para actualizar.")
     else:
         st.info("Aún no hay base de datos creada.")
 # ==========================================
@@ -373,55 +370,54 @@ with tab2:
 with tab3:
     st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
     
-    archivo = "crm_sistema_maestro.csv"
+    archivo = "Somostelser.csv"
     
     if os.path.exists(archivo):
-        try:
-            # AÑADIMOS 'on_bad_lines="skip"' para evitar el error de parsing
-            df = pd.read_csv(archivo, on_bad_lines='skip')
+        # Leemos el archivo real
+        df = pd.read_csv(archivo)
+        
+        # --- FILTRO DESACTIVADO PARA VISUALIZACIÓN ---
+        # Si quieres volver a filtrar por asesor, descomenta las líneas de abajo:
+        # if not es_admin and 'CREADO_POR' in df.columns:
+        #     df = df[df['CREADO_POR'] == st.session_state.correo_asesor]
             
-            if not df.empty:
-                # 1. Métricas Rápidas
-                c1, c2, c3 = st.columns(3)
-                c1.metric("Total Registros", len(df))
+        if not df.empty:
+            # 1. Métricas Rápidas
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Total Registros", len(df))
+            
+            # Contar ventas instaladas (usando tu columna ESTADO)
+            instaladas = len(df[df['ESTADO'] == 'Instalado'])
+            c2.metric("Ventas Instaladas", instaladas)
+            
+            # Contar portafolio FIJO
+            fijos = len(df[df['PORTAFOLIO'] == 'FIJO'])
+            c3.metric("Portafolio FIJO", fijos)
+            
+            st.divider()
+            
+            # 2. Gráficos basados en tus columnas reales
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("#### 📈 Ventas por Estado")
+                # Contamos cuántos hay por estado
+                estado_counts = df['ESTADO'].value_counts()
+                st.bar_chart(estado_counts)
                 
-                # Verificamos si las columnas existen antes de usarlas
-                if 'ESTADO' in df.columns:
-                    instaladas = len(df[df['ESTADO'] == 'Instalado'])
-                    c2.metric("Ventas Instaladas", instaladas)
-                
-                if 'PORTAFOLIO' in df.columns:
-                    fijos = len(df[df['PORTAFOLIO'] == 'FIJO'])
-                    moviles = len(df[df['PORTAFOLIO'] == 'MOVIL'])
-                    c3.metric("Fijo | Móvil", f"{fijos} | {moviles}")
-                
-                st.divider()
-                
-                # 2. Gráficos
-                col1, col2 = st.columns(2)
-                
-                if 'ESTADO' in df.columns:
-                    with col1:
-                        st.markdown("#### 📈 Ventas por Estado")
-                        estado_data = df['ESTADO'].value_counts().reset_index()
-                        estado_data.columns = ['ESTADO', 'CANTIDAD']
-                        chart1 = alt.Chart(estado_data).mark_bar(color='#2ecc71').encode(x='ESTADO', y='CANTIDAD')
-                        st.altair_chart(chart1, use_container_width=True)
-                
-                if 'PORTAFOLIO' in df.columns:
-                    with col2:
-                        st.markdown("#### 📊 Portafolio (Fijo vs Móvil)")
-                        portafolio_data = df['PORTAFOLIO'].value_counts().reset_index()
-                        portafolio_data.columns = ['PORTAFOLIO', 'CANTIDAD']
-                        chart2 = alt.Chart(portafolio_data).mark_bar().encode(
-                            x='PORTAFOLIO', y='CANTIDAD', 
-                            color=alt.Color('PORTAFOLIO', scale=alt.Scale(range=['#3498db', '#e74c3c']))
-                        )
-                        st.altair_chart(chart2, use_container_width=True)
-                
-                st.divider()
-                st.markdown("### 📋 Base de Datos Somostelser")
-                st.dataframe(df, use_container_width=True)
-                
-        except Exception as e:
-            st.error(f"Error al leer el archivo: {e}. Por favor revisa el formato del CSV.")
+            with col2:
+                st.markdown("#### 📊 Ventas por Frente")
+                # Contamos cuántos hay por frente (B2B / B2C)
+                frente_counts = df['FRENTE'].value_counts()
+                st.bar_chart(frente_counts)
+            
+            st.divider()
+            
+            # 3. Dataframe interactivo (para que el Admin vea todo)
+            st.markdown("### 📋 Base de Datos Somostelser")
+            st.dataframe(df, use_container_width=True)
+            
+        else:
+            st.warning("El archivo CSV no tiene datos.")
+    else:
+        st.error(
