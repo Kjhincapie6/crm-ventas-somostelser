@@ -344,13 +344,12 @@ def probar_bot():
     mensaje = "¡Hola! Probando integración con CRM Somos Telser."
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     params = {"chat_id": chat_id, "text": mensaje}
-    
-    try:
-        respuesta = requests.get(url, params=params)
-        if respuesta.status_code == 200:
-            st.success("✅ ¡Éxito!")
-        else:
-            # ESTO NOS DIRÁ LA RAZÓN DEL ERROR 400
-            st.error(f"❌ Error 400: {respuesta.json().get('description')}")
-    except Exception as e:
-        st.error(f"❌ Error de conexión: {e}")
+    respuesta = requests.get(url, params=params)
+    if respuesta.status_code == 200:
+        st.success("✅ ¡Mensaje enviado con éxito!")
+    else:
+        st.error(f"❌ Falló el envío. Código: {respuesta.status_code}")
+
+# --- EN LA PESTAÑA DONDE QUIERAS EL BOTÓN ---
+if st.button("Enviar mensaje de prueba a Telegram"):
+    probar_bot()
