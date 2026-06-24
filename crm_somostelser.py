@@ -41,16 +41,19 @@ with st.sidebar:
         st.session_state.correo_asesor = None
         st.rerun()
 
-    # ASISTENTE DE OFERTAS
+    # ASISTENTE DE OFERTAS (VERSIÓN LIMPIA)
     st.markdown("---")
     st.subheader("🤖 Asistente de Ofertas")
     consulta = st.text_input("Buscar precio:", placeholder="Ej: 500Mbps, 60GB")
+    
     if consulta:
         portafolio = {**PLANES_MOVIL, **PLANES_FIJO}
         res = {k: v for k, v in portafolio.items() if consulta.lower() in k.lower()}
-        for plan, precio in res.items():
-            with st.expander(plan[:20] + "..."):
-                st.write(f"**Plan:** {plan}\n\n**Precio:** ${precio:,.0f}")
+        if res:
+            seleccion = st.selectbox("Resultados:", list(res.keys()))
+            st.metric(label="Precio Sugerido", value=f"${res[seleccion]:,.0f} COP")
+        else:
+            st.warning("Sin resultados.")
 
     # DASHBOARD
     st.markdown("---")
@@ -58,8 +61,11 @@ with st.sidebar:
     if os.path.exists("crm_sistema_maestro.csv"):
         try:
             df = pd.read_csv("crm_sistema_maestro.csv")
-            if 'DIVISION' in df.columns: st.bar_chart(df['DIVISION'].value_counts())
-        except: st.info("Cargando...")
+            if 'DIVISION' in df.columns and not df.empty:
+                st.bar_chart(df['DIVISION'].value_counts())
+            else:
+                st.caption("Esperando ventas...")
+        except: st.caption("Cargando...")
 
 # ==========================================
 # 3. INTERFAZ Y AGENTE FINANCIERO
@@ -93,7 +99,6 @@ with st.form("registro_full", clear_on_submit=True):
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
 
-    # Lógica financiera
     dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
     valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
     st.info(f"💰 **Total: ${valor:,.0f} COP** (Dcto: {dcto}%)")
