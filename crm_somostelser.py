@@ -104,3 +104,36 @@ if guardar:
     archivo = "crm_sistema_maestro.csv"
     pd.concat([pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame(), nueva_fila]).to_csv(archivo, index=False)
     st.success("✅ Venta registrada correctamente.")
+
+# ... (Tu código de configuración y formulario anterior) ...
+
+    # 1. CÁLCULO (INPUT DEL AGENTE)
+    dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
+    valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
+    
+    # 2. BOTÓN DE GUARDAR
+    submitted = st.form_submit_button("💾 Guardar Venta Completa")
+
+# 3. AGENTE FINANCIERO (LÓGICA DE DECISIÓN TIPO N8N)
+if submitted:
+    if n_doc and nombre:
+        # Nodo de decisión financiera
+        umbral = 35000.0
+        if valor >= umbral:
+            estado_financiero = "APROBADO"
+            st.success(f"✅ Venta procesada. Estado: {estado_financiero}")
+        else:
+            estado_financiero = "REVISION"
+            st.warning(f"⚠️ Alerta: Rentabilidad baja. Estado: {estado_financiero}. Requiere revisión.")
+        
+        # Nodo de registro (Persistencia de datos)
+        nueva_fila = pd.DataFrame([{
+            'DIVISION': div, 'NIT': n_doc, 'CLIENTE': nombre, 'SERVICIO': servicio, 
+            'VALOR_TOTAL': valor, 'ESTADO_FINANCIERO': estado_financiero,
+            'ASESOR_REGISTRO': st.session_state.correo_asesor
+        }])
+        
+        archivo = "crm_sistema_maestro.csv"
+        pd.concat([pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame(), nueva_fila]).to_csv(archivo, index=False)
+    else:
+        st.error("⚠️ Error en el nodo de entrada: Faltan datos obligatorios.")
