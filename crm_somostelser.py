@@ -56,8 +56,11 @@ if st.session_state.correo_asesor is None:
 
 # --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
 with st.sidebar:
-    if os.path.exists("logo_somostelser.png"):
-        st.image("logo_somostelser.png", use_container_width=True)
+    # ... logo ...
+    
+    # Identificador de rol
+    rol = "👑 Admin" if es_admin else "👤 Asesor"
+    st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
 
 
 # --- TAREAS PENDIENTES ---
