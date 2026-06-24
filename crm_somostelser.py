@@ -365,5 +365,4 @@ mensaje = (
     f"✅ Venta {id_venta} actualizada.\n"
     f"Nuevo estado: {nuevo_estado}"
 )
-
 enviar_telegram(mensaje).")
