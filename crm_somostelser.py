@@ -55,16 +55,29 @@ with st.sidebar:
         else:
             st.warning("Sin resultados.")
 
-   # DASHBOARD Y VENTAS RECIENTES
+  # DASHBOARD Y VENTAS RECIENTES
     st.markdown("---")
     st.subheader("📊 Control de Gestión")
     
     if os.path.exists("crm_sistema_maestro.csv"):
-        df = pd.read_csv("crm_sistema_maestro.csv")
-        if not df.empty:
-            # Gráfico de barras
-            if 'DIVISION' in df.columns:
-                st.bar_chart(df['DIVISION'].value_counts())
+        try:
+            df = pd.read_csv("crm_sistema_maestro.csv")
+            if not df.empty:
+                # Gráfico
+                if 'DIVISION' in df.columns:
+                    st.bar_chart(df['DIVISION'].value_counts())
+                
+                # Tabla segura: solo muestra si las columnas existen
+                columnas_deseadas = ['CLIENTE', 'SERVICIO', 'VALOR_TOTAL']
+                if all(col in df.columns for col in columnas_deseadas):
+                    st.markdown("**Últimas ventas:**")
+                    st.table(df[columnas_deseadas].tail(3))
+                else:
+                    st.caption("Estructura de datos en actualización.")
+        except:
+            st.caption("Cargando...")
+    else:
+        st.caption("Esperando primera venta.")
             
             # Tabla pequeña de las últimas 3 ventas (¡Esto aporta mucho valor!)
             st.markdown("**Últimas ventas:**")
