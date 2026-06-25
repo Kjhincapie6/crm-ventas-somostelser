@@ -106,7 +106,7 @@ es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
 # --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
 with st.sidebar:
     if os.path.exists("logo_somostelser.png"):
-        st.image("logo_somostelser.png", use_container_width=True)
+        st.image("logo_somostelser.png", use_column_width=True)
     
     # Identificador de rol
     rol = "👑 Admin" if es_admin else "👤 Asesor"
