@@ -211,17 +211,23 @@ with tab1:
 
     c1, c2 = st.columns(2)
 
-    with c1:
-        st.subheader("🏢 Datos del Cliente")
-        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
-        n_doc = st.text_input("Número de Documento:")
-        nombre = st.text_input("Razón Social o Nombre:")
-        dir = st.text_input("Dirección:")
-        barrio = st.text_input("Barrio:")
-        
-        # --- AQUÍ ESTÁ EL CAMBIO ---
-        depto = st.selectbox("Departamento:", sorted(list(UBICACIONES_COL.keys())))
-        muni = st.selectbox("Municipio:", sorted(UBICACIONES_COL[depto]))
+   # Modifica tu parte de los selectores así:
+with c1:
+    
+    # Departamento con búsqueda habilitada
+    depto = st.selectbox(
+        "Departamento:", 
+        options=sorted(list(UBICACIONES_COL.keys())),
+        index=0,
+        placeholder="Escribe para buscar departamento..."
+    )
+    
+    # Municipio con búsqueda habilitada
+    muni = st.selectbox(
+        "Municipio:", 
+        options=sorted(UBICACIONES_COL[depto]),
+        placeholder="Escribe para buscar municipio..."
+    )
         # ---------------------------
         
         email_cli = st.text_input("Email contacto:")
