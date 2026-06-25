@@ -198,30 +198,20 @@ tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de V
 # ------------------------------------------
 # 1. DEFINICIÓN DE DATOS (fuera del tab1)
 # ------------------------------------------
-UBICACIONES_COL = {dept.name: [mun.name for mun in dept.municipalities] for dept in departments}
-UBICACIONES_COL = {
-    "Antioquia": ["Medellín", "Envigado", "Itagüí", "Sabaneta", "Bello", "Rionegro"],
-    "Cundinamarca": ["Bogotá", "Soacha", "Chía", "Cajicá", "Zipaquirá"],
-    "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura", "Cartago"],
-    "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia"],
-    "Santander": ["Bucaramanga", "Floridablanca", "Girón", "Barrancabermeja"]
-}
-
-# ------------------------------------------
-# 2. PESTAÑA 1 INTEGRADA
-# ------------------------------------------
-# 1. CARGA EL JSON PRIMERO (Fuera de cualquier pestaña)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_PATH = os.path.join(BASE_DIR, "colombia.json")
 
 try:
     with open(JSON_PATH, "r", encoding="utf-8") as f:
         UBICACIONES_COL = json.load(f)
-except FileNotFoundError:
-    st.error(f"No se encontró el archivo en: {JSON_PATH}")
-    UBICACIONES_COL = {"Error": ["Archivo no encontrado"]}
+except (FileNotFoundError, json.JSONDecodeError):
+    # Si falla la carga del JSON, esto evita que la app se caiga
+    UBICACIONES_COL = {
+        "Antioquia": ["Medellín"], 
+        "Cundinamarca": ["Bogotá"]
+    }
 
-# 2. LUEGO CONSTRUYE LA INTERFAZ
+# --- 2. INTERFAZ ---
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
     c1, c2 = st.columns(2)
@@ -235,6 +225,7 @@ with tab1:
         barrio = st.text_input("Barrio:")
         
         # --- SELECTORES CON BÚSQUEDA PREDICTIVA ---
+        # Usamos sorted() para que aparezcan alfabéticamente
         depto = st.selectbox(
             "Departamento:", 
             options=sorted(list(UBICACIONES_COL.keys())),
@@ -242,6 +233,7 @@ with tab1:
             placeholder="Escribe para buscar departamento..."
         )
         
+        # Lógica para municipio
         if depto:
             muni = st.selectbox(
                 "Municipio:", 
@@ -252,6 +244,8 @@ with tab1:
         else:
             muni = st.selectbox("Municipio:", options=[], disabled=True, placeholder="Selecciona primero un depto")
         
+        # Nuevos campos solicitados
+        st.subheader("📋 Información de Gestión")
         email_cli = st.text_input("Email contacto:")
         movil_cli = st.text_input("Contacto autorizado:")
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
