@@ -195,7 +195,7 @@ tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de V
 # ------------------------------------------
 # PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
 # ------------------------------------------
-# 1. Definimos la estructura de datos fuera de tab1
+# Asegúrate de tener esto definido antes del bloque with tab1:
 UBICACIONES_COL = {
     "Antioquia": ["Medellín", "Envigado", "Itagüí", "Sabaneta", "Bello", "Rionegro"],
     "Cundinamarca": ["Bogotá", "Soacha", "Chía", "Cajicá", "Zipaquirá"],
@@ -204,7 +204,9 @@ UBICACIONES_COL = {
     "Santander": ["Bucaramanga", "Floridablanca", "Girón", "Barrancabermeja"]
 }
 
-# 2. Pestaña 1
+# ------------------------------------------
+# BLOQUE INTEGRADO EN PESTAÑA 1
+# ------------------------------------------
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
 
@@ -218,19 +220,24 @@ with tab1:
         dir = st.text_input("Dirección:")
         barrio = st.text_input("Barrio:")
         
-        # Selectores con búsqueda
+        # --- SELECTORES CON BÚSQUEDA PREDICTIVA ---
         depto = st.selectbox(
             "Departamento:", 
             options=sorted(list(UBICACIONES_COL.keys())),
-            index=0,
+            index=None, # Permite que inicie vacío para escribir
             placeholder="Escribe para buscar departamento..."
         )
         
-        muni = st.selectbox(
-            "Municipio:", 
-            options=sorted(UBICACIONES_COL[depto]),
-            placeholder="Escribe para buscar municipio..."
-        )
+        if depto: # Solo muestra municipios si se ha elegido un depto
+            muni = st.selectbox(
+                "Municipio:", 
+                options=sorted(UBICACIONES_COL[depto]),
+                index=None,
+                placeholder="Escribe para buscar municipio..."
+            )
+        else:
+            muni = None # Valor temporal si no hay depto
+        # ------------------------------------------
         
         email_cli = st.text_input("Email contacto:")
         movil_cli = st.text_input("Contacto autorizado:")
