@@ -196,19 +196,31 @@ tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de V
 # PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
 # ------------------------------------------
 with tab1:
-    div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
-
+    st.subheader("🏢 Datos del Cliente")
+    
+    # 1. Definimos la lógica de departamentos y municipios
+    datos_colombia = {
+        "Antioquia": ["Medellín", "Envigado", "Itagüí", "Sabaneta", "Bello"],
+        "Cundinamarca": ["Bogotá", "Soacha", "Chía", "Cajicá"],
+        "Valle del Cauca": ["Cali", "Palmira", "Buga"]
+    }
+    
     c1, c2 = st.columns(2)
-
+    
     with c1:
-        st.subheader("🏢 Datos del Cliente")
+        # Campos de documentos
         t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
         n_doc = st.text_input("Número de Documento:")
         nombre = st.text_input("Razón Social o Nombre:")
         dir = st.text_input("Dirección:")
         barrio = st.text_input("Barrio:")
-        muni = st.text_input("Municipio:")
-        email_cli = st.text_input("Departamento:")
+        
+        # 2. Selectores dinámicos para ubicación
+        depto_seleccionado = st.selectbox("Departamento:", list(datos_colombia.keys()))
+        muni_seleccionado = st.selectbox("Municipio:", datos_colombia[depto_seleccionado])
+        
+        # Otros datos
+        email_cli = st.text_input("Email contacto:")
         movil_cli = st.text_input("Contacto autorizado:")
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
