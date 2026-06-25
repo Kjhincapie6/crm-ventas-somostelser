@@ -196,31 +196,19 @@ tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de V
 # PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
 # ------------------------------------------
 with tab1:
-    st.subheader("🏢 Datos del Cliente")
-    
-    # 1. Definimos la lógica de departamentos y municipios
-    datos_colombia = {
-        "Antioquia": ["Medellín", "Envigado", "Itagüí", "Sabaneta", "Bello"],
-        "Cundinamarca": ["Bogotá", "Soacha", "Chía", "Cajicá"],
-        "Valle del Cauca": ["Cali", "Palmira", "Buga"]
-    }
-    
+    div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
+
     c1, c2 = st.columns(2)
-    
+
     with c1:
-        # Campos de documentos
+        st.subheader("🏢 Datos del Cliente")
         t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
         n_doc = st.text_input("Número de Documento:")
         nombre = st.text_input("Razón Social o Nombre:")
         dir = st.text_input("Dirección:")
         barrio = st.text_input("Barrio:")
-        
-        # 2. Selectores dinámicos para ubicación
-        depto_seleccionado = st.selectbox("Departamento:", list(datos_colombia.keys()))
-        muni_seleccionado = st.selectbox("Municipio:", datos_colombia[depto_seleccionado])
-        
-        # Otros datos
-        email_cli = st.text_input("Email contacto:")
+        muni = st.text_input("Municipio:")
+        email_cli = st.text_input("Departamento:")
         movil_cli = st.text_input("Contacto autorizado:")
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
@@ -235,22 +223,12 @@ with tab1:
         estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
         bitacora = st.text_area("📝 Notas / Bitácora:")
         
-        # ... líneas anteriores ...
+        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         lineas = st.number_input("Líneas:", min_value=1, value=1)
         
-        # AQUÍ COMIENZA EL BLOQUE - Asegúrate de que el 'if' esté alineado con 'lineas ='
-        if lineas >= 9:
-            dcto = 30
-        elif lineas >= 6:
-            dcto = 25
-        elif lineas >= 3:
-            dcto = 20
-        elif lineas == 2:
-            dcto = 10
-        else:
-            dcto = 0
-            
+        # CÁLCULO FINANCIERO DINÁMICO
+        dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         
         # PANEL DE VALOR COMERCIAL
