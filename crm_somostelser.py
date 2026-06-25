@@ -196,19 +196,38 @@ tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de V
 # PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
 # ------------------------------------------
 UBICACIONES_COL = {
+    "Amazonas": ["Leticia", "Puerto Nariño"],
     "Antioquia": ["Medellín", "Envigado", "Itagüí", "Bello", "Rionegro", "Sabaneta", "La Estrella", "Caldas"],
-    "Bogotá D.C.": ["Bogotá"],
-    "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura", "Cartago", "Jamundí", "Tuluá"],
+    "Arauca": ["Arauca", "Tame", "Saravena"],
     "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia", "Malambo"],
-    "Santander": ["Bucaramanga", "Floridablanca", "Girón", "Piedecuesta", "Barrancabermeja"],
     "Bolívar": ["Cartagena", "Magangué", "Turbaco"],
-    "Boyacá": ["Tunja", "Duitama", "Sogamoso"],
+    "Boyacá": ["Tunja", "Duitama", "Sogamoso", "Chiquinquirá"],
     "Caldas": ["Manizales", "La Dorada", "Chinchiná"],
-    "Cundinamarca": ["Soacha", "Chía", "Cajicá", "Zipaquirá", "Fusagasugá"],
-    "Nariño": ["Pasto", "Ipiales"],
+    "Caquetá": ["Florencia", "San Vicente del Caguán"],
+    "Casanare": ["Yopal", "Aguazul"],
+    "Cauca": ["Popayán", "Santander de Quilichao", "Puerto Tejada"],
+    "Cesar": ["Valledupar", "Aguachica", "Codazzi"],
+    "Chocó": ["Quibdó", "Istmina"],
+    "Córdoba": ["Montería", "Lorica", "Cereté"],
+    "Cundinamarca": ["Bogotá D.C.", "Soacha", "Chía", "Cajicá", "Zipaquirá", "Fusagasugá", "Facatativá"],
+    "Guainía": ["Inírida"],
+    "Guaviare": ["San José del Guaviare"],
+    "Huila": ["Neiva", "Pitalito", "Garzón"],
+    "La Guajira": ["Riohacha", "Maicao", "Uribia"],
+    "Magdalena": ["Santa Marta", "Ciénaga"],
+    "Meta": ["Villavicencio", "Acacías", "Granada"],
+    "Nariño": ["Pasto", "Ipiales", "Tumaco"],
+    "Norte de Santander": ["Cúcuta", "Ocaña", "Villa del Rosario"],
+    "Putumayo": ["Mocoa", "Puerto Asís"],
+    "Quindío": ["Armenia", "Calarcá"],
     "Risaralda": ["Pereira", "Dosquebradas", "Santa Rosa de Cabal"],
-    "Tolima": ["Ibagué", "Espinal", "Melgar"]
-}
+    "San Andrés y Providencia": ["San Andrés"],
+    "Santander": ["Bucaramanga", "Floridablanca", "Girón", "Piedecuesta", "Barrancabermeja"],
+    "Sucre": ["Sincelejo", "Corozal"],
+    "Tolima": ["Ibagué", "Espinal", "Melgar", "Honda"],
+    "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura", "Cartago", "Jamundí", "Tuluá"],
+    "Vaupés": ["Mitú"],
+    "Vichada": ["Puerto Carreño"]
 
 # Aquí sigue tu lógica de tab1
 with tab1:
