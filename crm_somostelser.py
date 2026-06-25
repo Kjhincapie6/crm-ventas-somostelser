@@ -300,20 +300,19 @@ with tab1:
             </div>
             """, unsafe_allow_html=True)
 
-      st.subheader("📎 Documentos del Cliente")
+    st.subheader("📎 Documentos del Cliente")
 
-# Un solo llamado a st.file_uploader con la estructura correcta
-archivo_subido = st.file_uploader(
-    "Adjuntar documentos", 
-    type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
-    label_visibility="collapsed"
-)
+    # Todo lo que sigue debe estar alineado a la misma altura de la 's' de st.subheader
+    archivo_subido = st.file_uploader(
+        "Adjuntar documentos", 
+        type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
+        label_visibility="collapsed"
+    )
 
-st.caption("Formatos aceptados: PDF, PNG, JPG, DOCX, XLSX")
+    st.caption("Formatos aceptados: PDF, PNG, JPG, DOCX, XLSX")
 
-if archivo_subido:
-    # Mostramos el nombre del archivo subido en lugar de 'len()'
-    st.success(f"📎 Documento '{archivo_subido.name}' seleccionado exitosamente")
+    if archivo_subido:
+        st.success(f"📎 Documento '{archivo_subido.name}' seleccionado exitosamente")
 
     guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
 
