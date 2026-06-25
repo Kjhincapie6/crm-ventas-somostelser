@@ -248,8 +248,18 @@ PLANES_FIJO = {
     "Internet 1 Giga": 120000
 }
         
-        # CÁLCULO FINANCIERO DINÁMICO
-        dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
+       # CÁLCULO FINANCIERO DINÁMICO
+        if lineas >= 9:
+            dcto = 30
+        elif lineas >= 6:
+            dcto = 25
+        elif lineas >= 3:
+            dcto = 20
+        elif lineas == 2:
+            dcto = 10
+        else:
+            dcto = 0
+            
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         
         # PANEL DE VALOR COMERCIAL
