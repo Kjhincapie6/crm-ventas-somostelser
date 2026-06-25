@@ -195,40 +195,42 @@ tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de V
 # ------------------------------------------
 # PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
 # ------------------------------------------
-# 1. Definimos la estructura de datos fuera del tab1 para que sea rápida
+# 1. Definimos la estructura de datos fuera de tab1
 UBICACIONES_COL = {
     "Antioquia": ["Medellín", "Envigado", "Itagüí", "Sabaneta", "Bello", "Rionegro"],
     "Cundinamarca": ["Bogotá", "Soacha", "Chía", "Cajicá", "Zipaquirá"],
     "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura", "Cartago"],
     "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia"],
     "Santander": ["Bucaramanga", "Floridablanca", "Girón", "Barrancabermeja"]
-    # Puedes seguir añadiendo los demás aquí...
 }
 
-# 2. Tu Pestaña 1 modificada
+# 2. Pestaña 1
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
 
     c1, c2 = st.columns(2)
 
-   # Modifica tu parte de los selectores así:
-with c1:
-    
-    # Departamento con búsqueda habilitada
-    depto = st.selectbox(
-        "Departamento:", 
-        options=sorted(list(UBICACIONES_COL.keys())),
-        index=0,
-        placeholder="Escribe para buscar departamento..."
-    )
-    
-    # Municipio con búsqueda habilitada
-    muni = st.selectbox(
-        "Municipio:", 
-        options=sorted(UBICACIONES_COL[depto]),
-        placeholder="Escribe para buscar municipio..."
-    )
-        # ---------------------------
+    with c1:
+        st.subheader("🏢 Datos del Cliente")
+        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
+        n_doc = st.text_input("Número de Documento:")
+        nombre = st.text_input("Razón Social o Nombre:")
+        dir = st.text_input("Dirección:")
+        barrio = st.text_input("Barrio:")
+        
+        # Selectores con búsqueda
+        depto = st.selectbox(
+            "Departamento:", 
+            options=sorted(list(UBICACIONES_COL.keys())),
+            index=0,
+            placeholder="Escribe para buscar departamento..."
+        )
+        
+        muni = st.selectbox(
+            "Municipio:", 
+            options=sorted(UBICACIONES_COL[depto]),
+            placeholder="Escribe para buscar municipio..."
+        )
         
         email_cli = st.text_input("Email contacto:")
         movil_cli = st.text_input("Contacto autorizado:")
