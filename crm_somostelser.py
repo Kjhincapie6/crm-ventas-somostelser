@@ -5,6 +5,8 @@ import random
 import requests
 import altair as alt
 import json
+import streamlit as st
+from colombia import departments
 from datetime import date
 
 # ==========================================
@@ -196,6 +198,7 @@ tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de V
 # ------------------------------------------
 # 1. DEFINICIÓN DE DATOS (fuera del tab1)
 # ------------------------------------------
+UBICACIONES_COL = {dept.name: [mun.name for mun in dept.municipalities] for dept in departments}
 UBICACIONES_COL = {
     "Antioquia": ["Medellín", "Envigado", "Itagüí", "Sabaneta", "Bello", "Rionegro"],
     "Cundinamarca": ["Bogotá", "Soacha", "Chía", "Cajicá", "Zipaquirá"],
