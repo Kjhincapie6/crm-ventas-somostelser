@@ -228,7 +228,7 @@ UBICACIONES_COL = {
     "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura", "Cartago", "Jamundí", "Tuluá"],
     "Vaupés": ["Mitú"],
     "Vichada": ["Puerto Carreño"]
-
+}
 # Aquí sigue tu lógica de tab1
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
