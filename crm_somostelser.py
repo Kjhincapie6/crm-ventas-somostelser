@@ -195,9 +195,24 @@ tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de V
 # ------------------------------------------
 # PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
 # ------------------------------------------
+UBICACIONES_COL = {
+    "Antioquia": ["Medellín", "Envigado", "Itagüí", "Bello", "Rionegro", "Sabaneta", "La Estrella", "Caldas"],
+    "Bogotá D.C.": ["Bogotá"],
+    "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura", "Cartago", "Jamundí", "Tuluá"],
+    "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia", "Malambo"],
+    "Santander": ["Bucaramanga", "Floridablanca", "Girón", "Piedecuesta", "Barrancabermeja"],
+    "Bolívar": ["Cartagena", "Magangué", "Turbaco"],
+    "Boyacá": ["Tunja", "Duitama", "Sogamoso"],
+    "Caldas": ["Manizales", "La Dorada", "Chinchiná"],
+    "Cundinamarca": ["Soacha", "Chía", "Cajicá", "Zipaquirá", "Fusagasugá"],
+    "Nariño": ["Pasto", "Ipiales"],
+    "Risaralda": ["Pereira", "Dosquebradas", "Santa Rosa de Cabal"],
+    "Tolima": ["Ibagué", "Espinal", "Melgar"]
+}
+
+# Aquí sigue tu lógica de tab1
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
-
     c1, c2 = st.columns(2)
 
     with c1:
@@ -207,8 +222,26 @@ with tab1:
         nombre = st.text_input("Razón Social o Nombre:")
         dir = st.text_input("Dirección:")
         barrio = st.text_input("Barrio:")
-        muni = st.text_input("Municipio:")
-        email_cli = st.text_input("Departamento:")
+        
+        # Selectores con búsqueda predictiva (Nativos de Streamlit)
+        depto = st.selectbox(
+            "Departamento:", 
+            options=sorted(list(UBICACIONES_COL.keys())),
+            index=None,
+            placeholder="Escribe para buscar departamento..."
+        )
+        
+        if depto:
+            muni = st.selectbox(
+                "Municipio:", 
+                options=sorted(UBICACIONES_COL[depto]),
+                index=None,
+                placeholder="Escribe para buscar municipio..."
+            )
+        else:
+            muni = st.selectbox("Municipio:", options=[], disabled=True, placeholder="Selecciona primero un depto")
+
+        email_cli = st.text_input("Email contacto:")
         movil_cli = st.text_input("Contacto autorizado:")
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
