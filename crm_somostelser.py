@@ -299,8 +299,7 @@ with tab1:
                 <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
             </div>
             """, unsafe_allow_html=True)
-
-   st.subheader("📎 Documentos del Cliente")
+st.subheader("📎 Documentos del Cliente")
         
         archivo_subido = st.file_uploader(
             "Adjuntar documentos",
