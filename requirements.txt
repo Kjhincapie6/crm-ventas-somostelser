@@ -1,4 +1,4 @@
 %%writefile requirements.txt
-streamlit==1.35.0
+streamlit
 pandas
 colombia
