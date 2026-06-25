@@ -193,9 +193,8 @@ st.subheader("Gestión Inteligente de Contratos B2B")
 tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de Venta", "📊 Base de Datos"])
 
 # ------------------------------------------
-# PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
+# 1. DEFINICIÓN DE DATOS (fuera del tab1)
 # ------------------------------------------
-# Asegúrate de tener esto definido antes del bloque with tab1:
 UBICACIONES_COL = {
     "Antioquia": ["Medellín", "Envigado", "Itagüí", "Sabaneta", "Bello", "Rionegro"],
     "Cundinamarca": ["Bogotá", "Soacha", "Chía", "Cajicá", "Zipaquirá"],
@@ -205,7 +204,7 @@ UBICACIONES_COL = {
 }
 
 # ------------------------------------------
-# BLOQUE INTEGRADO EN PESTAÑA 1
+# 2. PESTAÑA 1 INTEGRADA
 # ------------------------------------------
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
@@ -224,11 +223,12 @@ with tab1:
         depto = st.selectbox(
             "Departamento:", 
             options=sorted(list(UBICACIONES_COL.keys())),
-            index=None, # Permite que inicie vacío para escribir
+            index=None, 
             placeholder="Escribe para buscar departamento..."
         )
         
-        if depto: # Solo muestra municipios si se ha elegido un depto
+        # Lógica para el selector de municipio
+        if depto:
             muni = st.selectbox(
                 "Municipio:", 
                 options=sorted(UBICACIONES_COL[depto]),
@@ -236,7 +236,9 @@ with tab1:
                 placeholder="Escribe para buscar municipio..."
             )
         else:
-            muni = None # Valor temporal si no hay depto
+            # Mostramos un selector vacío y deshabilitado para mantener el orden visual
+            muni = st.selectbox("Municipio:", options=[], disabled=True, placeholder="Selecciona primero un depto")
+        
         # ------------------------------------------
         
         email_cli = st.text_input("Email contacto:")
