@@ -195,18 +195,20 @@ tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de V
 # ------------------------------------------
 # PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
 # ------------------------------------------
-# 1. DEFINICIÓN: Esta parte debe ir FUERA de 'with tab1', 
-# idealmente arriba, cerca de tus otros imports o definiciones.
+# 1. Definimos la estructura de datos fuera del tab1 para que sea rápida
 UBICACIONES_COL = {
     "Antioquia": ["Medellín", "Envigado", "Itagüí", "Sabaneta", "Bello", "Rionegro"],
     "Cundinamarca": ["Bogotá", "Soacha", "Chía", "Cajicá", "Zipaquirá"],
-    "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura"],
-    "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia"]
+    "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura", "Cartago"],
+    "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia"],
+    "Santander": ["Bucaramanga", "Floridablanca", "Girón", "Barrancabermeja"]
+    # Puedes seguir añadiendo los demás aquí...
 }
 
-# 2. IMPLEMENTACIÓN: Así debe quedar tu bloque dentro de 'with tab1'
+# 2. Tu Pestaña 1 modificada
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
+
     c1, c2 = st.columns(2)
 
     with c1:
@@ -217,9 +219,10 @@ with tab1:
         dir = st.text_input("Dirección:")
         barrio = st.text_input("Barrio:")
         
-        # Selectores inteligentes de Colombia
-        depto = st.selectbox("Departamento:", list(UBICACIONES_COL.keys()))
-        muni = st.selectbox("Municipio:", UBICACIONES_COL[depto])
+        # --- AQUÍ ESTÁ EL CAMBIO ---
+        depto = st.selectbox("Departamento:", sorted(list(UBICACIONES_COL.keys())))
+        muni = st.selectbox("Municipio:", sorted(UBICACIONES_COL[depto]))
+        # ---------------------------
         
         email_cli = st.text_input("Email contacto:")
         movil_cli = st.text_input("Contacto autorizado:")
