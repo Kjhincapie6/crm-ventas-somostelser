@@ -4,7 +4,6 @@ import os
 import random
 import requests
 import altair as alt
-import json
 from datetime import date
 
 # ==========================================
