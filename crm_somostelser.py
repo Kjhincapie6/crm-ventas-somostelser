@@ -235,9 +235,18 @@ with tab1:
         estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
         bitacora = st.text_area("📝 Notas / Bitácora:")
         
-        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
-        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
-        lineas = st.number_input("Líneas:", min_value=1, value=1)
+        # Definición como diccionarios (necesario para usar .keys())
+PLANES_MOVIL = {
+    "Plan Básico 10GB": 45000,
+    "Plan Pro 30GB": 65000,
+    "Plan Ilimitado": 90000
+}
+
+PLANES_FIJO = {
+    "Internet 300MB": 70000,
+    "Internet 500MB": 90000,
+    "Internet 1 Giga": 120000
+}
         
         # CÁLCULO FINANCIERO DINÁMICO
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
