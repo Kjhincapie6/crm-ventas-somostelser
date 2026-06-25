@@ -193,7 +193,45 @@ st.subheader("Gestión Inteligente de Contratos B2B")
 tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de Venta", "📊 Base de Datos"])
 
 # ------------------------------------------
-# PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
+# 1. DEFINICIÓN DE DATOS (fuera del tab1)
+# ------------------------------------------
+UBICACIONES_COL = {
+    "Amazonas": ["Leticia", "Puerto Nariño"],
+    "Antioquia": ["Medellín", "Envigado", "Itagüí", "Bello", "Rionegro", "Sabaneta", "La Estrella", "Caldas"],
+    "Arauca": ["Arauca", "Tame", "Saravena"],
+    "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia", "Malambo"],
+    "Bolívar": ["Cartagena", "Magangué", "Turbaco"],
+    "Boyacá": ["Tunja", "Duitama", "Sogamoso", "Chiquinquirá"],
+    "Caldas": ["Manizales", "La Dorada", "Chinchiná"],
+    "Caquetá": ["Florencia", "San Vicente del Caguán"],
+    "Casanare": ["Yopal", "Aguazul"],
+    "Cauca": ["Popayán", "Santander de Quilichao", "Puerto Tejada"],
+    "Cesar": ["Valledupar", "Aguachica", "Codazzi"],
+    "Chocó": ["Quibdó", "Istmina"],
+    "Córdoba": ["Montería", "Lorica", "Cereté"],
+    "Cundinamarca": ["Bogotá D.C.", "Soacha", "Chía", "Cajicá", "Zipaquirá", "Fusagasugá", "Facatativá"],
+    "Guainía": ["Inírida"],
+    "Guaviare": ["San José del Guaviare"],
+    "Huila": ["Neiva", "Pitalito", "Garzón"],
+    "La Guajira": ["Riohacha", "Maicao", "Uribia"],
+    "Magdalena": ["Santa Marta", "Ciénaga"],
+    "Meta": ["Villavicencio", "Acacías", "Granada"],
+    "Nariño": ["Pasto", "Ipiales", "Tumaco"],
+    "Norte de Santander": ["Cúcuta", "Ocaña", "Villa del Rosario"],
+    "Putumayo": ["Mocoa", "Puerto Asís"],
+    "Quindío": ["Armenia", "Calarcá"],
+    "Risaralda": ["Pereira", "Dosquebradas", "Santa Rosa de Cabal"],
+    "San Andrés y Providencia": ["San Andrés"],
+    "Santander": ["Bucaramanga", "Floridablanca", "Girón", "Piedecuesta", "Barrancabermeja"],
+    "Sucre": ["Sincelejo", "Corozal"],
+    "Tolima": ["Ibagué", "Espinal", "Melgar", "Honda"],
+    "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura", "Cartago", "Jamundí", "Tuluá"],
+    "Vaupés": ["Mitú"],
+    "Vichada": ["Puerto Carreño"]
+}
+
+# ------------------------------------------
+# 2. PESTAÑA 1 INTEGRADA
 # ------------------------------------------
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
@@ -207,8 +245,30 @@ with tab1:
         nombre = st.text_input("Razón Social o Nombre:")
         dir = st.text_input("Dirección:")
         barrio = st.text_input("Barrio:")
-        muni = st.text_input("Municipio:")
-        email_cli = st.text_input("Departamento:")
+        
+        # --- SELECTORES CON BÚSQUEDA PREDICTIVA ---
+        depto = st.selectbox(
+            "Departamento:", 
+            options=sorted(list(UBICACIONES_COL.keys())),
+            index=None, 
+            placeholder="Escribe para buscar departamento..."
+        )
+        
+        # Lógica para el selector de municipio
+        if depto:
+            muni = st.selectbox(
+                "Municipio:", 
+                options=sorted(UBICACIONES_COL[depto]),
+                index=None,
+                placeholder="Escribe para buscar municipio..."
+            )
+        else:
+            # Mostramos un selector vacío y deshabilitado para mantener el orden visual
+            muni = st.selectbox("Municipio:", options=[], disabled=True, placeholder="Selecciona primero un depto")
+        
+        # ------------------------------------------
+        
+        email_cli = st.text_input("Email contacto:")
         movil_cli = st.text_input("Contacto autorizado:")
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
