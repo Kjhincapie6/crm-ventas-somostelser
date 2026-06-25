@@ -299,18 +299,18 @@ with tab1:
                 <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
             </div>
             """, unsafe_allow_html=True)
-st.subheader("📎 Documentos del Cliente")
-        
-        archivo_subido = st.file_uploader(
-            "Adjuntar documentos",
-            type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
-            accept_multiple_files=True,
-            label_visibility="collapsed"
-        )
+ # Supongamos que esta es la línea 300
+    st.subheader("📎 Documentos del Cliente") # Línea 303: Alineada 4 espacios adentro de 'with c2'
 
-        if archivo_subido:
-            st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
+    archivo_subido = st.file_uploader(        # Alineada exactamente con la 's' de st.subheader
+        "Adjuntar documentos",                # 4 espacios adentro de archivo_subido
+        type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
+        accept_multiple_files=True,
+        label_visibility="collapsed"
+    )
 
+    if archivo_subido:                        # Alineada exactamente con la 's' de st.subheader
+        st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)") # 4 espacios adentro del 'if'
 
     guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
 
