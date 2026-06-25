@@ -5,7 +5,6 @@ import random
 import requests
 import altair as alt
 import json
-import streamlit as st
 from colombia import departments
 from datetime import date
 
@@ -44,7 +43,10 @@ if st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM":
 st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
 # ... (Aquí sigue el resto de tu código de login, sidebar, etc.)
+# Esta línea carga todo el país automáticamente
+UBICACIONES_COL = {dept.name: [mun.name for mun in dept.municipalities] for dept in departments}
 
+# ... resto de tu código ...
 # ==========================================
 # 1. PORTAFOLIO Y DATOS
 # ==========================================
