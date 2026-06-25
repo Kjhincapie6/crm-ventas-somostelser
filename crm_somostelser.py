@@ -301,7 +301,6 @@ with tab1:
             """, unsafe_allow_html=True)
 
     st.subheader("📎 Documentos del Cliente")
-
         archivo_subido = st.file_uploader(
             "Adjuntar documentos",
             type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
@@ -310,6 +309,7 @@ with tab1:
 
         if archivo_subido:
             st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
+
 
 
     guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
