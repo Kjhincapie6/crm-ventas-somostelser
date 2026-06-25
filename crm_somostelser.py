@@ -4,7 +4,6 @@ import os
 import random
 import requests
 import altair as alt
-import streamlit as st
 import json
 from datetime import date
 
@@ -208,9 +207,20 @@ UBICACIONES_COL = {
 # ------------------------------------------
 # 2. PESTAÑA 1 INTEGRADA
 # ------------------------------------------
+# 1. CARGA EL JSON PRIMERO (Fuera de cualquier pestaña)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+JSON_PATH = os.path.join(BASE_DIR, "colombia.json")
+
+try:
+    with open(JSON_PATH, "r", encoding="utf-8") as f:
+        UBICACIONES_COL = json.load(f)
+except FileNotFoundError:
+    st.error(f"No se encontró el archivo en: {JSON_PATH}")
+    UBICACIONES_COL = {"Error": ["Archivo no encontrado"]}
+
+# 2. LUEGO CONSTRUYE LA INTERFAZ
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
-
     c1, c2 = st.columns(2)
 
     with c1:
@@ -229,7 +239,6 @@ with tab1:
             placeholder="Escribe para buscar departamento..."
         )
         
-        # Lógica para el selector de municipio
         if depto:
             muni = st.selectbox(
                 "Municipio:", 
@@ -238,10 +247,7 @@ with tab1:
                 placeholder="Escribe para buscar municipio..."
             )
         else:
-            # Mostramos un selector vacío y deshabilitado para mantener el orden visual
             muni = st.selectbox("Municipio:", options=[], disabled=True, placeholder="Selecciona primero un depto")
-        
-        # ------------------------------------------
         
         email_cli = st.text_input("Email contacto:")
         movil_cli = st.text_input("Contacto autorizado:")
