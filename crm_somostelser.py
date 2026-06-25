@@ -291,8 +291,9 @@ with tab1:
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         
-        # PANEL DE VALOR COMERCIAL
-       frases = [
+    
+    # PANEL DE VALOR COMERCIAL
+    frases = [
         "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
         "💎 La calidad de tu servicio es nuestra mayor ventaja.",
         "📈 ¡A superar la meta de ventas de este mes!",
