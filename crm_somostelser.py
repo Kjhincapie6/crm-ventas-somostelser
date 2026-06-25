@@ -200,41 +200,40 @@ tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de V
 # ------------------------------------------
 # 1. DEFINICIÓN DE DATOS (fuera del tab1)
 # ------------------------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-JSON_PATH = os.path.join(BASE_DIR, "colombia.json")
+# Definición maestra (sin librerías externas, sin archivos JSON que fallan)
+UBICACIONES_COL = {
+    "Antioquia": ["Medellín", "Envigado", "Itagüí", "Bello", "Rionegro", "Sabaneta", "La Estrella", "Caldas"],
+    "Bogotá D.C.": ["Bogotá"],
+    "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura", "Cartago", "Jamundí", "Tuluá"],
+    "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia", "Malambo"],
+    "Santander": ["Bucaramanga", "Floridablanca", "Girón", "Piedecuesta", "Barrancabermeja"],
+    "Bolívar": ["Cartagena", "Magangué", "Turbaco"],
+    "Boyacá": ["Tunja", "Duitama", "Sogamoso"],
+    "Caldas": ["Manizales", "La Dorada", "Chinchiná"],
+    "Cundinamarca": ["Soacha", "Chía", "Cajicá", "Zipaquirá", "Fusagasugá"],
+    "Nariño": ["Pasto", "Ipiales"],
+    "Risaralda": ["Pereira", "Dosquebradas", "Santa Rosa de Cabal"],
+    "Tolima": ["Ibagué", "Espinal", "Melgar"]
+    # Puedes seguir agregando aquí de forma segura
+}
 
-try:
-    with open(JSON_PATH, "r", encoding="utf-8") as f:
-        UBICACIONES_COL = json.load(f)
-except (FileNotFoundError, json.JSONDecodeError):
-    # Si falla la carga del JSON, esto evita que la app se caiga
-    UBICACIONES_COL = {
-        "Antioquia": ["Medellín"], 
-        "Cundinamarca": ["Bogotá"]
-    }
-
-# --- 2. INTERFAZ ---
+# La interfaz funcionará igual, pero sin depender de leer un JSON mal formado
 with tab1:
-    div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
-    c1, c2 = st.columns(2)
-
-    with c1:
-        st.subheader("🏢 Datos del Cliente")
-        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
-        n_doc = st.text_input("Número de Documento:")
-        nombre = st.text_input("Razón Social o Nombre:")
-        dir = st.text_input("Dirección:")
-        barrio = st.text_input("Barrio:")
-        
-        # --- SELECTORES CON BÚSQUEDA PREDICTIVA ---
-        # Usamos sorted() para que aparezcan alfabéticamente
-        depto = st.selectbox(
-            "Departamento:", 
-            options=sorted(list(UBICACIONES_COL.keys())),
-            index=None, 
-            placeholder="Escribe para buscar departamento..."
+    # ... tu código de radio buttons y columnas ...
+    depto = st.selectbox(
+        "Departamento:", 
+        options=sorted(list(UBICACIONES_COL.keys())),
+        index=None,
+        placeholder="Escribe para buscar departamento..."
+    )
+    
+    if depto:
+        muni = st.selectbox(
+            "Municipio:", 
+            options=sorted(UBICACIONES_COL[depto]),
+            index=None,
+            placeholder="Escribe para buscar municipio..."
         )
-        
         # Lógica para municipio
         if depto:
             muni = st.selectbox(
