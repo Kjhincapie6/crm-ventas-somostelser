@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import random
 import requests
+import altair as alt
 from datetime import date
 
 # ==========================================
