@@ -235,20 +235,11 @@ with tab1:
         estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
         bitacora = st.text_area("📝 Notas / Bitácora:")
         
-        # Definición como diccionarios (necesario para usar .keys())
-PLANES_MOVIL = {
-    "Plan Básico 10GB": 45000,
-    "Plan Pro 30GB": 65000,
-    "Plan Ilimitado": 90000
-}
-
-PLANES_FIJO = {
-    "Internet 300MB": 70000,
-    "Internet 500MB": 90000,
-    "Internet 1 Giga": 120000
-}
+        # ... líneas anteriores ...
+        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
+        lineas = st.number_input("Líneas:", min_value=1, value=1)
         
-       # CÁLCULO FINANCIERO DINÁMICO
+        # AQUÍ COMIENZA EL BLOQUE - Asegúrate de que el 'if' esté alineado con 'lineas ='
         if lineas >= 9:
             dcto = 30
         elif lineas >= 6:
