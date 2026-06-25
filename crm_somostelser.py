@@ -265,9 +265,52 @@ with tab1:
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
     with c2:
-    st.subheader("👤 Representante Legal") # <-- Esta línea debe tener 4 espacios más que 'with c2:'
-    nom_rep = st.text_input("Nombre Rep. Legal:")
-    cc_rep = st.text_input("Cédula Rep. Legal:")
+        st.subheader("👤 Representante Legal")
+        nom_rep = st.text_input("Nombre Rep. Legal:")
+        cc_rep = st.text_input("Cédula Rep. Legal:")
+        mail_rep = st.text_input("Correo Rep. Legal:")
+        tel_rep = st.text_input("Móvil Rep. Legal:")
+        
+        st.subheader("📊 Estado y Plan")
+        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+        bitacora = st.text_area("📝 Notas / Bitácora:")
+        
+        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
+        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
+        lineas = st.number_input("Líneas:", min_value=1, value=1)
+        
+        # CÁLCULO FINANCIERO DINÁMICO
+        dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
+        valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
+        
+        # PANEL DE VALOR COMERCIAL
+        frases = [
+            "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
+            "💎 La calidad de tu servicio es nuestra mayor ventaja.",
+            "📈 ¡A superar la meta de ventas de este mes!",
+            "🤝 Cada cliente cuenta, ¡haz que esta venta sea memorable!",
+            "🎯 ¡Enfocados en el objetivo, gran gestión!"
+        ]
+
+        if valor > 0:
+            st.markdown(f"""
+            <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
+                <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
+                <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
+            </div>
+            """, unsafe_allow_html=True)
+ # Supongamos que esta es la línea 300
+    st.subheader("📎 Documentos del Cliente") # Línea 303: Alineada 4 espacios adentro de 'with c2'
+
+    archivo_subido = st.file_uploader(        # Alineada exactamente con la 's' de st.subheader
+        "Adjuntar documentos",                # 4 espacios adentro de archivo_subido
+        type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
+        accept_multiple_files=True,
+        label_visibility="collapsed"
+    )
+
+    if archivo_subido:                        # Alineada exactamente con la 's' de st.subheader
+        st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)") # 4 espacios adentro del 'if'
 
     guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
 
