@@ -42,7 +42,6 @@ st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
 # ... (Aquí sigue el resto de tu código de login, sidebar, etc.)
 
-# ... resto de tu código ...
 # ==========================================
 # 1. PORTAFOLIO Y DATOS
 # ==========================================
@@ -67,7 +66,7 @@ PLANES_FIJO = {
 }
 
 # ==========================================
-# PAG1. CONFIGURACIÓN E IDENTIDAD (SISTEMA DE LOGIN)
+# 2. CONFIGURACIÓN E IDENTIDAD (SISTEMA DE LOGIN)
 # ==========================================
 if 'correo_asesor' not in st.session_state:
     st.session_state.correo_asesor = None
@@ -106,7 +105,7 @@ es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
 # --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
 with st.sidebar:
     if os.path.exists("logo_somostelser.png"):
-        st.image("logo_somostelser.png", use_column_width=True)
+        st.image("logo_somostelser.png", use_container_width=True)
     
     # Identificador de rol
     rol = "👑 Admin" if es_admin else "👤 Asesor"
@@ -194,56 +193,22 @@ st.subheader("Gestión Inteligente de Contratos B2B")
 tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de Venta", "📊 Base de Datos"])
 
 # ------------------------------------------
-# 1. DEFINICIÓN DE DATOS (fuera del tab1)
+# PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
 # ------------------------------------------
-# Definición maestra (sin librerías externas, sin archivos JSON que fallan)
-UBICACIONES_COL = {
-    "Antioquia": ["Medellín", "Envigado", "Itagüí", "Bello", "Rionegro", "Sabaneta", "La Estrella", "Caldas"],
-    "Bogotá D.C.": ["Bogotá"],
-    "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura", "Cartago", "Jamundí", "Tuluá"],
-    "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia", "Malambo"],
-    "Santander": ["Bucaramanga", "Floridablanca", "Girón", "Piedecuesta", "Barrancabermeja"],
-    "Bolívar": ["Cartagena", "Magangué", "Turbaco"],
-    "Boyacá": ["Tunja", "Duitama", "Sogamoso"],
-    "Caldas": ["Manizales", "La Dorada", "Chinchiná"],
-    "Cundinamarca": ["Soacha", "Chía", "Cajicá", "Zipaquirá", "Fusagasugá"],
-    "Nariño": ["Pasto", "Ipiales"],
-    "Risaralda": ["Pereira", "Dosquebradas", "Santa Rosa de Cabal"],
-    "Tolima": ["Ibagué", "Espinal", "Melgar"]
-    # Puedes seguir agregando aquí de forma segura
-}
-
-# La interfaz funcionará igual, pero sin depender de leer un JSON mal formado
 with tab1:
-    # ... tu código de radio buttons y columnas ...
-    depto = st.selectbox(
-        "Departamento:", 
-        options=sorted(list(UBICACIONES_COL.keys())),
-        index=None,
-        placeholder="Escribe para buscar departamento..."
-    )
-    
-    if depto:
-        muni = st.selectbox(
-            "Municipio:", 
-            options=sorted(UBICACIONES_COL[depto]),
-            index=None,
-            placeholder="Escribe para buscar municipio..."
-        )
-        # Lógica para municipio
-        if depto:
-            muni = st.selectbox(
-                "Municipio:", 
-                options=sorted(UBICACIONES_COL[depto]),
-                index=None,
-                placeholder="Escribe para buscar municipio..."
-            )
-        else:
-            muni = st.selectbox("Municipio:", options=[], disabled=True, placeholder="Selecciona primero un depto")
-        
-        # Nuevos campos solicitados
-        st.subheader("📋 Información de Gestión")
-        email_cli = st.text_input("Email contacto:")
+    div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+        st.subheader("🏢 Datos del Cliente")
+        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
+        n_doc = st.text_input("Número de Documento:")
+        nombre = st.text_input("Razón Social o Nombre:")
+        dir = st.text_input("Dirección:")
+        barrio = st.text_input("Barrio:")
+        muni = st.text_input("Municipio:")
+        email_cli = st.text_input("Departamento:")
         movil_cli = st.text_input("Contacto autorizado:")
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
