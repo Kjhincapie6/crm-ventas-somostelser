@@ -5,7 +5,6 @@ import random
 import requests
 import altair as alt
 import json
-from colombia import departments
 from datetime import date
 
 # ==========================================
