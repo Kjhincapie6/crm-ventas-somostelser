@@ -303,11 +303,12 @@ with tab1:
         st.subheader("📎 Documentos del Cliente")
 
         archivo_subido = st.file_uploader(
-            "Adjuntar archivos (PDF, PNG, JPG, DOCX, XLSX)", 
-        type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
-        accept_multiple_files=False,
-        label_visibility="visible"
-        )
+          uploaded_file = st.file_uploader(
+    "Adjuntar documentos", 
+    type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
+    label_visibility="collapsed"
+)
+            st.caption("Formatos aceptados: PDF, PNG, JPG, DOCX, XLSX")
 
         if archivo_subido:
             st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
