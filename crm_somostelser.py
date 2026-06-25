@@ -292,13 +292,22 @@ with tab1:
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         
         # PANEL DE VALOR COMERCIAL
-        frases = [
-            "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
-            "💎 La calidad de tu servicio es nuestra mayor ventaja.",
-            "📈 ¡A superar la meta de ventas de este mes!",
-            "🤝 Cada cliente cuenta, ¡haz que esta venta sea memorable!",
-            "🎯 ¡Enfocados en el objetivo, gran gestión!"
-        ]
+       frases = [
+        "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
+        "💎 La calidad de tu servicio es nuestra mayor ventaja.",
+        "📈 ¡A superar la meta de ventas de este mes!",
+        "🤝 Cada cliente cuenta, ¡haz que esta venta sea memorable!",
+        "🎯 ¡Enfocados en el objetivo, excelente gestión!",
+        "⚡ ¡Tu energía determina tu éxito, mantén el ritmo!",
+        "🌟 Un cliente feliz es la mejor estrategia de crecimiento.",
+        "📊 Los buenos datos y una gran estrategia siempre cierran ventas.",
+        "🔥 La persistencia vence a la resistencia, ¡tú puedes!",
+        "🏆 Los grandes logros nacen de la constancia diaria.",
+        "💼 Profesionalismo y visión: así se construyen relaciones duraderas.",
+        "🧠 Conecta con el cliente, entiende su necesidad y el cierre será natural.",
+        "💡 Cada gestión bien hecha es una semilla para el éxito de mañana.",
+        "🥇 ¡No hay límites cuando hay buena planeación y actitud!"
+    ]
 
         if valor > 0:
             st.markdown(f"""
