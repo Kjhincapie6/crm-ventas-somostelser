@@ -195,43 +195,9 @@ tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de V
 # ------------------------------------------
 # PESTAÑA 1: TU CÓDIGO ORIGINAL INTACTO
 # ------------------------------------------
-UBICACIONES_COL = {
-    "Amazonas": ["Leticia", "Puerto Nariño"],
-    "Antioquia": ["Medellín", "Envigado", "Itagüí", "Bello", "Rionegro", "Sabaneta", "La Estrella", "Caldas"],
-    "Arauca": ["Arauca", "Tame", "Saravena"],
-    "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia", "Malambo"],
-    "Bolívar": ["Cartagena", "Magangué", "Turbaco"],
-    "Boyacá": ["Tunja", "Duitama", "Sogamoso", "Chiquinquirá"],
-    "Caldas": ["Manizales", "La Dorada", "Chinchiná"],
-    "Caquetá": ["Florencia", "San Vicente del Caguán"],
-    "Casanare": ["Yopal", "Aguazul"],
-    "Cauca": ["Popayán", "Santander de Quilichao", "Puerto Tejada"],
-    "Cesar": ["Valledupar", "Aguachica", "Codazzi"],
-    "Chocó": ["Quibdó", "Istmina"],
-    "Córdoba": ["Montería", "Lorica", "Cereté"],
-    "Cundinamarca": ["Bogotá D.C.", "Soacha", "Chía", "Cajicá", "Zipaquirá", "Fusagasugá", "Facatativá"],
-    "Guainía": ["Inírida"],
-    "Guaviare": ["San José del Guaviare"],
-    "Huila": ["Neiva", "Pitalito", "Garzón"],
-    "La Guajira": ["Riohacha", "Maicao", "Uribia"],
-    "Magdalena": ["Santa Marta", "Ciénaga"],
-    "Meta": ["Villavicencio", "Acacías", "Granada"],
-    "Nariño": ["Pasto", "Ipiales", "Tumaco"],
-    "Norte de Santander": ["Cúcuta", "Ocaña", "Villa del Rosario"],
-    "Putumayo": ["Mocoa", "Puerto Asís"],
-    "Quindío": ["Armenia", "Calarcá"],
-    "Risaralda": ["Pereira", "Dosquebradas", "Santa Rosa de Cabal"],
-    "San Andrés y Providencia": ["San Andrés"],
-    "Santander": ["Bucaramanga", "Floridablanca", "Girón", "Piedecuesta", "Barrancabermeja"],
-    "Sucre": ["Sincelejo", "Corozal"],
-    "Tolima": ["Ibagué", "Espinal", "Melgar", "Honda"],
-    "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura", "Cartago", "Jamundí", "Tuluá"],
-    "Vaupés": ["Mitú"],
-    "Vichada": ["Puerto Carreño"]
-}
-# Aquí sigue tu lógica de tab1
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
+
     c1, c2 = st.columns(2)
 
     with c1:
@@ -241,26 +207,8 @@ with tab1:
         nombre = st.text_input("Razón Social o Nombre:")
         dir = st.text_input("Dirección:")
         barrio = st.text_input("Barrio:")
-        
-        # Selectores con búsqueda predictiva (Nativos de Streamlit)
-        depto = st.selectbox(
-            "Departamento:", 
-            options=sorted(list(UBICACIONES_COL.keys())),
-            index=None,
-            placeholder="Escribe para buscar departamento..."
-        )
-        
-        if depto:
-            muni = st.selectbox(
-                "Municipio:", 
-                options=sorted(UBICACIONES_COL[depto]),
-                index=None,
-                placeholder="Escribe para buscar municipio..."
-            )
-        else:
-            muni = st.selectbox("Municipio:", options=[], disabled=True, placeholder="Selecciona primero un depto")
-
-        email_cli = st.text_input("Email contacto:")
+        muni = st.text_input("Municipio:")
+        email_cli = st.text_input("Departamento:")
         movil_cli = st.text_input("Contacto autorizado:")
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
@@ -299,18 +247,17 @@ with tab1:
                 <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
             </div>
             """, unsafe_allow_html=True)
- # Supongamos que esta es la línea 300
-    st.subheader("📎 Documentos del Cliente") # Línea 303: Alineada 4 espacios adentro de 'with c2'
 
-    archivo_subido = st.file_uploader(        # Alineada exactamente con la 's' de st.subheader
-        "Adjuntar documentos",                # 4 espacios adentro de archivo_subido
-        type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
-        accept_multiple_files=True,
-        label_visibility="collapsed"
-    )
+        st.subheader("📎 Documentos del Cliente")
 
-    if archivo_subido:                        # Alineada exactamente con la 's' de st.subheader
-        st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)") # 4 espacios adentro del 'if'
+        archivo_subido = st.file_uploader(
+            "Adjuntar documentos",
+            type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
+            accept_multiple_files=True
+        )
+
+        if archivo_subido:
+            st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
 
     guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
 
