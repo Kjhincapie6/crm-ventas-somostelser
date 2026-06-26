@@ -598,10 +598,10 @@ if es_admin:
                                 legend=alt.Legend(title="Estado"),
                                 scale=alt.Scale(domain=['Activado', 'Anulado'], 
                                                 range=['#00a0e3', '#231f20'])),
-                tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD'] # Opcional: para ver los datos al pasar el mouse
-                ).properties(height=300)
+                tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD']
+            ).properties(height=300)
 
-            # 4. LA LÍNEA MÁS IMPORTANTE: Mostrar el gráfico en Streamlit
+            # 4. Mostrar el gráfico en Streamlit
             st.altair_chart(chart2, use_container_width=True)
                 # Tooltip para ver los detalles al pasar el mouse
                 tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD']
