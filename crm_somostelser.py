@@ -500,34 +500,39 @@ with tab2:
             opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
             venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
             
-            # Validación de selección
-            if venta_seleccionada and " - " in venta_seleccionada:
-                id_venta = int(venta_seleccionada.split(" - ")[0])
-                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
-                
-                st.info(f"📌 Estado Actual: **{estado_actual}**")
-                
-                # --- Lógica de actualización (Dentro del IF) ---
-                nuevo_estado = st.selectbox(
-                    "Cambiar estado a:", 
-                    ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
-                    key="select_nuevo_estado_tab2"
-                )
-                
-                if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2"):
-                    # 1. Guardar en CSV
-                    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
-                    df_update.to_csv("crm_sistema_maestro.csv", index=False)
+            # --- VALIDACIÓN ROBUSTA CON TRY-EXCEPT ---
+            try:
+                if venta_seleccionada and " - " in venta_seleccionada:
+                    # Extraer ID
+                    id_venta = int(venta_seleccionada.split(" - ")[0])
+                    estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
                     
-                    # 2. Notificar Telegram
-                    mensaje = f"✅ Venta {id_venta} actualizada.\nNuevo estado: {nuevo_estado}"
-                    enviar_telegram(mensaje)
+                    st.info(f"📌 Estado Actual: **{estado_actual}**")
                     
-                    # 3. Éxito
-                    st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
-                    st.rerun()
-            else:
-                st.warning("La selección no tiene un formato válido.")
+                    # Lógica de actualización
+                    nuevo_estado = st.selectbox(
+                        "Cambiar estado a:", 
+                        ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
+                        key="select_nuevo_estado_tab2"
+                    )
+                    
+                    if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2"):
+                        # 1. Guardar en CSV
+                        df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
+                        df_update.to_csv("crm_sistema_maestro.csv", index=False)
+                        
+                        # 2. Notificar Telegram
+                        mensaje = f"✅ Venta {id_venta} actualizada.\nNuevo estado: {nuevo_estado}"
+                        enviar_telegram(mensaje)
+                        
+                        # 3. Éxito
+                        st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
+                        st.rerun()
+                else:
+                    st.warning("La selección no tiene un formato válido.")
+            except Exception:
+                # Si ocurre cualquier error inesperado, mostramos un mensaje amigable
+                st.info("Selecciona una venta para gestionar su estado.")
         else:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
