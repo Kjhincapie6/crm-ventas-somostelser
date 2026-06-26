@@ -233,39 +233,28 @@ UBICACIONES_COL = {
 # ------------------------------------------
 # 2. PESTAÑA 1 INTEGRADA
 # ------------------------------------------
-with tab1:
-    div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio_tab1", horizontal=True)
-
-    c1, c2 = st.columns(2)
+c1, c2 = st.columns([1, 1], gap="large") # gap="large" da espacio entre columnas
 
     with c1:
-        st.subheader("🏢 Datos del Cliente")
-        tipo_persona = st.selectbox("Tipo de Persona:", ["Persona Natural", "Persona Jurídica"], key="tipo_persona_tab1")
-        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CC", "CE", "PPT"], key="t_doc_tab1")
-        n_doc = st.text_input("Número de Documento:", key="n_doc_tab1")
-        nombre = st.text_input("Razón Social o Nombre:", key="nombre_tab1")
-        
-        # --- Configuración de Líneas Móviles (VENTANA ADICIONAL) ---
-        # Solo aparece si la división es Móvil
-        datos_moviles = {"tipo": "N/A", "operador": "N/A", "num_linea": "N/A", "cantidad": 1}
-        
-        if div == "Móvil":
-            with st.popover("📱 Configurar Líneas Móviles"):
-                st.write("### Detalles de la línea")
-                datos_moviles["cantidad"] = st.number_input("Cantidad de líneas:", min_value=1, value=1, key="cant_lineas_tab1")
-                datos_moviles["tipo"] = st.radio("Tipo de gestión:", ["Portabilidad", "Línea Nueva", "Línea Existente"], key="tipo_gest_tab1")
-                
-                if datos_moviles["tipo"] == "Portabilidad":
-                    datos_moviles["operador"] = st.selectbox("Operador Origen:", ["Claro", "Movistar", "Móvil Éxito", "Wom"], key="op_origen_tab1")
-                
-                datos_moviles["num_linea"] = st.text_input("Número de línea (ej: 3001234567):", key="num_linea_tab1")
-                st.info(f"✅ Configurado: {datos_moviles['cantidad']} líneas ({datos_moviles['tipo']})")
+        st.markdown("### 🏢 Datos del Cliente")
+        with st.container(border=True): # Borde para fijar la estructura
+            t_doc = st.selectbox("Tipo Doc:", ["NIT", "CC", "CE", "PPT"], key="t_doc_tab1")
+            n_doc = st.text_input("Documento:", key="n_doc_tab1")
+            nombre = st.text_input("Razón Social/Nombre:", key="nombre_tab1")
+            dir = st.text_input("Dirección:", key="dir_tab1")
+            # ... el resto de tus campos aquí ...
 
     with c2:
-        st.subheader("👤 Datos Complementarios")
-        if tipo_persona == "Persona Jurídica":
-            nom_rep = st.text_input("Nombre Rep. Legal:", key="nom_rep_tab1")
-            cc_rep = st.text_input("Cédula Rep. Legal:", key="cc_rep_tab1")
+        st.markdown("### 📊 Estado y Gestión")
+        with st.container(border=True): # Borde para que todo quede alineado
+            estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Activado", "Anulado"], key="estado_tab1")
+            servicio = st.selectbox("Servicio:", list(tarifas.keys()), key="servicio_tab1")
+            lineas = st.number_input(titulo_cantidad, min_value=1, value=1, key="lineas_tab1")
+            
+            # El popover ahora queda contenido dentro de este bloque, sin mover nada más
+            if div == "Móvil":
+                with st.popover("📱 Configurar Líneas", use_container_width=True):
+                    # ... campos del popover ...
         
         estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], key="estado_tab1")
         servicio = st.selectbox("Servicio:", list(tarifas.keys()) if 'tarifas' in locals() else ["Plan Tigo"], key="servicio_tab1")
