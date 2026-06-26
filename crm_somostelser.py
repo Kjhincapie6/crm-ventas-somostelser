@@ -190,7 +190,21 @@ st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
 
 # --- LAS PESTAÑAS ---
-tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de Venta", "📊 Base de Datos"])
+# Definimos las pestañas base (siempre visibles)
+nombres_pestanas = ["Registrar Venta", "Actualizar Estado de Venta"]
+
+# Si es administrador, añadimos la tercera
+if st.session_state.get('es_admin', False):
+    nombres_pestanas.append("Base de Datos")
+
+# Creamos las pestañas dinámicamente
+tabs = st.tabs(nombres_pestanas)
+
+# Asignamos las pestañas a variables para que tu código siga funcionando igual
+tab1 = tabs[0]
+tab2 = tabs[1]
+if st.session_state.get('es_admin', False):
+    tab3 = tabs[2]
 
 # ------------------------------------------
 # 1. DEFINICIÓN DE DATOS (fuera del tab1)
