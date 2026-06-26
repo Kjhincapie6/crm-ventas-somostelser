@@ -273,16 +273,19 @@ with tab1:
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
     with c2:
+        st.subheader("👤 Representante Legal")
+        nom_rep = st.text_input("Nombre Rep. Legal:")
+        cc_rep = st.text_input("Cédula Rep. Legal:")
+        mail_rep = st.text_input("Correo Rep. Legal:")
+        tel_rep = st.text_input("Móvil Rep. Legal:")
+        
+        st.subheader("📊 Estado y Plan")
+        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+        bitacora = st.text_area("📝 Notas / Bitácora:")
+        
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
-        
-        # Título dinámico: "Líneas" para Móvil, "Cantidad" para Fijo
-        titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
-        lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
-        
-        # Título dinámico: "Líneas" para Móvil, "Cantidad" para Fijo
-        titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
-        lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
+        lineas = st.number_input("Líneas:", min_value=1, value=1)
         
         # CÁLCULO FINANCIERO DINÁMICO
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
@@ -494,7 +497,3 @@ with tab3:
             st.warning("El archivo CSV no tiene datos.")
     else:
         st.error(f"No se encuentra el archivo {archivo}. Asegúrate de haberlo subido a GitHub.")
-
-
-
-
