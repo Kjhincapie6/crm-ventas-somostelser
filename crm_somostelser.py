@@ -383,7 +383,7 @@ with tab1:
         
         # 🔄 Título dinámico: Si es Móvil dice "Líneas:", si no, dice "Cantidad:"
         titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
-        lineas = st.number_input(titulo_cantidad, min_value=1, value=1, key="input_lineas_cantidad_tab1"))
+       lineas = st.number_input(titulo_cantidad, min_value=1, value=1, key="input_lineas_cantidad_tab1")
         # --- NUEVA LÓGICA: LÍNEA MÓVIL PARA FULL TIGO ---
         plan_movil_asociado = None
         if div == "Fijo" and "Full Tigo" in servicio:
