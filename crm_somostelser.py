@@ -233,9 +233,6 @@ UBICACIONES_COL = {
 # ------------------------------------------
 # 2. PESTAÑA 1 INTEGRADA
 # ------------------------------------------
-# ------------------------------------------
-# 2. PESTAÑA 1 INTEGRADA
-# ------------------------------------------
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
 
@@ -364,7 +361,6 @@ with tab1:
         else:
             st.error("⚠️ Faltan datos obligatorios: Número de Documento y Razón Social/Nombre.")
             
-# A PARTIR DE AQUÍ DEBE SEGUIR TU PESTAÑA 2:
 # ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================)
