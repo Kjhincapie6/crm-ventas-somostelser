@@ -232,7 +232,7 @@ if es_admin:
 # ------------------------------------------
 UBICACIONES_COL = {
     "Amazonas": ["Leticia", "Puerto Nariño"],
-    "Antioquia": ["Medellín", "Envigado", "Itagüí", "Bello", "Rionegro", "Sabaneta", "La Estrella", "Caldas","Retiro"],
+    "Antioquia": ["Medellín", "Envigado", "Itagüí", "Bello", "Rionegro", "Sabaneta", "La Estrella", "Caldas"],
     "Arauca": ["Arauca", "Tame", "Saravena"],
     "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia", "Malambo"],
     "Bolívar": ["Cartagena", "Magangué", "Turbaco"],
@@ -410,9 +410,6 @@ with tab1:
                 <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
             </div>
             """, unsafe_allow_html=True)
-        # ==============================
-        # Documentos cliente
-        # ==============================
 
         st.subheader("📎 Documentos del Cliente")
 
@@ -424,35 +421,34 @@ with tab1:
 
         if archivo_subido:
             st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
-            
-    # Guardar Venta 
+
     guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
 
     if guardar:
         if n_doc and nombre:
+
             carpeta_documentos = "documentos_clientes"
+
             if not os.path.exists(carpeta_documentos):
                 os.makedirs(carpeta_documentos)
 
             archivos_guardados = []
+
             if archivo_subido:
                 for archivo_doc in archivo_subido:
                     nombre_archivo = f"{n_doc}_{archivo_doc.name}"
-                    ruta_archivo = os.path.join(carpeta_documentos, nombre_archivo)
+                    ruta_archivo = os.path.join(
+                        carpeta_documentos,
+                        nombre_archivo
+                    )
+
                     with open(ruta_archivo, "wb") as f:
                         f.write(archivo_doc.getbuffer())
+
                     archivos_guardados.append(nombre_archivo)
 
-            # Corrección del NameError: df_ex siempre existirá
             archivo = "crm_sistema_maestro.csv"
-            if os.path.exists(archivo):
-                df_ex = pd.read_csv(archivo)
-            else:
-                df_ex = pd.DataFrame(columns=[
-                    'ID_VENTA', 'ASESOR', 'ESTADO', 'DIVISION', 'NIT', 
-                    'CLIENTE', 'SERVICIO', 'VALOR_TOTAL', 'BITACORA', 
-                    'DOCUMENTOS', 'ESTADO_FINANCIERO'
-                ])
+            df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
 
             nueva_fila = pd.DataFrame([{
                 'ID_VENTA': len(df_ex) + 1,
@@ -465,10 +461,15 @@ with tab1:
                 'VALOR_TOTAL': valor,
                 'BITACORA': bitacora,
                 'DOCUMENTOS': ";".join(archivos_guardados),
-                'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
+                'ESTADO_FINANCIERO': (
+                    "APROBADO" if valor >= 35000 else "REVISION"
+                )
             }])
 
-            pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
+            pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(
+                archivo,
+                index=False
+            )
 
             st.success("✅ Venta registrada correctamente.")
             st.rerun()
@@ -499,32 +500,44 @@ with tab2:
             opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
             venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
             
-            # --- LÓGICA DE ACTUALIZACIÓN CON CORRECCIÓN DE DECIMALES ---
             if venta_seleccionada:
-                try:
-                    # Corrección: usamos int(float()) para manejar números como "311.0"
-                    id_venta = int(float(venta_seleccionada.split(" - ")[0]))
-                    estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
+                id_venta = int(venta_seleccionada.split(" - ")[0])
+                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
+                
+                st.info(f"📌 Estado Actual: **{estado_actual}**")
+                
+                nuevo_estado = st.selectbox(
+                    "Cambiar estado a:", 
+                    ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
+                    key="select_nuevo_estado_tab2"
+                )
+                
+                if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2"):
+                    # 1. Guardar en CSV
+                    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
+                    df_update.to_csv("crm_sistema_maestro.csv", index=False)
                     
-                    st.info(f"📌 Estado Actual: **{estado_actual}**")
+                    # 2. Notificar Telegram
+                    mensaje = f"✅ Venta {id_venta} actualizada.\nNuevo estado: {nuevo_estado}"
+                    enviar_telegram(mensaje)
                     
-                    nuevo_estado = st.selectbox(
-                        "Cambiar estado a:", 
-                        ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
-                        key="select_nuevo_estado_tab2"
-                    )
-                    
+                    # 3. Éxito
+                    st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
+                    st.rerun()
+        else:
+            st.warning("No tienes ventas registradas para actualizar.")
+    else:
+        st.info("Aún no hay base de datos creada.")
 # ==========================================
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ==========================================
-if es_admin:
-    with tab3:
-        st.subheader("Análisis Centralizado")
-        
-        archivo = "crm_sistema_maestro.csv"
-        
-        if os.path.exists(archivo):
-            df = pd.read_csv(archivo)
+with tab3:
+    st.subheader("Gestión de Análisis Centralizado")
+    
+    archivo = "crm_sistema_maestro.csv"
+    
+    if os.path.exists(archivo):
+        df = pd.read_csv(archivo)
             
         if not df.empty:
             # 1. Métricas Rápidas
@@ -563,33 +576,25 @@ if es_admin:
             df['ESTADO_NORMALIZADO'] = df['ESTADO'].replace('Instalado', 'Activado')
             df_filtrado = df[df['ESTADO_NORMALIZADO'].isin(['Activado', 'Anulado'])]
             
-
-            # (Asegúrate de que este código esté dentro de tu bloque 'if es_admin: with tab3:')
-            st.markdown("#### 📊 Portafolio: Activadas vs Anuladas por Servicio")
-
-            # 1. Primero, creamos df_filtrado normalizando los nombres
-            # (Asegúrate de tener esta línea antes de agrupar)
-            df['ESTADO_NORMALIZADO'] = df['ESTADO'].replace('Instalado', 'Activado')
-            df_filtrado = df[df['ESTADO_NORMALIZADO'].isin(['Activado', 'Anulado'])]
-
-            # 2. Tu código de agrupación (¡Está perfecto!)
+            # Agrupamos por ambos para tener la relación exacta
             portafolio_grouped = df_filtrado.groupby(['PORTAFOLIO', 'ESTADO_NORMALIZADO']).size().reset_index(name='CANTIDAD')
             
-            # 3. Creación del gráfico
             chart2 = alt.Chart(portafolio_grouped).mark_bar().encode(
+                # En el eje X ponemos ambos: Portafolio y Estado
                 x=alt.X('PORTAFOLIO:N', title="Servicio"),
+                # xOffset separa las barras dentro de cada Servicio
                 xOffset='ESTADO_NORMALIZADO:N',
                 y='CANTIDAD:Q',
+                # El color indica si es Activado o Anulado
                 color=alt.Color('ESTADO_NORMALIZADO:N', 
                                 legend=alt.Legend(title="Estado"),
                                 scale=alt.Scale(domain=['Activado', 'Anulado'], 
                                                 range=['#00a0e3', '#231f20'])),
+                # Tooltip para ver los detalles al pasar el mouse
                 tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD']
             ).properties(height=300)
             
-            # 4. Mostrar el gráfico en Streamlit
             st.altair_chart(chart2, use_container_width=True)
-    
             # --- PANEL DE ANÁLISIS AUTOMÁTICO ---
             st.markdown("### 💡 Análisis Crítico y Mejoras")
             
@@ -618,24 +623,19 @@ if es_admin:
             else:
                 st.info("No hay datos suficientes para generar un análisis automático.")
             
-# ==========================================
-# GESTIÓN DE ANÁLISIS CENTRALIZADO (Solo Admin)
-# ==========================================
-if es_admin:
-    with tab3:
-        st.subheader("📊 Base de Datos Actual")
-        
-        # Fíjate cómo este 'if' y su 'else' están en la misma línea vertical
-        if os.path.exists("crm_sistema_maestro.csv"):
-            df_verificar = pd.read_csv("crm_sistema_maestro.csv")
-            
-            # 1. Mostramos la tabla interactiva una sola vez
+            # 3. Dataframe interactivo
             st.markdown("### 📋 Base de Datos Somostelser")
-            st.dataframe(df_verificar, use_container_width=True)
-            
-            # 2. Botón para descargar la base de datos y revisarla en Excel
-            csv = df_verificar.to_csv(index=False).encode('utf-8')
-            st.download_button("📥 Descargar Base de Datos (CSV)", data=csv, file_name="crm_respaldo.csv")
-            
-        else: # <--- Este else está perfectamente alineado con el if os.path.exists
-            st.warning("El archivo 'crm_sistema_maestro.csv' aún no ha sido creado.")
+            st.dataframe(df, use_container_width=True)
+
+with tab3: # O simplemente añádelo donde prefieras
+    st.subheader("📊 Base de Datos Actual")
+    
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_verificar = pd.read_csv("crm_sistema_maestro.csv")
+        st.dataframe(df_verificar) # Esto muestra la tabla completa
+        
+        # Botón para descargar la base de datos y revisarla en Excel
+        csv = df_verificar.to_csv(index=False).encode('utf-8')
+        st.download_button("📥 Descargar Base de Datos (CSV)", data=csv, file_name="crm_respaldo.csv")
+    else:
+        st.warning("El archivo 'crm_sistema_maestro.csv' aún no ha sido creado.")
