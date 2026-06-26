@@ -532,7 +532,7 @@ with tab2:
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ==========================================
 with tab3:
-    st.subheader("Gestión de Análisis Centralizado")
+    st.subheader("Análisis Centralizado")
     
     archivo = "crm_sistema_maestro.csv"
     
