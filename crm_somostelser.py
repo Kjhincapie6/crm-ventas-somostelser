@@ -6,23 +6,6 @@ import requests
 import altair as alt
 from datetime import date
 
-# 1. ESTO ES LO PRIMERO Y ÚNICO AL INICIO
-st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
-
-# 2. LUEGO TU CSS
-st.markdown("""
-    <style>
-    :root { --brand-blue: #00a0e3; --brand-black: #231f20; }
-    button[data-baseweb="tab"][aria-selected="true"] { color: var(--brand-blue) !important; }
-    div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] { background-color: var(--brand-blue) !important; }
-    .stSelectbox > div[data-baseweb="select"] > div:focus-within,
-    .stTextInput > div > div > input:focus {
-        border-color: var(--brand-blue) !important;
-        box-shadow: 0 0 5px var(--brand-blue) !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 # ==========================================
 # TELEGRAM
 # ==========================================
