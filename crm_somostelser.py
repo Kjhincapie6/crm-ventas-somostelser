@@ -479,7 +479,7 @@ with tab3:
                 estado_data = df['ESTADO'].value_counts().reset_index()
                 estado_data.columns = ['ESTADO', 'CANTIDAD']
                 
-                chart1 = alt.Chart(estado_data).mark_bar(color='#2ecc71').encode(
+                chart1 = alt.Chart(estado_data).mark_bar(color='#00a0e3').encode(
                     x='ESTADO',
                     y='CANTIDAD'
                 )
@@ -493,7 +493,7 @@ with tab3:
                 chart2 = alt.Chart(portafolio_data).mark_bar().encode(
                     x='PORTAFOLIO',
                     y='CANTIDAD',
-                    color=alt.Color('PORTAFOLIO', scale=alt.Scale(range=['#3498db', '#e74c3c']))
+                    color=alt.Color('PORTAFOLIO', scale=alt.Scale(range=['#00a0e3', '#58595b']))
                 )
                 st.altair_chart(chart2, use_container_width=True)
             
