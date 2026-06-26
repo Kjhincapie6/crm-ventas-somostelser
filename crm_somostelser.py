@@ -191,6 +191,7 @@ st.subheader("Gestión Inteligente de Contratos B2B")
 
 # --- LAS PESTAÑAS ---
 tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de Venta", "📊 Base de Datos"])
+st.write("Si ves este mensaje, el problema no es el set_page_config, sino otro comando que se está ejecutando antes.")
 
 # ------------------------------------------
 # 1. DEFINICIÓN DE DATOS (fuera del tab1)
