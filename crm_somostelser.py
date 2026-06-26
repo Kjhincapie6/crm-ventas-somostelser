@@ -367,17 +367,19 @@ with tab1:
 
     with c2:
         st.subheader("👤 Representante Legal")
-        nom_rep = st.text_input("Nombre Rep. Legal:", key="input_nombre_rep_legal")
-        cc_rep = st.text_input("Cédula Rep. Legal:")
-        mail_rep = st.text_input("Correo Rep. Legal:")
-        tel_rep = st.text_input("Móvil Rep. Legal:")
+        # He añadido 'key' a cada uno para hacerlos únicos
+        nom_rep = st.text_input("Nombre Rep. Legal:", key="input_nombre_rep")
+        cc_rep = st.text_input("Cédula Rep. Legal:", key="input_cedula_rep")
+        mail_rep = st.text_input("Correo Rep. Legal:", key="input_mail_rep")
+        tel_rep = st.text_input("Móvil Rep. Legal:", key="input_tel_rep")
         
         st.subheader("📊 Estado y Plan")
-        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
-        bitacora = st.text_area("📝 Notas / Bitácora:")
+        # También te recomiendo ponerle key a estos si siguen dando error
+        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], key="select_estado")
+        bitacora = st.text_area("📝 Notas / Bitácora:", key="area_bitacora")
         
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
-        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
+        servicio = st.selectbox("Servicio:", list(tarifas.keys()), key="select_servicio")
         
         # 🔄 Título dinámico: Si es Móvil dice "Líneas:", si no, dice "Cantidad:"
         titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
