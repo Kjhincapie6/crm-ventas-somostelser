@@ -222,10 +222,7 @@ with tab2:
     pass
 
 if es_admin:
-    with tab3:
-        # AQUÍ VA TODO TU CÓDIGO DEL DASHBOARD
-        st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
-        # ... resto de tu lógica de gráficos ...
+    
 
 # ------------------------------------------
 # 1. DEFINICIÓN DE DATOS (fuera del tab1)
