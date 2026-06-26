@@ -585,12 +585,6 @@ with tab2:
 with tab3:
     st.subheader("📊 Gestión de Análisis Centralizado")
     
-    archivo = "crm_sistema_maestro.csv"
-    
-    if os.path.exists(archivo):
-        df = pd.read_csv(archivo)
-        
-        if not df.empty:
             # 1. Métricas Rápidas
             c1, c2, c3 = st.columns(3)
             c1.metric("Total Registros", len(df))
