@@ -501,7 +501,13 @@ with tab2:
             venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
             
             if venta_seleccionada:
+                # Verificamos si el separador existe antes de intentar dividir
+                if " - " in venta_seleccionada:
                 id_venta = int(venta_seleccionada.split(" - ")[0])
+                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
+                st.info(f"📌 Estado Actual: **{estado_actual}**")
+            else:
+                st.warning("La selección no tiene un formato válido.")
                 estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
                 
                 st.info(f"📌 Estado Actual: **{estado_actual}**")
