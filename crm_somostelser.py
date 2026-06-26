@@ -6,19 +6,13 @@ import requests
 import altair as alt
 from datetime import date
 
-# DEBE IR AQUÍ, ANTES DE CUALQUIER OTRA COSA
-st.write("Si ves este mensaje, el problema no es el set_page_config, sino otro comando que se está ejecutando antes.")
-st.markdown("""
-    <style>
-    :root { --brand-blue: #00a0e3; --brand-black: #231f20; }
-    .stSelectbox > div[data-baseweb="select"] > div:focus-within,
-    .stTextInput > div > div > input:focus {
-        border-color: var(--brand-blue) !important;
-        box-shadow: 0 0 5px var(--brand-blue) !important;
-    }
-    h1, h2, h3 { color: var(--brand-black) !important; }
-    </style>
-""", unsafe_allow_html=True)
+# ESTA ES LA LÍNEA 1 O 2 (luego de los imports)
+st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
+
+# DESPUÉS de esto, ya puedes poner tus estilos:
+st.markdown("""<style>...</style>""", unsafe_allow_html=True)
+
+# ... TODO lo demás ...
 
 # ==========================================
 # TELEGRAM
