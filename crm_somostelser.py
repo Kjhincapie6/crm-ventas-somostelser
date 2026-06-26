@@ -584,10 +584,6 @@ with tab2:
 # ==========================================
 with tab3:
     st.subheader("📊 Gestión de Análisis Centralizado")
-    
-            # 1. Métricas Rápidas
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Total Registros", len(df))
             
             # Ajuste de seguridad: verificar columnas
             if 'ESTADO' in df.columns:
