@@ -600,7 +600,7 @@ if es_admin:
                                                 range=['#00a0e3', '#231f20'])),
                 tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD']
             ).properties(height=300)
-
+            
             # 4. Mostrar el gráfico en Streamlit
             st.altair_chart(chart2, use_container_width=True)
                 # Tooltip para ver los detalles al pasar el mouse
