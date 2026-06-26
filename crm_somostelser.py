@@ -171,14 +171,6 @@ with st.sidebar:
                 st.metric("💰 Ingresos Totales", f"${df['VALOR_TOTAL'].sum():,.0f} COP")
                 st.bar_chart(df['DIVISION'].value_counts())
                 
-                # --- EXPORTAR SOLO PARA ADMIN ---
-                if es_admin:
-                    st.download_button(
-                        label="📥 Exportar CRM a Excel",
-                        data=df.to_csv(index=False).encode('utf-8'),
-                        file_name='CRM_Ventas_SomosTelser.csv',
-                        mime='text/csv'
-                    )
             else:
                 st.caption("Aún no hay ventas registradas.")
         except: 
