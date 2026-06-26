@@ -224,7 +224,7 @@ with tab2:
 if es_admin:
     with tab3:
         # AQUÍ VA TODO TU CÓDIGO DEL DASHBOARD
-        st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
+        st.subheader("Derechos del Administrador")
         # ... resto de tu lógica de gráficos ...
 
 # ------------------------------------------
