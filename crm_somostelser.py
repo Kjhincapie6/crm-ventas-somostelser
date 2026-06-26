@@ -308,8 +308,7 @@ with tab1:
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         if valor > 0:
-            st.markdown(f'<div style="background-color: #e1f5fe; padding: 10px; border-radius: 5px;">💰 <b>Total:</b> ${valor:,.0f} COP</div>', unsafe_allow_html=True
-        
+            st.markdown(f'<div style="background-color: #e1f5fe; padding: 10px; border-radius: 5px;">💰 <b>Total:</b> ${valor:,.0f} COP</div>', unsafe_allow_html=True)
         # PANEL DE VALOR COMERCIAL
         frases = [
             "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
