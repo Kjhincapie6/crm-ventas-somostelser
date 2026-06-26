@@ -430,63 +430,40 @@ with tab1:
 # ==========================================
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
-
-    if not os.path.exists("crm_sistema_maestro.csv"):
-        st.info("Aún no hay base de datos creada.")
-    else:
+    
+    if os.path.exists("crm_sistema_maestro.csv"):
         df_update = pd.read_csv("crm_sistema_maestro.csv")
         
-        # --- RED DE SEGURIDAD: CREAR COLUMNAS SI NO EXISTEN ---
-        columnas_requeridas = ['ESTADO', 'ID_VENTA', 'CLIENTE', 'ASESOR']
-        for col in columnas_requeridas:
-            if col not in df_update.columns:
-                df_update[col] = "Sin dato"
+        # Parches de seguridad
+        if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "En proceso de firma"
+        if 'ID_VENTA' not in df_update.columns: df_update['ID_VENTA'] = range(1, len(df_update) + 1)
+        if 'CLIENTE' not in df_update.columns: df_update['CLIENTE'] = "Cliente Desconocido"
         
-        # Parches de seguridad y formato
-        df_update["ID_VENTA"] = df_update["ID_VENTA"].astype(float).astype(int)
-
-        # Filtro por asesor
-        if not es_admin:
+        # Filtro de Asesor
+        if not es_admin and 'ASESOR' in df_update.columns:
             df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
         else:
             df_mis_ventas = df_update
-
-        if df_mis_ventas.empty:
-            st.warning("No tienes ventas registradas para actualizar.")
-        else:
-            opciones_ventas = df_mis_ventas["ID_VENTA"].astype(str) + " - " + df_mis_ventas["CLIENTE"].astype(str)
+            
+        if not df_mis_ventas.empty:
+            opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
             venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
-
+            
+            # --- LÓGICA DE ACTUALIZACIÓN CON CORRECCIÓN DE DECIMALES ---
             if venta_seleccionada:
                 try:
+                    # Corrección: usamos int(float()) para manejar números como "311.0"
                     id_venta = int(float(venta_seleccionada.split(" - ")[0]))
-                    venta = df_update[df_update["ID_VENTA"] == id_venta]
+                    estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
+                    
+                    st.info(f"📌 Estado Actual: **{estado_actual}**")
+                    
+                    nuevo_estado = st.selectbox(
+                        "Cambiar estado a:", 
+                        ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
+                        key="select_nuevo_estado_tab2"
+                    )
 
-                    if venta.empty:
-                        st.error("❌ No se encontró la venta.")
-                    else:
-                        estado_actual = venta.iloc[0]["ESTADO"]
-                        st.info(f"📌 Estado actual: **{estado_actual}**")
-
-                        nuevo_estado = st.selectbox(
-                            "Cambiar estado a:",
-                            ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
-                            key="select_nuevo_estado_tab2"
-                        )
-
-                        st.divider()
-
-                        # --- BOTÓN CON KEY ÚNICA ---
-                        if st.button("💾 Guardar Actualización", key="btn_actualizar_venta_tab2"):
-                            df_update.loc[df_update["ID_VENTA"] == id_venta, "ESTADO"] = nuevo_estado
-                            df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                            
-                            enviar_telegram(f"✅ Venta {id_venta} actualizada a: {nuevo_estado}")
-                            st.success("✅ Venta actualizada correctamente.")
-                            st.rerun()
-
-                except Exception as e:
-                    st.exception(e)
 # ==========================================
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ==========================================
