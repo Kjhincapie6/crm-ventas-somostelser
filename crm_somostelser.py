@@ -6,6 +6,9 @@ import requests
 import altair as alt
 from datetime import date
 
+# ESTA DEBE SER LA LÍNEA 8 (o la primera que usa 'st.')
+st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
+
 # ==========================================
 # TELEGRAM
 # ==========================================
