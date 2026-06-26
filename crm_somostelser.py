@@ -477,7 +477,6 @@ with tab1:
         else:
             st.error("⚠️ Faltan datos obligatorios.")
 # ==========================================
-# ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
 with tab2:
@@ -501,10 +500,11 @@ with tab2:
             opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
             venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
             
-            # --- LÓGICA DE ACTUALIZACIÓN RECUPERADA ---
+            # --- LÓGICA DE ACTUALIZACIÓN CON CORRECCIÓN DE DECIMALES ---
             if venta_seleccionada:
                 try:
-                    id_venta = int(venta_seleccionada.split(" - ")[0])
+                    # Corrección: usamos int(float()) para manejar números como "311.0"
+                    id_venta = int(float(venta_seleccionada.split(" - ")[0]))
                     estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
                     
                     st.info(f"📌 Estado Actual: **{estado_actual}**")
@@ -527,8 +527,8 @@ with tab2:
                         # 3. Éxito
                         st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
                         st.rerun()
-                except Exception:
-                    st.warning("Error al procesar la selección de venta.")
+                except Exception as e:
+                    st.warning("Error al procesar la selección de venta. Asegúrate de que el ID sea correcto.")
         else:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
