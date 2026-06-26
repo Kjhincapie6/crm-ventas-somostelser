@@ -425,56 +425,69 @@ with tab1:
         if archivo_subido:
             st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
             
-    # Guardar Venta 
-    guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
+# ==================================================
+# PESTAÑA 1: Botn de guardado  y limpieza del panel 
+# ====================================================
 
-    if guardar:
-        if n_doc and nombre:
-            carpeta_documentos = "documentos_clientes"
-            if not os.path.exists(carpeta_documentos):
-                os.makedirs(carpeta_documentos)
+# Definimos el formulario. 'clear_on_submit=True' es lo que limpia todo automáticamente
+with st.form("formulario_ingreso_venta", clear_on_submit=True):
+    # Asegúrate de que tus inputs estén AQUÍ adentro
+    # Ejemplo:
+    # nombre = st.text_input("Razón Social o Nombre:", key="input_nombre")
+    # n_doc = st.text_input("Número de Documento:", key="input_doc")
+    # ... resto de tus campos ...
+    
+    guardar = st.form_submit_button("💾 Guardar Venta", use_container_width=True)
 
-            archivos_guardados = []
-            if archivo_subido:
-                for archivo_doc in archivo_subido:
-                    nombre_archivo = f"{n_doc}_{archivo_doc.name}"
-                    ruta_archivo = os.path.join(carpeta_documentos, nombre_archivo)
-                    with open(ruta_archivo, "wb") as f:
-                        f.write(archivo_doc.getbuffer())
-                    archivos_guardados.append(nombre_archivo)
+# La lógica de guardado va FUERA del form, pero después de que se presione el botón
+if guardar:
+    if n_doc and nombre:
+        # 1. Preparación de archivos
+        carpeta_documentos = "documentos_clientes"
+        if not os.path.exists(carpeta_documentos):
+            os.makedirs(carpeta_documentos)
 
-            # Corrección del NameError: df_ex siempre existirá
-            archivo = "crm_sistema_maestro.csv"
-            if os.path.exists(archivo):
-                df_ex = pd.read_csv(archivo)
-            else:
-                df_ex = pd.DataFrame(columns=[
-                    'ID_VENTA', 'ASESOR', 'ESTADO', 'DIVISION', 'NIT', 
-                    'CLIENTE', 'SERVICIO', 'VALOR_TOTAL', 'BITACORA', 
-                    'DOCUMENTOS', 'ESTADO_FINANCIERO'
-                ])
+        archivos_guardados = []
+        if archivo_subido:
+            for archivo_doc in archivo_subido:
+                nombre_archivo = f"{n_doc}_{archivo_doc.name}"
+                ruta_archivo = os.path.join(carpeta_documentos, nombre_archivo)
+                with open(ruta_archivo, "wb") as f:
+                    f.write(archivo_doc.getbuffer())
+                archivos_guardados.append(nombre_archivo)
 
-            nueva_fila = pd.DataFrame([{
-                'ID_VENTA': len(df_ex) + 1,
-                'ASESOR': st.session_state.correo_asesor,
-                'ESTADO': estado,
-                'DIVISION': div,
-                'NIT': n_doc,
-                'CLIENTE': nombre,
-                'SERVICIO': servicio,
-                'VALOR_TOTAL': valor,
-                'BITACORA': bitacora,
-                'DOCUMENTOS': ";".join(archivos_guardados),
-                'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
-            }])
-
-            pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
-
-            st.success("✅ Venta registrada correctamente.")
-            st.rerun()
-
+        # 2. Manejo seguro del DataFrame (Corregido para no dar NameError)
+        archivo = "crm_sistema_maestro.csv"
+        if os.path.exists(archivo):
+            df_ex = pd.read_csv(archivo)
         else:
-            st.error("⚠️ Faltan datos obligatorios.")
+            df_ex = pd.DataFrame(columns=[
+                'ID_VENTA', 'ASESOR', 'ESTADO', 'DIVISION', 'NIT', 
+                'CLIENTE', 'SERVICIO', 'VALOR_TOTAL', 'BITACORA', 
+                'DOCUMENTOS', 'ESTADO_FINANCIERO'
+            ])
+
+        # 3. Creación y guardado
+        nueva_fila = pd.DataFrame([{
+            'ID_VENTA': len(df_ex) + 1,
+            'ASESOR': st.session_state.correo_asesor,
+            'ESTADO': estado,
+            'DIVISION': div,
+            'NIT': n_doc,
+            'CLIENTE': nombre,
+            'SERVICIO': servicio,
+            'VALOR_TOTAL': valor,
+            'BITACORA': bitacora,
+            'DOCUMENTOS': ";".join(archivos_guardados),
+            'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
+        }])
+
+        pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
+
+        st.success("✅ Venta registrada correctamente.")
+        # Ya no necesitas st.rerun() manual, el form se limpia solo al recargar
+    else:
+        st.error("⚠️ Faltan datos obligatorios.")
 # ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
