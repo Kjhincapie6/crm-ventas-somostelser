@@ -289,7 +289,7 @@ with tab1:
             datos_moviles["cant"] = st.number_input("Cantidad:", min_value=1, value=1, key="cant_f_tab1")
 
         # --- BOTÓN DE CIERRE MANUAL ---
-        if st.button("💾 Registrar y Cerrar Venta", key="btn_save_tab1", type="primary", use_container_width=True):
+        if st.button("💾 Registrar Linea y Cerrar Venta", key="btn_save_tab1", type="primary", use_container_width=True):
             if n_doc and nombre:
                 # Lógica de guardado en CSV
                 archivo = "crm_sistema_maestro.csv"
