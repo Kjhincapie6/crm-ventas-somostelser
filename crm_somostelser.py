@@ -6,6 +6,35 @@ import requests
 import altair as alt
 from datetime import date
 
+# --- ESTILOS DE MARCA SOMOS TELSER ---
+st.markdown("""
+    <style>
+    /* Color principal de la marca (Azul Cian) */
+    :root {
+        --brand-blue: #00a0e3; 
+        --brand-black: #231f20;
+    }
+
+    /* Borde de campos cuando se seleccionan */
+    .stSelectbox > div[data-baseweb="select"] > div:focus-within,
+    .stTextInput > div > div > input:focus {
+        border-color: var(--brand-blue) !important;
+        box-shadow: 0 0 5px var(--brand-blue) !important;
+    }
+
+    /* Botones de acción */
+    div.stButton > button:hover {
+        border-color: var(--brand-blue) !important;
+        color: var(--brand-blue) !important;
+    }
+    
+    /* Encabezados y textos importantes */
+    h1, h2, h3 {
+        color: var(--brand-black) !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # ==========================================
 # TELEGRAM
 # ==========================================
