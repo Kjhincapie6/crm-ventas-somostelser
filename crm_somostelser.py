@@ -6,14 +6,6 @@ import requests
 import altair as alt
 from datetime import date
 
-# ESTA ES LA LÍNEA 1 O 2 (luego de los imports)
-st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
-
-# DESPUÉS de esto, ya puedes poner tus estilos:
-st.markdown("""<style>...</style>""", unsafe_allow_html=True)
-
-# ... TODO lo demás ...
-
 # ==========================================
 # TELEGRAM
 # ==========================================
