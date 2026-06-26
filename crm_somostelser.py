@@ -500,12 +500,16 @@ with tab2:
             opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
             venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
             
-            if venta_seleccionada:
-                # Verificamos si el separador existe antes de intentar dividir
-                if " - " in venta_seleccionada:
-                id_venta = int(venta_seleccionada.split(" - ")[0])
-                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
-                st.info(f"📌 Estado Actual: **{estado_actual}**")
+            # Línea 505: Tu validación
+    if venta_seleccionada and " - " in venta_seleccionada:
+        # TODO ESTO debe ir desplazado a la derecha (4 espacios)
+        id_venta = int(venta_seleccionada.split(" - ")[0])
+        estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
+        
+        st.info(f"📌 Estado Actual: **{estado_actual}**")
+        
+        # El resto de tu lógica (como el selectbox de nuevo_estado) 
+        # también debe estar aquí adentro
             else:
                 st.warning("La selección no tiene un formato válido.")
                 estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
