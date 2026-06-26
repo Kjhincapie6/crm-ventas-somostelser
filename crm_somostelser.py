@@ -6,37 +6,22 @@ import requests
 import altair as alt
 from datetime import date
 
-# 1. ESTO DEBE SER LO PRIMERO (Ya lo tienes en la línea 10 de tu imagen)
+# 1. ESTO VA DE PRIMERO (Línea 8 o similar)
 st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
-# 2. COLOCA EL CSS AQUÍ MISMO, JUSTO DESPUÉS:
+# 2. ESTO VA DESPUÉS
 st.markdown("""
     <style>
     :root {
         --brand-blue: #00a0e3; 
         --brand-black: #231f20;
     }
-
-    /* Color de foco en inputs */
-    .stSelectbox > div[data-baseweb="select"] > div:focus-within,
-    .stTextInput > div > div > input:focus {
-        border-color: var(--brand-blue) !important;
-        box-shadow: 0 0 5px var(--brand-blue) !important;
-    }
-
-    /* PESTAÑAS (TABS) - Color Azul Corporativo */
-    button[data-baseweb="tab"][aria-selected="true"] {
-        color: var(--brand-blue) !important;
-    }
-    div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] {
-        background-color: var(--brand-blue) !important;
-    }
-
-    /* Títulos y textos */
-    h1, h2, h3 { color: var(--brand-black) !important; }
+    button[data-baseweb="tab"][aria-selected="true"] { color: var(--brand-blue) !important; }
+    div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] { background-color: var(--brand-blue) !important; }
     </style>
 """, unsafe_allow_html=True)
 
+# 3. AHORA, TODO TU CÓDIGO RESTANTE (tab1, tab2, etc.)
 # ==========================================
 # TELEGRAM
 # ==========================================
