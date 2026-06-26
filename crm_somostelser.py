@@ -286,20 +286,29 @@ with tab1:
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         
-        # 🔄 Título dinámico: Si es Móvil dice "Líneas:", si no, dice "Cantidad:"
-        titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
-        lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
-        # --- NUEVA LÓGICA: LÍNEA MÓVIL PARA FULL TIGO ---
-        plan_movil_asociado = None
-        if div == "Fijo" and "Full Tigo" in servicio:
-            incluye_movil = st.checkbox("📱 ¿Incluye línea móvil?")
-            if incluye_movil:
-                plan_movil_asociado = "Plan Datos Tigo Empresarial 6.12 (Ilim GB)"
-                st.info(f"✨ Plan móvil asociado: **{plan_movil_asociado}**")
+        # --- LOGICA MOVIL (POPOVER) ---
+        tipo_gestion = "N/A"
+        operador_origen = "N/A"
+        num_linea = "N/A"
         
-        # CÁLCULO FINANCIERO DINÁMICO
+        if div == "Móvil":
+            with st.popover("📱 Configurar Líneas Móviles"):
+                tipo_gestion = st.radio("Tipo de Gestión", ["Portabilidad", "Línea Nueva", "Línea Existente"], key="gestion_tab1")
+                if tipo_gestion == "Portabilidad":
+                    operador_origen = st.selectbox("Operador Origen", ["Claro", "Movistar", "Móvil Éxito", "Wom"], key="op_tab1")
+                num_linea = st.text_input("Número de Línea:", key="num_linea_tab1")
+        
+        # Full Tigo
+        if div == "Fijo" and "Full Tigo" in servicio:
+            incluye_movil = st.checkbox("📱 ¿Incluye línea móvil?", key="chk_full_tigo_tab1")
+            if incluye_movil:
+                st.info("✨ Plan asociado: Plan Datos Tigo Empresarial 6.12")
+        
+        # Cálculos
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
+        if valor > 0:
+            st.markdown(f'<div style="background-color: #e1f5fe; padding: 10px; border-radius: 5px;">💰 <b>Total:</b> ${valor:,.0f} COP</div>', unsafe_allow_html=True
         
         # PANEL DE VALOR COMERCIAL
         frases = [
