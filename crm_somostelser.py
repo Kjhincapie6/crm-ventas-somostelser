@@ -581,6 +581,10 @@ if es_admin:
 
 st.markdown("#### 📊 Portafolio: Activadas vs Anuladas por Servicio")
 
+# (Asegúrate de que este código esté dentro de tu bloque 'if es_admin: with tab3:')
+
+st.markdown("#### 📊 Portafolio: Activadas vs Anuladas por Servicio")
+
 # 1. Primero, creamos df_filtrado normalizando los nombres
 # (Asegúrate de tener esta línea antes de agrupar)
 df['ESTADO_NORMALIZADO'] = df['ESTADO'].replace('Instalado', 'Activado')
