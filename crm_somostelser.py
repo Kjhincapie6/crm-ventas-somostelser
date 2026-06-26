@@ -429,67 +429,28 @@ with tab1:
 # PESTAÑA 1: Botn de guardado  y limpieza del panel 
 # ==================================================
 
-with st.form("formulario_ingreso_venta", clear_on_submit=True):
-    # 1. TODOS tus campos DEBEN estar dentro del form para que se limpien
-    # Asegúrate de usar los mismos nombres de variables que tenías antes
-    nombre = st.text_input("Razón Social o Nombre:")
-    n_doc = st.text_input("Número de Documento:")
-    estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
-    div = st.selectbox("División:", ["División A", "División B"]) # Ajusta según tus opciones
-    servicio = st.text_input("Servicio:")
-    valor = st.number_input("Valor Total:", min_value=0)
-    bitacora = st.text_area("Bitácora:")
-    archivo_subido = st.file_uploader("Subir documentos:", accept_multiple_files=True)
-    
-    # El botón DEBE ser un form_submit_button
-    guardar = st.form_submit_button("💾 Guardar Venta", use_container_width=True)
+# --- PESTAÑA 1: INGRESO DE VENTA ---
 
-# 2. La lógica de guardado sigue fuera del form, pero usará las variables de arriba
-if guardar:
+# 1. Asegúrate de definir tus campos así para que funcionen con el reseteo:
+nombre = st.text_input("Razón Social o Nombre:", value=st.session_state.get("nombre_input", ""), key="nombre_input")
+n_doc = st.text_input("Número de Documento:", value=st.session_state.get("doc_input", ""), key="doc_input")
+# ... (define aquí el resto de tus campos usando value=st.session_state.get("key", "") y key="key")
+
+# 2. El botón de guardar
+if st.button("💾 Guardar Venta", use_container_width=True):
     if n_doc and nombre:
-        # 1. Preparación de archivos
-        carpeta_documentos = "documentos_clientes"
-        if not os.path.exists(carpeta_documentos):
-            os.makedirs(carpeta_documentos)
-
-        archivos_guardados = []
-        if archivo_subido:
-            for archivo_doc in archivo_subido:
-                nombre_archivo = f"{n_doc}_{archivo_doc.name}"
-                ruta_archivo = os.path.join(carpeta_documentos, nombre_archivo)
-                with open(ruta_archivo, "wb") as f:
-                    f.write(archivo_doc.getbuffer())
-                archivos_guardados.append(nombre_archivo)
-
-        # 2. Manejo seguro del DataFrame
-        archivo = "crm_sistema_maestro.csv"
-        if os.path.exists(archivo):
-            df_ex = pd.read_csv(archivo)
-        else:
-            df_ex = pd.DataFrame(columns=[
-                'ID_VENTA', 'ASESOR', 'ESTADO', 'DIVISION', 'NIT', 
-                'CLIENTE', 'SERVICIO', 'VALOR_TOTAL', 'BITACORA', 
-                'DOCUMENTOS', 'ESTADO_FINANCIERO'
-            ])
-
-        # 3. Creación y guardado
-        nueva_fila = pd.DataFrame([{
-            'ID_VENTA': len(df_ex) + 1,
-            'ASESOR': st.session_state.correo_asesor,
-            'ESTADO': estado,
-            'DIVISION': div,
-            'NIT': n_doc,
-            'CLIENTE': nombre,
-            'SERVICIO': servicio,
-            'VALOR_TOTAL': valor,
-            'BITACORA': bitacora,
-            'DOCUMENTOS': ";".join(archivos_guardados),
-            'ESTADO_FINANCIERO': ("APROBADO" if valor >= 35000 else "REVISION")
-        }])
-
-        pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
+        # ... (Tu lógica de archivos y guardado en CSV que ya tienes) ...
+        # ... pd.concat([df_ex, nueva_fila], ...).to_csv(...) ...
 
         st.success("✅ Venta registrada correctamente.")
+        
+        # 3. AQUÍ ES DONDE SE LIMPIA: Reseteamos los valores en session_state
+        st.session_state["nombre_input"] = ""
+        st.session_state["doc_input"] = ""
+        # Repite esta línea para cada uno de tus otros campos (servicio, valor, etc.)
+        
+        # 4. Forzamos una actualización visual sin perder el estado de otras cosas
+        st.rerun()
     else:
         st.error("⚠️ Faltan datos obligatorios.")
 # ==========================================
