@@ -425,9 +425,9 @@ with tab1:
         if archivo_subido:
             st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
             
-# ==================================================
-# PESTAÑA 1: Botn de guardado  y limpieza del panel 
-# ==================================================
+# ==========================================
+# PESTAÑA 2: ACTUALIZAR EL ESTADO
+# ==========================================
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
     
@@ -464,6 +464,9 @@ with tab2:
                         key="select_nuevo_estado_tab2"
                     )
                     
+                    # --- LÍNEA DE DIAGNÓSTICO ---
+                    st.write("---") 
+                    
                     if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2"):
                         # 1. Guardar en CSV
                         df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
@@ -476,8 +479,8 @@ with tab2:
                         # 3. Éxito
                         st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
                         st.rerun()
-                except Exception:
-                    st.warning("Error al procesar la selección de venta.")
+                except Exception as e:
+                    st.warning(f"Error técnico: {e}")
             else:
                 st.warning("Selecciona una venta válida.")
         else:
