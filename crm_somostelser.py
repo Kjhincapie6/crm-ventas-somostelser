@@ -422,12 +422,13 @@ with tab1:
             </div>
             """, unsafe_allow_html=True)
 
-        st.subheader("📎 Documentos del Cliente")
+       st.subheader("📎 Documentos del Cliente")
 
         archivo_subido = st.file_uploader(
             "Adjuntar documentos",
             type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
-            accept_multiple_files=True
+            accept_multiple_files=True,
+            key="file_uploader_ventas_tab1" # <--- ESTO ES LO QUE DEBES AGREGAR
         )
 
         if archivo_subido:
