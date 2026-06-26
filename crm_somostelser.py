@@ -189,40 +189,6 @@ with st.sidebar:
 st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
 
-# --- LAS PESTAÑAS ---
-# 1. Definimos las pestañas base
-nombres_pestanas = ["Registrar Venta", "Actualizar Estado de Venta"]
-
-# 2. Verificación de Administrador (usando el correo para mayor seguridad)
-es_admin = st.session_state.get('correo_asesor') == "ADMIN@SOMOSTELSER.COM"
-
-if es_admin:
-    nombres_pestanas.append("Base de Datos")
-
-# 3. Creamos las pestañas dinámicamente
-tabs = st.tabs(nombres_pestanas)
-
-# 4. Asignamos variables de forma segura
-tab1 = tabs[0]
-tab2 = tabs[1]
-
-if es_admin:
-    tab3 = tabs[2]
-
-# ------------------------------------------
-# USO DE LAS PESTAÑAS (Protegiendo el acceso)
-# ------------------------------------------
-
-with tab1:
-    # ... tu código de registro ...
-    pass
-
-with tab2:
-    # ... tu código de actualización ...
-    pass
-
-if es_admin:
-    with tab3:
         
 # ------------------------------------------
 # 1. DEFINICIÓN DE DATOS (fuera del tab1)
@@ -528,6 +494,40 @@ with tab2:
 # ==========================================
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ==========================================
+# --- LAS PESTAÑAS ---
+# 1. Definimos las pestañas base
+nombres_pestanas = ["Registrar Venta", "Actualizar Estado de Venta"]
+
+# 2. Verificación de Administrador (usando el correo para mayor seguridad)
+es_admin = st.session_state.get('correo_asesor') == "ADMIN@SOMOSTELSER.COM"
+
+if es_admin:
+    nombres_pestanas.append("Base de Datos")
+
+# 3. Creamos las pestañas dinámicamente
+tabs = st.tabs(nombres_pestanas)
+
+# 4. Asignamos variables de forma segura
+tab1 = tabs[0]
+tab2 = tabs[1]
+
+if es_admin:
+    tab3 = tabs[2]
+
+# ------------------------------------------
+# USO DE LAS PESTAÑAS (Protegiendo el acceso)
+# ------------------------------------------
+
+with tab1:
+    # ... tu código de registro ...
+    pass
+
+with tab2:
+    # ... tu código de actualización ...
+    pass
+
+if es_admin:
+
 with tab3:
     st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
     
