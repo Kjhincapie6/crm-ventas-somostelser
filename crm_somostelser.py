@@ -234,8 +234,7 @@ UBICACIONES_COL = {
 # 2. PESTAÑA 1 INTEGRADA
 # ------------------------------------------
 c1, c2 = st.columns([1, 1], gap="large") # gap="large" da espacio entre columnas
-
-    with c1:
+with c1:
         st.markdown("### 🏢 Datos del Cliente")
         with st.container(border=True): # Borde para fijar la estructura
             t_doc = st.selectbox("Tipo Doc:", ["NIT", "CC", "CE", "PPT"], key="t_doc_tab1")
