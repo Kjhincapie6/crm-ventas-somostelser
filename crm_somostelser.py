@@ -426,65 +426,116 @@ with tab1:
             st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
             
 # ==========================================
+# ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
-    
+
     if os.path.exists("crm_sistema_maestro.csv"):
+
         df_update = pd.read_csv("crm_sistema_maestro.csv")
-        
-        # Parches de seguridad y normalización de ID
-        if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "En proceso de firma"
-        if 'ID_VENTA' not in df_update.columns: df_update['ID_VENTA'] = range(1, len(df_update) + 1)
-        # Forzar ID_VENTA a entero para evitar conflictos de tipo
-        df_update['ID_VENTA'] = df_update['ID_VENTA'].astype(float).astype(int)
-        
-        # Filtro de Asesor
+
+        # Parches de seguridad
+        if 'ESTADO' not in df_update.columns:
+            df_update['ESTADO'] = "En proceso de firma"
+
+        if 'ID_VENTA' not in df_update.columns:
+            df_update['ID_VENTA'] = range(1, len(df_update) + 1)
+
+        if 'CLIENTE' not in df_update.columns:
+            df_update['CLIENTE'] = "Cliente Desconocido"
+
+        # Asegurar que el ID sea entero
+        df_update["ID_VENTA"] = df_update["ID_VENTA"].astype(int)
+
+        # Filtro por asesor
         if not es_admin and 'ASESOR' in df_update.columns:
-            df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
+            df_mis_ventas = df_update[
+                df_update['ASESOR'] == st.session_state.correo_asesor
+            ]
         else:
             df_mis_ventas = df_update
-            
+
         if not df_mis_ventas.empty:
-            opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
-            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
-            
-            # --- LÓGICA DE ACTUALIZACIÓN CON DEPURACIÓN ---
-            if venta_seleccionada and " - " in venta_seleccionada:
+
+            opciones_ventas = (
+                df_mis_ventas["ID_VENTA"].astype(str)
+                + " - "
+                + df_mis_ventas["CLIENTE"]
+            )
+
+            venta_seleccionada = st.selectbox(
+                "Selecciona la venta:",
+                opciones_ventas.tolist(),
+                key="select_venta_update"
+            )
+
+            if venta_seleccionada:
+
                 try:
-                    # Corrección: int(float(...)) maneja el "311.0"
+
                     id_venta = int(float(venta_seleccionada.split(" - ")[0]))
-                    
-                    # Verificación: ¿Existe este ID en el DF?
-                    fila = df_update[df_update['ID_VENTA'] == id_venta]
-                    
-                    if not fila.empty:
-                        estado_actual = fila['ESTADO'].values[0]
-                        st.info(f"📌 Estado Actual: **{estado_actual}**")
-                        
+
+                    venta = df_update[df_update["ID_VENTA"] == id_venta]
+
+                    if venta.empty:
+                        st.error("❌ No se encontró la venta seleccionada.")
+                    else:
+
+                        estado_actual = venta.iloc[0]["ESTADO"]
+
+                        st.info(f"📌 Estado actual: **{estado_actual}**")
+
                         nuevo_estado = st.selectbox(
-                            "Cambiar estado a:", 
-                            ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
+                            "Cambiar estado a:",
+                            [
+                                "Cotizado",
+                                "En proceso de firma",
+                                "Ingreso de pedido",
+                                "Activado",
+                                "Anulado"
+                            ],
                             key="select_nuevo_estado_tab2"
                         )
-                        
-                        # Botón de guardado
-                        if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2"):
-                            df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
-                            df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                            enviar_telegram(f"✅ Venta {id_venta} actualizada. Nuevo estado: {nuevo_estado}")
-                            st.success("✅ Estado actualizado y notificado.")
+
+                        st.divider()
+
+                        # -------- BOTÓN --------
+                        guardar = st.button(
+                            "💾 Guardar Venta",
+                            key="btn_guardar_venta"
+                        )
+
+                        if guardar:
+
+                            df_update.loc[
+                                df_update["ID_VENTA"] == id_venta,
+                                "ESTADO"
+                            ] = nuevo_estado
+
+                            df_update.to_csv(
+                                "crm_sistema_maestro.csv",
+                                index=False
+                            )
+
+                            mensaje = (
+                                f"✅ Venta {id_venta} actualizada\n"
+                                f"Nuevo estado: {nuevo_estado}"
+                            )
+
+                            enviar_telegram(mensaje)
+
+                            st.success("✅ Venta actualizada correctamente.")
+
                             st.rerun()
-                    else:
-                        st.error(f"No se encontró la venta con ID: {id_venta}")
-                        
+
                 except Exception as e:
-                    st.error(f"Error procesando la venta: {e}")
-            else:
-                st.warning("Selecciona una venta válida.")
+                    st.exception(e)
+
         else:
             st.warning("No tienes ventas registradas para actualizar.")
+
     else:
         st.info("Aún no hay base de datos creada.")
 # ==========================================
