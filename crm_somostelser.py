@@ -579,6 +579,7 @@ with tab2:
                 except Exception as e:
                     st.error(f"Error al procesar: {e}")
 # ==========================================
+# ==========================================
 # PESTAÑA 3: DASHBOARD Y GESTIÓN DE DATOS
 # ==========================================
 with tab3:
@@ -590,11 +591,11 @@ with tab3:
         df = pd.read_csv(archivo)
         
         if not df.empty:
-            # --- 1. MÉTRICAS RÁPIDAS ---
+            # 1. Métricas Rápidas
             c1, c2, c3 = st.columns(3)
             c1.metric("Total Registros", len(df))
             
-            # Ajuste de seguridad: verificar si existen las columnas antes de operar
+            # Ajuste de seguridad: verificar columnas
             if 'ESTADO' in df.columns:
                 instaladas = len(df[df['ESTADO'] == 'Instalado'])
                 c2.metric("Ventas Instaladas", instaladas)
@@ -606,7 +607,7 @@ with tab3:
             
             st.divider()
             
-            # --- 2. GRÁFICOS ---
+            # 2. Gráficos
             st.markdown("#### 📈 Ventas por Estado")
             estado_data = df['ESTADO'].value_counts().reset_index()
             estado_data.columns = ['ESTADO', 'CANTIDAD']
@@ -617,8 +618,9 @@ with tab3:
             )
             st.altair_chart(chart1, use_container_width=True)
             
-            # --- 3. ANÁLISIS CRÍTICO ---
-            st.markdown("### 💡 Análisis Crítico")
+            st.markdown("---")
+            
+            st.markdown("#### 📊 Portafolio: Activadas vs Anuladas por Servicio")
             df['ESTADO_NORMALIZADO'] = df['ESTADO'].replace('Instalado', 'Activado')
             df_filtrado = df[df['ESTADO_NORMALIZADO'].isin(['Activado', 'Anulado'])]
             
@@ -629,9 +631,42 @@ with tab3:
                     x=alt.X('PORTAFOLIO:N', title="Servicio"),
                     xOffset='ESTADO_NORMALIZADO:N',
                     y='CANTIDAD:Q',
-                    color=alt.Color('ESTADO_NORMALIZADO:N', scale=alt.Scale(domain=['Activado', 'Anulado'], range=['#00a0e3', '#231f20'])),
+                    color=alt.Color('ESTADO_NORMALIZADO:N', 
+                                    legend=alt.Legend(title="Estado"),
+                                    scale=alt.Scale(domain=['Activado', 'Anulado'], 
+                                                    range=['#00a0e3', '#231f20'])),
                     tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD']
                 ).properties(height=300)
                 st.altair_chart(chart2, use_container_width=True)
-
-          
+            
+            # 3. Análisis Crítico
+            st.markdown("### 💡 Análisis Crítico y Mejoras")
+            total_ventas = len(df_filtrado)
+            if total_ventas > 0:
+                tasa_anulacion = len(df[df['ESTADO'] == 'Anulado']) / len(df) * 100
+                c_a1, c_a2 = st.columns(2)
+                with c_a1:
+                    st.markdown("**Observaciones:**")
+                    if tasa_anulacion > 20:
+                        st.warning(f"⚠️ Tasa de anulación alta ({tasa_anulacion:.1f}%).")
+                    else:
+                        st.success("✅ Tasa de anulación dentro de límites aceptables.")
+                with c_a2:
+                    st.markdown("**Oportunidades de Mejora:**")
+                    if 'fijos' in locals() and 'moviles' in locals():
+                        if fijos > moviles:
+                            st.write("• El portafolio **Fijo** es el motor actual.")
+                        else:
+                            st.write("• El portafolio **Móvil** tiene tracción.")
+            
+            # 4. Base de Datos interactiva y descarga (Todo integrado aquí)
+            st.markdown("### 📋 Base de Datos Somostelser")
+            st.dataframe(df, use_container_width=True)
+            
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button("📥 Descargar Base de Datos (CSV)", data=csv, file_name="crm_respaldo.csv")
+            
+        else:
+            st.info("El archivo CSV está vacío.")
+    else:
+        st.warning("El archivo 'crm_sistema_maestro.csv' aún no ha sido creado.")
