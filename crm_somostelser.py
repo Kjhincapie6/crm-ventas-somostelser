@@ -224,7 +224,7 @@ with tab2:
 if es_admin:
     with tab3:
         # AQUÍ VA TODO TU CÓDIGO DEL DASHBOARD
-        st.subheader("Derechos del Administrador")
+        st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
         # ... resto de tu lógica de gráficos ...
 
 # ------------------------------------------
@@ -532,7 +532,7 @@ with tab2:
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ==========================================
 with tab3:
-    st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
+    st.subheader("Gestión de Análisis Centralizado")
     
     archivo = "crm_sistema_maestro.csv"
     
