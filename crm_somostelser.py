@@ -459,6 +459,33 @@ with tab3:
             ).properties(height=300)
             
             st.altair_chart(chart2, use_container_width=True)
+            # --- PANEL DE ANÁLISIS AUTOMÁTICO ---
+            st.markdown("### 💡 Análisis Crítico y Mejoras")
+            
+            # Calculamos tasas rápidas
+            total_ventas = len(df_filtrado)
+            if total_ventas > 0:
+                tasa_anulacion = len(df[df['ESTADO'] == 'Anulado']) / len(df) * 100
+                
+                # Creamos contenedores de análisis
+                c_a1, c_a2 = st.columns(2)
+                
+                with c_a1:
+                    st.markdown("**Observaciones:**")
+                    if tasa_anulacion > 20:
+                        st.warning(f"⚠️ Tasa de anulación alta ({tasa_anulacion:.1f}%). Se sugiere revisar el proceso de validación de datos.")
+                    else:
+                        st.success("✅ Tasa de anulación dentro de límites aceptables.")
+                
+                with c_a2:
+                    st.markdown("**Oportunidades de Mejora:**")
+                    # Lógica simple para sugerir según qué portafolio es más fuerte
+                    if fijos > moviles:
+                        st.write("• El portafolio **Fijo** es el motor actual. Enfocar campañas de cross-selling en clientes Móviles.")
+                    else:
+                        st.write("• El portafolio **Móvil** tiene tracción. Evaluar ofertas de fidelización para clientes Fijos.")
+            else:
+                st.info("No hay datos suficientes para generar un análisis automático.")
             
             # 3. Dataframe interactivo
             st.markdown("### 📋 Base de Datos Somostelser")
