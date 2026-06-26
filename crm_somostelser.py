@@ -579,7 +579,6 @@ with tab2:
                 except Exception as e:
                     st.error(f"Error al procesar: {e}")
 # ==========================================
-# ==========================================
 # PESTAÑA 3: DASHBOARD Y GESTIÓN DE DATOS (SEGURIDAD ADMIN)
 # ==========================================
 if st.session_state.get('correo_asesor') == "ADMIN@SOMOSTELSER.COM":
@@ -633,4 +632,4 @@ if st.session_state.get('correo_asesor') == "ADMIN@SOMOSTELSER.COM":
             else:
                 st.info("El archivo CSV está vacío.")
         else:
-            st.warning("El archivo 'crm_sistema_maestro.csv' aún no ha sido creado.")
+            st.warning("El archivo 'crm_sistema_maestro.csv' aún no ha sido creado."
