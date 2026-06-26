@@ -427,19 +427,24 @@ with tab1:
             
 # ==================================================
 # PESTAÑA 1: Botn de guardado  y limpieza del panel 
-# ====================================================
+# ==================================================
 
-# Definimos el formulario. 'clear_on_submit=True' es lo que limpia todo automáticamente
 with st.form("formulario_ingreso_venta", clear_on_submit=True):
-    # Asegúrate de que tus inputs estén AQUÍ adentro
-    # Ejemplo:
-    # nombre = st.text_input("Razón Social o Nombre:", key="input_nombre")
-    # n_doc = st.text_input("Número de Documento:", key="input_doc")
-    # ... resto de tus campos ...
+    # 1. TODOS tus campos DEBEN estar dentro del form para que se limpien
+    # Asegúrate de usar los mismos nombres de variables que tenías antes
+    nombre = st.text_input("Razón Social o Nombre:")
+    n_doc = st.text_input("Número de Documento:")
+    estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+    div = st.selectbox("División:", ["División A", "División B"]) # Ajusta según tus opciones
+    servicio = st.text_input("Servicio:")
+    valor = st.number_input("Valor Total:", min_value=0)
+    bitacora = st.text_area("Bitácora:")
+    archivo_subido = st.file_uploader("Subir documentos:", accept_multiple_files=True)
     
+    # El botón DEBE ser un form_submit_button
     guardar = st.form_submit_button("💾 Guardar Venta", use_container_width=True)
 
-# La lógica de guardado va FUERA del form, pero después de que se presione el botón
+# 2. La lógica de guardado sigue fuera del form, pero usará las variables de arriba
 if guardar:
     if n_doc and nombre:
         # 1. Preparación de archivos
@@ -456,7 +461,7 @@ if guardar:
                     f.write(archivo_doc.getbuffer())
                 archivos_guardados.append(nombre_archivo)
 
-        # 2. Manejo seguro del DataFrame (Corregido para no dar NameError)
+        # 2. Manejo seguro del DataFrame
         archivo = "crm_sistema_maestro.csv"
         if os.path.exists(archivo):
             df_ex = pd.read_csv(archivo)
@@ -485,7 +490,6 @@ if guardar:
         pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
 
         st.success("✅ Venta registrada correctamente.")
-        # Ya no necesitas st.rerun() manual, el form se limpia solo al recargar
     else:
         st.error("⚠️ Faltan datos obligatorios.")
 # ==========================================
