@@ -6,19 +6,15 @@ import requests
 import altair as alt
 from datetime import date
 
-# --- 1. CONFIGURACIÓN DE PÁGINA (PRIMERA LÍNEA CON 'st.') ---
+# 1. ESTO ES LO PRIMERO Y ÚNICO AL INICIO
 st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
 
-# --- 2. ESTILOS CSS ---
+# 2. LUEGO TU CSS
 st.markdown("""
     <style>
     :root { --brand-blue: #00a0e3; --brand-black: #231f20; }
-    
-    /* Pestañas */
     button[data-baseweb="tab"][aria-selected="true"] { color: var(--brand-blue) !important; }
     div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] { background-color: var(--brand-blue) !important; }
-    
-    /* Inputs */
     .stSelectbox > div[data-baseweb="select"] > div:focus-within,
     .stTextInput > div > div > input:focus {
         border-color: var(--brand-blue) !important;
@@ -27,8 +23,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. AHORA SÍ: TODO EL RESTO DE TU CÓDIGO ---
-# Aquí puedes poner tus tab1, tab2, tab3 = st.tabs(...) y todo lo demás.
 # ==========================================
 # TELEGRAM
 # ==========================================
