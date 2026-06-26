@@ -276,22 +276,25 @@ with tab1:
         # --- VENTANA FLOTANTE (POPOVER) ---
         # Solo se activa si la división es MÓVIL
         datos_moviles = {"tipo": "N/A", "op": "N/A", "num": "N/A", "cant": 1}
+       # Asegúrate de que esta línea esté alineada con el código de arriba
+    if 'lista_lineas' not in st.session_state:
+        st.session_state.lista_lineas = []
+
+    # El 'with' del popover debe tener EXACTAMENTE la misma sangría que el 'if' de arriba
+    with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
+        # Estos inputs temporales capturan los datos de una sola línea
+        cant = st.number_input("Cantidad de líneas:", min_value=1, value=1, key="cant_m_tab1")
+        tipo = st.radio("Tipo de gestión:", ["Portabilidad", "Línea Nueva", "Línea Existente"], key="gest_m_tab1")
+        op = "N/A"
+        if tipo == "Portabilidad":
+            op = st.selectbox("Operador Origen:", ["Claro", "Movistar", "Móvil Éxito", "Wom"], key="op_m_tab1")
+        num = st.text_input("Número de línea:", key="num_m_tab1")
         
-        if 'lista_lineas' not in st.session_state:
-            st.session_state.lista_lineas = []
-           with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
-               # Estos inputs temporales capturan los datos de una sola línea
-               cant = st.number_input("Cantidad de líneas:", min_value=1, value=1, key="cant_m_tab1")
-               tipo = st.radio("Tipo de gestión:", ["Portabilidad", "Línea Nueva", "Línea Existente"], key="gest_m_tab1")
-               op = "N/A"
-               if tipo == "Portabilidad":
-                   op = st.selectbox("Operador Origen:", ["Claro", "Movistar", "Móvil Éxito", "Wom"], key="op_m_tab1")
-                num = st.text_input("Número de línea:", key="num_m_tab1")
-               # BOTÓN PARA ACUMULAR
-                if st.button("➕ Agregar esta línea a la venta"):
-                    nueva_linea = {"cantidad": cant, "tipo": tipo, "operador": op, "numero": num}
-                    st.session_state.lista_lineas.append(nueva_linea)
-                    st.success(f"Línea {num} agregada a la lista")
+        # BOTÓN PARA ACUMULAR
+        if st.button("➕ Agregar esta línea a la venta"):
+            nueva_linea = {"cantidad": cant, "tipo": tipo, "operador": op, "numero": num}
+            st.session_state.lista_lineas.append(nueva_linea)
+            st.success(f"Línea {num} agregada a la lista")
         else:
             st.info("La gestión móvil no aplica para división Fija.")
             datos_moviles["cant"] = st.number_input("Cantidad:", min_value=1, value=1, key="cant_f_tab1")
