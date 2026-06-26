@@ -171,6 +171,14 @@ with st.sidebar:
                 st.metric("💰 Ingresos Totales", f"${df['VALOR_TOTAL'].sum():,.0f} COP")
                 st.bar_chart(df['DIVISION'].value_counts())
                 
+                # --- EXPORTAR SOLO PARA ADMIN ---
+                if es_admin:
+                    st.download_button(
+                        label="📥 Exportar CRM a Excel",
+                        data=df.to_csv(index=False).encode('utf-8'),
+                        file_name='CRM_Ventas_SomosTelser.csv',
+                        mime='text/csv'
+                    )
             else:
                 st.caption("Aún no hay ventas registradas.")
         except: 
@@ -181,63 +189,43 @@ with st.sidebar:
 st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
 
-# 1. Lógica de roles y creación dinámica de pestañas
+# --- LAS PESTAÑAS ---
+# 1. Definimos las pestañas base
+nombres_pestanas = ["Registrar Venta", "Actualizar Estado de Venta"]
+
+# 2. Verificación de Administrador (usando el correo para mayor seguridad)
 es_admin = st.session_state.get('correo_asesor') == "ADMIN@SOMOSTELSER.COM"
 
-nombres_pestanas = ["Registrar Venta", "Actualizar Estado de Venta"]
 if es_admin:
     nombres_pestanas.append("Base de Datos")
 
+# 3. Creamos las pestañas dinámicamente
 tabs = st.tabs(nombres_pestanas)
 
+# 4. Asignamos variables de forma segura
 tab1 = tabs[0]
 tab2 = tabs[1]
+
 if es_admin:
     tab3 = tabs[2]
 
-# 2. Contenido de la Pestaña 3 (Dashboard)
+# ------------------------------------------
+# USO DE LAS PESTAÑAS (Protegiendo el acceso)
+# ------------------------------------------
+
+with tab1:
+    # ... tu código de registro ...
+    pass
+
+with tab2:
+    # ... tu código de actualización ...
+    pass
+
 if es_admin:
     with tab3:
-        # Título único: Declarado solo una vez aquí
+        # AQUÍ VA TODO TU CÓDIGO DEL DASHBOARD
         st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
-        
-        archivo = "crm_sistema_maestro.csv"
-        
-        if os.path.exists(archivo):
-            df = pd.read_csv(archivo)
-            
-            if not df.empty:
-                # --- Métricas ---
-                c1, c2, c3 = st.columns(3)
-                c1.metric("Total Registros", len(df))
-                
-                # Verificamos columnas para evitar errores si el CSV es nuevo
-                if 'ESTADO' in df.columns:
-                    c2.metric("Ventas Instaladas", len(df[df['ESTADO'] == 'Instalado']))
-                
-                if 'PORTAFOLIO' in df.columns:
-                    fijos = len(df[df['PORTAFOLIO'] == 'FIJO'])
-                    moviles = len(df[df['PORTAFOLIO'] == 'MOVIL'])
-                    c3.metric("Fijo vs Móvil", f"{fijos} | {moviles}")
-                
-                st.divider()
-                
-                # --- Visualización de Datos ---
-                st.markdown("### 📋 Base de Datos Maestro")
-                st.dataframe(df, use_container_width=True)
-                
-                # Botón de descarga
-                csv = df.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    "📥 Descargar Base de Datos (CSV)", 
-                    data=csv, 
-                    file_name="crm_respaldo.csv",
-                    mime="text/csv"
-                )
-            else:
-                st.info("La base de datos está vacía.")
-        else:
-            st.warning("El archivo de datos no ha sido creado aún.")
+        # ... resto de tu lógica de gráficos ...
 
 # ------------------------------------------
 # 1. DEFINICIÓN DE DATOS (fuera del tab1)
