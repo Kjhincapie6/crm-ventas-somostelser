@@ -273,11 +273,22 @@ with tab1:
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
     with c2:
-        st.subheader("👤 Representante Legal")
-        nom_rep = st.text_input("Nombre Rep. Legal:")
-        cc_rep = st.text_input("Cédula Rep. Legal:")
-        mail_rep = st.text_input("Correo Rep. Legal:")
-        tel_rep = st.text_input("Móvil Rep. Legal:")
+       st.subheader("📊 Estado y Plan")
+        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+        bitacora = st.text_area("📝 Notas / Bitácora:")
+        
+        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
+        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
+        # 🔄 Título dinámico: "Líneas" para Móvil, "Cantidad" para Fijo
+        titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
+        lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
+        # --- NUEVA LÓGICA: LÍNEA MÓVIL PARA FULL TIGO ---
+        plan_movil_asociado = None
+        if div == "Fijo" and "Full Tigo" in servicio:
+        incluye_movil = st.checkbox("📱 ¿Incluye línea móvil?")
+            if incluye_movil:
+                plan_movil_asociado = "Plan Datos Tigo Empresarial 6.12 (Ilim GB)"
+                st.info(f"✨ Plan móvil asociado: **{plan_movil_asociado}**")
         
         st.subheader("📊 Estado y Plan")
         estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
