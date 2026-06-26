@@ -579,34 +579,34 @@ with tab2:
                 except Exception as e:
                     st.error(f"Error al procesar: {e}")
 # ==========================================
-# PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
+# PESTAÑA 3: DASHBOARD Y GESTIÓN DE DATOS
 # ==========================================
 with tab3:
-    st.subheader("Gestión de Análisis Centralizado")
+    st.subheader("📊 Gestión de Análisis Centralizado")
     
     archivo = "crm_sistema_maestro.csv"
     
     if os.path.exists(archivo):
         df = pd.read_csv(archivo)
-            
+        
         if not df.empty:
-            # 1. Métricas Rápidas
+            # --- 1. MÉTRICAS RÁPIDAS ---
             c1, c2, c3 = st.columns(3)
             c1.metric("Total Registros", len(df))
             
-            # Ajuste: usamos 'Instalado' que es lo que aparece en tu captura
-            instaladas = len(df[df['ESTADO'] == 'Instalado'])
-            c2.metric("Ventas Instaladas", instaladas)
+            # Ajuste de seguridad: verificar si existen las columnas antes de operar
+            if 'ESTADO' in df.columns:
+                instaladas = len(df[df['ESTADO'] == 'Instalado'])
+                c2.metric("Ventas Instaladas", instaladas)
             
-            fijos = len(df[df['PORTAFOLIO'] == 'FIJO'])
-            moviles = len(df[df['PORTAFOLIO'] == 'MOVIL'])
-            c3.metric("Fijo vs Móvil", f"{fijos} | {moviles}")
+            if 'PORTAFOLIO' in df.columns:
+                fijos = len(df[df['PORTAFOLIO'] == 'FIJO'])
+                moviles = len(df[df['PORTAFOLIO'] == 'MOVIL'])
+                c3.metric("Fijo vs Móvil", f"{fijos} | {moviles}")
             
             st.divider()
             
-            # --- GRÁFICOS APILADOS (UNO DEBAJO DEL OTRO) ---
-            
-            # Gráfico 1: Ventas por Estado
+            # --- 2. GRÁFICOS ---
             st.markdown("#### 📈 Ventas por Estado")
             estado_data = df['ESTADO'].value_counts().reset_index()
             estado_data.columns = ['ESTADO', 'CANTIDAD']
@@ -617,75 +617,31 @@ with tab3:
             )
             st.altair_chart(chart1, use_container_width=True)
             
-            st.markdown("---") # Divisor sutil entre gráficos
-            
-            # Gráfico 2: Portafolio Agrupado (Fijo/Móvil + Activado/Anulado)
-            st.markdown("#### 📊 Portafolio: Activadas vs Anuladas por Servicio")
-            
-            # Normalizamos nombres
+            # --- 3. ANÁLISIS CRÍTICO ---
+            st.markdown("### 💡 Análisis Crítico")
             df['ESTADO_NORMALIZADO'] = df['ESTADO'].replace('Instalado', 'Activado')
             df_filtrado = df[df['ESTADO_NORMALIZADO'].isin(['Activado', 'Anulado'])]
             
-            # Agrupamos por ambos para tener la relación exacta
-            portafolio_grouped = df_filtrado.groupby(['PORTAFOLIO', 'ESTADO_NORMALIZADO']).size().reset_index(name='CANTIDAD')
-            
-            chart2 = alt.Chart(portafolio_grouped).mark_bar().encode(
-                # En el eje X ponemos ambos: Portafolio y Estado
-                x=alt.X('PORTAFOLIO:N', title="Servicio"),
-                # xOffset separa las barras dentro de cada Servicio
-                xOffset='ESTADO_NORMALIZADO:N',
-                y='CANTIDAD:Q',
-                # El color indica si es Activado o Anulado
-                color=alt.Color('ESTADO_NORMALIZADO:N', 
-                                legend=alt.Legend(title="Estado"),
-                                scale=alt.Scale(domain=['Activado', 'Anulado'], 
-                                                range=['#00a0e3', '#231f20'])),
-                # Tooltip para ver los detalles al pasar el mouse
-                tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD']
-            ).properties(height=300)
-            
-            st.altair_chart(chart2, use_container_width=True)
-            # --- PANEL DE ANÁLISIS AUTOMÁTICO ---
-            st.markdown("### 💡 Análisis Crítico y Mejoras")
-            
-            # Calculamos tasas rápidas
-            total_ventas = len(df_filtrado)
-            if total_ventas > 0:
-                tasa_anulacion = len(df[df['ESTADO'] == 'Anulado']) / len(df) * 100
+            if not df_filtrado.empty and 'PORTAFOLIO' in df_filtrado.columns:
+                portafolio_grouped = df_filtrado.groupby(['PORTAFOLIO', 'ESTADO_NORMALIZADO']).size().reset_index(name='CANTIDAD')
                 
-                # Creamos contenedores de análisis
-                c_a1, c_a2 = st.columns(2)
-                
-                with c_a1:
-                    st.markdown("**Observaciones:**")
-                    if tasa_anulacion > 20:
-                        st.warning(f"⚠️ Tasa de anulación alta ({tasa_anulacion:.1f}%). Se sugiere revisar el proceso de validación de datos.")
-                    else:
-                        st.success("✅ Tasa de anulación dentro de límites aceptables.")
-                
-                with c_a2:
-                    st.markdown("**Oportunidades de Mejora:**")
-                    # Lógica simple para sugerir según qué portafolio es más fuerte
-                    if fijos > moviles:
-                        st.write("• El portafolio **Fijo** es el motor actual. Enfocar campañas de cross-selling en clientes Móviles.")
-                    else:
-                        st.write("• El portafolio **Móvil** tiene tracción. Evaluar ofertas de fidelización para clientes Fijos.")
-            else:
-                st.info("No hay datos suficientes para generar un análisis automático.")
-            
-            # 3. Dataframe interactivo
+                chart2 = alt.Chart(portafolio_grouped).mark_bar().encode(
+                    x=alt.X('PORTAFOLIO:N', title="Servicio"),
+                    xOffset='ESTADO_NORMALIZADO:N',
+                    y='CANTIDAD:Q',
+                    color=alt.Color('ESTADO_NORMALIZADO:N', scale=alt.Scale(domain=['Activado', 'Anulado'], range=['#00a0e3', '#231f20'])),
+                    tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD']
+                ).properties(height=300)
+                st.altair_chart(chart2, use_container_width=True)
+
+            # --- 4. BASE DE DATOS Y DESCARGA ---
             st.markdown("### 📋 Base de Datos Somostelser")
             st.dataframe(df, use_container_width=True)
-
-with tab3: # O simplemente añádelo donde prefieras
-    st.subheader("📊 Base de Datos Actual")
-    
-    if os.path.exists("crm_sistema_maestro.csv"):
-        df_verificar = pd.read_csv("crm_sistema_maestro.csv")
-        st.dataframe(df_verificar) # Esto muestra la tabla completa
-        
-        # Botón para descargar la base de datos y revisarla en Excel
-        csv = df_verificar.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Descargar Base de Datos (CSV)", data=csv, file_name="crm_respaldo.csv")
+            
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button("📥 Descargar Base de Datos (CSV)", data=csv, file_name="crm_respaldo.csv")
+            
+        else:
+            st.info("El archivo CSV está vacío.")
     else:
-        st.warning("El archivo 'crm_sistema_maestro.csv' aún no ha sido creado.")
+        st.warning("El archivo 'crm_sistema_maestro.csv' no existe.")
