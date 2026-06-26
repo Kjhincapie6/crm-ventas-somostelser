@@ -191,7 +191,7 @@ st.subheader("Gestión Inteligente de Contratos B2B")
 
 # --- LAS PESTAÑAS ---
 tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de Venta", "📊 Base de Datos"])
-st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
+
 st.write("Si ves este mensaje, el problema no es el set_page_config, sino otro comando que se está ejecutando antes.")
 st.markdown("""
     <style>
