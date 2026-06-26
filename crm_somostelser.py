@@ -270,7 +270,47 @@ with tab1:
         
         email_cli = st.text_input("Email contacto:")
         movil_cli = st.text_input("Contacto autorizado:")
-        tel_contacto = st.text_input("Móvil Contacto autorizado:")
+        tel_contacto = st.text_input("Móvil Contacto autorizado:")}
+
+        st.subheader("⚙️ Gestión Técnica") 
+        # --- VENTANA FLOTANTE (POPOVER) ---
+        # Solo se activa si la división es MÓVIL
+        datos_moviles = {"tipo": "N/A", "op": "N/A", "num": "N/A", "cant": 1}
+        
+        if div == "Móvil":
+            with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
+                datos_moviles["cant"] = st.number_input("Cantidad de líneas:", min_value=1, value=1, key="cant_m_tab1")
+                datos_moviles["tipo"] = st.radio("Tipo de gestión:", ["Portabilidad", "Línea Nueva", "Línea Existente"], key="gest_m_tab1")
+                if datos_moviles["tipo"] == "Portabilidad":
+                    datos_moviles["op"] = st.selectbox("Operador Origen:", ["Claro", "Movistar", "Móvil Éxito", "Wom"], key="op_m_tab1")
+                datos_moviles["num"] = st.text_input("Número de línea:", key="num_m_tab1")
+        else:
+            st.info("La gestión móvil no aplica para división Fija.")
+            datos_moviles["cant"] = st.number_input("Cantidad:", min_value=1, value=1, key="cant_f_tab1")
+
+        # --- BOTÓN DE CIERRE MANUAL ---
+        if st.button("💾 Registrar y Cerrar Venta", key="btn_save_tab1", type="primary", use_container_width=True):
+            if n_doc and nombre:
+                # Lógica de guardado en CSV
+                archivo = "crm_sistema_maestro.csv"
+                df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
+                
+                nueva_fila = pd.DataFrame([{
+                    'CLIENTE': nombre,
+                    'NIT': n_doc,
+                    'TIPO_PERSONA': tipo_pers,
+                    'DIVISION': div,
+                    'CANTIDAD_LINEAS': datos_moviles["cant"],
+                    'TIPO_GESTION': datos_moviles["tipo"],
+                    'OPERADOR': datos_moviles["op"],
+                    'NUM_LINEA': datos_moviles["num"]
+                }])
+                
+                pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
+                st.success("✅ Venta guardada exitosamente.")
+                st.rerun() # Esto refresca la app para limpiar el formulario
+            else:
+                st.error("⚠️ Faltan datos del titular.")
 
     with c2:
         st.subheader("👤 Representante Legal")
