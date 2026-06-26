@@ -239,34 +239,46 @@ with tab1:
     c1, c2 = st.columns(2)
 
     with c1:
-        st.subheader("🏢 Datos del Titular / Cliente")
-        tipo_persona = st.selectbox("Tipo de Persona:", ["Persona Jurídica", "Persona Natural"])
-        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CC", "CE", "PPT"])
+        st.subheader("🏢 Datos del Cliente")
+        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
         n_doc = st.text_input("Número de Documento:")
-        nombre = st.text_input("Razón Social o Nombre Titular:")
+        nombre = st.text_input("Razón Social o Nombre:")
         dir = st.text_input("Dirección:")
         barrio = st.text_input("Barrio:")
         
         # --- SELECTORES CON BÚSQUEDA PREDICTIVA ---
-        depto = st.selectbox("Departamento:", options=sorted(list(UBICACIONES_COL.keys())), index=None, placeholder="Escribe para buscar departamento...")
+        depto = st.selectbox(
+            "Departamento:", 
+            options=sorted(list(UBICACIONES_COL.keys())),
+            index=None, 
+            placeholder="Escribe para buscar departamento..."
+        )
+        
+        # Lógica para el selector de municipio
         if depto:
-            muni = st.selectbox("Municipio:", options=sorted(UBICACIONES_COL[depto]), index=None, placeholder="Escribe para buscar municipio...")
+            muni = st.selectbox(
+                "Municipio:", 
+                options=sorted(UBICACIONES_COL[depto]),
+                index=None,
+                placeholder="Escribe para buscar municipio..."
+            )
         else:
+            # Mostramos un selector vacío y deshabilitado para mantener el orden visual
             muni = st.selectbox("Municipio:", options=[], disabled=True, placeholder="Selecciona primero un depto")
+        
+        # ------------------------------------------
         
         email_cli = st.text_input("Email contacto:")
         movil_cli = st.text_input("Contacto autorizado:")
+        tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
     with c2:
-        # Lógica para ocultar Representante Legal si es Persona Natural
-        if tipo_persona == "Persona Jurídica":
-            st.subheader("👤 Representante Legal")
-            nom_rep = st.text_input("Nombre Rep. Legal:")
-            cc_rep = st.text_input("Cédula Rep. Legal:")
-        else:
-            nom_rep = nombre
-            cc_rep = n_doc
-            
+        st.subheader("👤 Representante Legal")
+        nom_rep = st.text_input("Nombre Rep. Legal:")
+        cc_rep = st.text_input("Cédula Rep. Legal:")
+        mail_rep = st.text_input("Correo Rep. Legal:")
+        tel_rep = st.text_input("Móvil Rep. Legal:")
+        
         st.subheader("📊 Estado y Plan")
         estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
         bitacora = st.text_area("📝 Notas / Bitácora:")
@@ -274,116 +286,9 @@ with tab1:
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         
-        titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
-        lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
-        
-        # --- VENTANA EMERGENTE PARA LÍNEAS MÓVILES (POPOVER) ---
-        tipo_gestion = ""
-        operador_origen = ""
-        num_linea = ""
-        
-        if div == "Móvil":
-            with st.popover("📱 Configurar Líneas Móviles"):
-                tipo_gestion = st.radio("Tipo de Gestión", ["Portabilidad", "Línea Nueva", "Línea Existente"])
-                if tipo_gestion == "Portabilidad":
-                    operador_origen = st.selectbox("Operador Origen", ["Claro", "Movistar", "Móvil Éxito", "Wom"])
-                
-                num_linea = st.text_input("Número de Línea a gestionar:")
-                st.info("Al presionar 'Finalizar y Guardar' abajo, esta información quedará registrada.")
-        
-        # Lógica de Full Tigo
-        if div == "Fijo" and "Full Tigo" in servicio:
-            incluye_movil = st.checkbox("📱 ¿Incluye línea móvil?")
-            if incluye_movil:
-                plan_movil_asociado = "Plan Datos Tigo Empresarial 6.12 (Ilim GB)"
-                st.info(f"✨ Plan móvil asociado: **{plan_movil_asociado}**")
-        
-        # CÁLCULO FINANCIERO DINÁMICO
-        dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
-        valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
-        
-        if valor > 0:
-            st.markdown(f"""
-            <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
-                <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-        st.subheader("📎 Documentos del Cliente")
-        archivo_subido = st.file_uploader("Adjuntar documentos", type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"], accept_multiple_files=True)
-
-    # --- CIERRE MANUAL Y GUARDADO ---
-    guardar = st.button("💾 Finalizar y Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
-
-    if guardar:
-        if n_doc and nombre:
-            # 1. Guardar archivos si existen
-            carpeta_documentos = "documentos_clientes"
-            if not os.path.exists(carpeta_documentos):
-                os.makedirs(carpeta_documentos)
-
-            archivos_guardados = []
-            if archivo_subido:
-                for archivo_doc in archivo_subido:
-                    nombre_archivo = f"{n_doc}_{archivo_doc.name}"
-                    ruta_archivo = os.path.join(carpeta_documentos, nombre_archivo)
-                    with open(ruta_archivo, "wb") as f:
-                        f.write(archivo_doc.getbuffer())
-                    archivos_guardados.append(nombre_archivo)
-
-            # 2. Guardar en Base de Datos (CSV)
-            archivo = "crm_sistema_maestro.csv"
-            df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
-
-            nueva_fila = pd.DataFrame([{
-                'ID_VENTA': len(df_ex) + 1,
-                'ASESOR': st.session_state.correo_asesor,
-                'ESTADO': estado,
-                'DIVISION': div,
-                'TIPO_PERSONA': tipo_persona,
-                'NIT': n_doc,
-                'CLIENTE': nombre,
-                'SERVICIO': servicio,
-                'CANTIDAD_LINEAS': lineas,
-                'TIPO_GESTION': tipo_gestion,      # Nuevo dato móvil
-                'OPERADOR_ORIGEN': operador_origen, # Nuevo dato móvil
-                'NUM_LINEA': num_linea,             # Nuevo dato móvil
-                'VALOR_TOTAL': valor,
-                'BITACORA': bitacora,
-                'DOCUMENTOS': ";".join(archivos_guardados),
-                'ESTADO_FINANCIERO': "APROBADO" if valor >= 35000 else "REVISION"
-            }])
-
-            pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
-
-            st.balloons()
-            st.success("✅ ¡Venta registrada correctamente y almacenada en la base de datos!")
-        else:
-            st.error("⚠️ Faltan datos obligatorios: Número de Documento y Razón Social/Nombre.")
-            
-# ==========================================
-# PESTAÑA 2: ACTUALIZAR EL ESTADO
-# ==========================================)
-
-    with c2:
-        st.subheader("👤 Representante Legal")
-        # He añadido 'key' a cada uno para hacerlos únicos
-        nom_rep = st.text_input("Nombre Rep. Legal:", key="input_nombre_rep")
-        cc_rep = st.text_input("Cédula Rep. Legal:", key="input_cedula_rep")
-        mail_rep = st.text_input("Correo Rep. Legal:", key="input_mail_rep")
-        tel_rep = st.text_input("Móvil Rep. Legal:", key="input_tel_rep")
-        
-        st.subheader("📊 Estado y Plan")
-        # También te recomiendo ponerle key a estos si siguen dando error
-        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], key="select_estado")
-        bitacora = st.text_area("📝 Notas / Bitácora:", key="area_bitacora")
-        
-        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
-        servicio = st.selectbox("Servicio:", list(tarifas.keys()), key="select_servicio")
-        
         # 🔄 Título dinámico: Si es Móvil dice "Líneas:", si no, dice "Cantidad:"
         titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
-        lineas = st.number_input(titulo_cantidad, min_value=1, value=1, key="input_lineas_cantidad_tab1")
+        lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
         # --- NUEVA LÓGICA: LÍNEA MÓVIL PARA FULL TIGO ---
         plan_movil_asociado = None
         if div == "Fijo" and "Full Tigo" in servicio:
@@ -422,13 +327,12 @@ with tab1:
             </div>
             """, unsafe_allow_html=True)
 
-       st.subheader("📎 Documentos del Cliente")
+        st.subheader("📎 Documentos del Cliente")
 
         archivo_subido = st.file_uploader(
             "Adjuntar documentos",
             type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
-            accept_multiple_files=True,
-            key="file_uploader_ventas_tab1" # <--- ESTO ES LO QUE DEBES AGREGAR
+            accept_multiple_files=True
         )
 
         if archivo_subido:
@@ -491,51 +395,55 @@ with tab1:
 # ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
-with c2:
-        st.subheader("👤 Representante Legal")
-        nom_rep = st.text_input("Nombre Rep. Legal:", key="input_nombre_rep")
-        cc_rep = st.text_input("Cédula Rep. Legal:", key="input_cedula_rep")
-        mail_rep = st.text_input("Correo Rep. Legal:", key="input_mail_rep")
-        tel_rep = st.text_input("Móvil Rep. Legal:", key="input_tel_rep")
+with tab2:
+    st.subheader("🔄 Actualizar Seguimiento de Venta")
+    
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_update = pd.read_csv("crm_sistema_maestro.csv")
         
-        st.subheader("📊 Estado y Plan")
-        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], key="select_estado")
-        bitacora = st.text_area("📝 Notas / Bitácora:", key="area_bitacora")
+        # Parches de seguridad
+        if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "En proceso de firma"
+        if 'ID_VENTA' not in df_update.columns: df_update['ID_VENTA'] = range(1, len(df_update) + 1)
+        if 'CLIENTE' not in df_update.columns: df_update['CLIENTE'] = "Cliente Desconocido"
         
-        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
-        servicio = st.selectbox("Servicio:", list(tarifas.keys()), key="select_servicio")
-        
-        titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
-        lineas = st.number_input(titulo_cantidad, min_value=1, value=1, key="input_lineas_cantidad_tab1")
-
-        # --- LÓGICA FULL TIGO ---
-        if div == "Fijo" and "Full Tigo" in servicio:
-            incluye_movil = st.checkbox("📱 ¿Incluye línea móvil?", key="check_full_tigo")
-            if incluye_movil:
-                plan_movil_asociado = "Plan Datos Tigo Empresarial 6.12 (Ilim GB)"
-                st.info(f"✨ Plan móvil asociado: **{plan_movil_asociado}**")
-        
-        # --- CÁLCULO FINANCIERO ---
-        dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
-        valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
-        
-        if valor > 0:
-            st.markdown(f"""
-            <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
-                <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-        st.subheader("📎 Documentos del Cliente")
-        archivo_subido = st.file_uploader(
-            "Adjuntar documentos",
-            type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"],
-            accept_multiple_files=True,
-            key="file_uploader_ventas_tab1"
-        )
-
-        if archivo_subido:
-            st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)"))
+        # Filtro de Asesor
+        if not es_admin and 'ASESOR' in df_update.columns:
+            df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
+        else:
+            df_mis_ventas = df_update
+            
+        if not df_mis_ventas.empty:
+            opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
+            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
+            
+            if venta_seleccionada:
+                id_venta = int(venta_seleccionada.split(" - ")[0])
+                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
+                
+                st.info(f"📌 Estado Actual: **{estado_actual}**")
+                
+                nuevo_estado = st.selectbox(
+                    "Cambiar estado a:", 
+                    ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
+                    key="select_nuevo_estado_tab2"
+                )
+                
+                if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2"):
+                    # 1. Guardar en CSV
+                    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
+                    df_update.to_csv("crm_sistema_maestro.csv", index=False)
+                    
+                    # 2. Notificar Telegram
+                    mensaje = f"✅ Venta {id_venta} actualizada.\nNuevo estado: {nuevo_estado}"
+                    enviar_telegram(mensaje)
+                    
+                    # 3. Éxito
+                    st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
+                    st.rerun()
+        else:
+            st.warning("No tienes ventas registradas para actualizar.")
+    else:
+        st.info("Aún no hay base de datos creada.")
 # ==========================================
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ==========================================
