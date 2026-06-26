@@ -367,7 +367,7 @@ with tab1:
 
     with c2:
         st.subheader("👤 Representante Legal")
-        nom_rep = st.text_input("Nombre Rep. Legal:")
+        nom_rep = st.text_input("Nombre Rep. Legal:", key="input_nombre_rep_legal")
         cc_rep = st.text_input("Cédula Rep. Legal:")
         mail_rep = st.text_input("Correo Rep. Legal:")
         tel_rep = st.text_input("Móvil Rep. Legal:")
