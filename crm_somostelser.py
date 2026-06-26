@@ -66,123 +66,45 @@ PLANES_FIJO = {
 }
 
 # ==========================================
-# 2. CONFIGURACIÓN E IDENTIDAD (SISTEMA DE LOGIN)
 # ==========================================
-if 'correo_asesor' not in st.session_state:
-    st.session_state.correo_asesor = None
-
-# --- PANTALLA DE ACCESO ---
-if st.session_state.correo_asesor is None:
-    st.title("🔐 Acceso al CRM Somos Telser")
-    st.write("Por favor, selecciona tu perfil e ingresa la contraseña:")
+# PESTAÑA 2: ACTUALIZAR EL ESTADO
+# ==========================================
+with tab2:
+    st.subheader("🔄 Actualizar Seguimiento de Venta")
     
-    usuario_seleccionado = st.selectbox("Usuario:", [
-        "", 
-        "ADMIN@SOMOSTELSER.COM", 
-        "ASESOR1@SOMOSTELSER.COM", 
-        "ASESOR2@SOMOSTELSER.COM",
-        "ASESOR3@SOMOSTELSER.COM",
-        "ASESOR4@SOMOSTELSER.COM"
-    ], key="select_usuario")
-    
-    password = st.text_input("Contraseña:", type="password", key="pass_input")
-    
-    # Botón de Login único
-    if st.button("Ingresar al Portal", key="btn_login"):
-        if usuario_seleccionado != "" and password == "Telser2026":
-            st.session_state.correo_asesor = usuario_seleccionado
-            st.rerun()
-        elif usuario_seleccionado == "":
-            st.warning("Por favor, selecciona un usuario.")
-        else:
-            st.error("Contraseña incorrecta.")
-            
-    st.stop() 
-
-# --- DEFINIR ROL ---
-es_admin = st.session_state.correo_asesor == "ADMIN@SOMOSTELSER.COM"
-
-# --- SIDEBAR (SI YA INICIÓ SESIÓN) ---
-with st.sidebar:
-    if os.path.exists("logo_somostelser.png"):
-        st.image("logo_somostelser.png", use_column_width=True)
-    
-    # Identificador de rol
-    rol = "👑 Admin" if es_admin else "👤 Asesor"
-    st.markdown(f"**{rol}:** `{st.session_state.correo_asesor}`")
-    
-    # Aquí siguen tus Tareas Pendientes...
-
-# --- TAREAS PENDIENTES ---
-    st.markdown("---")
-    st.subheader("🔔 Tareas Pendientes")
     if os.path.exists("crm_sistema_maestro.csv"):
-        df_tasks = pd.read_csv("crm_sistema_maestro.csv")
-        if 'FECHA_SEGUIMIENTO' in df_tasks.columns:
-            df_tasks['FECHA_SEGUIMIENTO'] = pd.to_datetime(df_tasks['FECHA_SEGUIMIENTO'])
-            hoy = pd.Timestamp(date.today())
-            
-            # CAMBIO AQUÍ: Filtramos solo para Cotizado o En proceso de firma
-            pendientes = df_tasks[
-                (df_tasks['FECHA_SEGUIMIENTO'] <= hoy) & 
-                (df_tasks['ESTADO'].isin(['Cotizado', 'En proceso de firma']))
-            ]
-            
-            if not es_admin: 
-                pendientes = pendientes[pendientes['ASESOR'] == st.session_state.correo_asesor]
-            
-            if not pendientes.empty:
-                for _, row in pendientes.iterrows(): 
-                    st.warning(f"📞 {row['CLIENTE']} | {row['TIPO_SEGUIMIENTO']}")
-            else: 
-                st.success("¡Todo al día!")
-                
-    
-        # Identificador de rol
-    
-    if st.button("🚪 Cerrar Sesión"):
-        st.session_state.correo_asesor = None
-        st.rerun()
-
-    st.markdown("---")
-    st.subheader("🤖 Asistente de Ofertas")
-    consulta = st.text_input("Buscar precio:", placeholder="Ej: 500Mbps, 60GB")
-    
-    if consulta:
-        portafolio = {**PLANES_MOVIL, **PLANES_FIJO}
-        res = {k: v for k, v in portafolio.items() if consulta.lower() in k.lower()}
-        if res:
-            seleccion = st.selectbox("Resultados:", list(res.keys()))
-            st.metric(label="Precio Sugerido", value=f"${res[seleccion]:,.0f} COP")
-        else:
-            st.warning("Sin resultados.")
-
-    st.markdown("---")
-    st.subheader("📊 Dashboard")
-    if os.path.exists("crm_sistema_maestro.csv"):
-        try:
-            df = pd.read_csv("crm_sistema_maestro.csv")
+        df_update = pd.read_csv("crm_sistema_maestro.csv")
         
-            # --- FILTRO POR ROL ---
-            if not es_admin and 'ASESOR' in df.columns:
-                df = df[df['ASESOR'] == st.session_state.correo_asesor]
-                
-            if 'DIVISION' in df.columns and not df.empty:
-                st.metric("💰 Ingresos Totales", f"${df['VALOR_TOTAL'].sum():,.0f} COP")
-                st.bar_chart(df['DIVISION'].value_counts())
-                
-                # --- EXPORTAR SOLO PARA ADMIN ---
-                if es_admin:
-                    st.download_button(
-                        label="📥 Exportar CRM a Excel",
-                        data=df.to_csv(index=False).encode('utf-8'),
-                        file_name='CRM_Ventas_SomosTelser.csv',
-                        mime='text/csv'
+        # Parches de seguridad
+        if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "En proceso de firma"
+        if 'ID_VENTA' not in df_update.columns: df_update['ID_VENTA'] = range(1, len(df_update) + 1)
+        if 'CLIENTE' not in df_update.columns: df_update['CLIENTE'] = "Cliente Desconocido"
+        
+        # Filtro de Asesor
+        if not es_admin and 'ASESOR' in df_update.columns:
+            df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
+        else:
+            df_mis_ventas = df_update
+            
+        if not df_mis_ventas.empty:
+            opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
+            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
+            
+            # --- LÓGICA DE ACTUALIZACIÓN CON CORRECCIÓN DE DECIMALES ---
+            if venta_seleccionada:
+                try:
+                    # Corrección: usamos int(float()) para manejar números como "311.0"
+                    id_venta = int(float(venta_seleccionada.split(" - ")[0]))
+                    estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
+                    
+                    st.info(f"📌 Estado Actual: **{estado_actual}**")
+                    
+                    nuevo_estado = st.selectbox(
+                        "Cambiar estado a:", 
+                        ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
+                        key="select_nuevo_estado_tab2"
                     )
-            else:
-                st.caption("Aún no hay ventas registradas.")
-        except: 
-            st.caption("Cargando...")
+
 # ==========================================
 # 3. INTERFAZ Y AGENTE FINANCIERO
 # ==========================================
