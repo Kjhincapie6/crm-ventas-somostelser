@@ -477,6 +477,7 @@ with tab1:
         else:
             st.error("⚠️ Faltan datos obligatorios.")
 # ==========================================
+# ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
 with tab2:
@@ -500,16 +501,14 @@ with tab2:
             opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
             venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
             
-            # --- VALIDACIÓN ROBUSTA CON TRY-EXCEPT ---
-            try:
-                if venta_seleccionada and " - " in venta_seleccionada:
-                    # Extraer ID
+            # --- LÓGICA DE ACTUALIZACIÓN RECUPERADA ---
+            if venta_seleccionada:
+                try:
                     id_venta = int(venta_seleccionada.split(" - ")[0])
                     estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
                     
                     st.info(f"📌 Estado Actual: **{estado_actual}**")
                     
-                    # Lógica de actualización
                     nuevo_estado = st.selectbox(
                         "Cambiar estado a:", 
                         ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
@@ -528,11 +527,8 @@ with tab2:
                         # 3. Éxito
                         st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
                         st.rerun()
-                else:
-                    st.warning("La selección no tiene un formato válido.")
-            except Exception:
-                # Si ocurre cualquier error inesperado, mostramos un mensaje amigable
-                st.info("Selecciona una venta para gestionar su estado.")
+                except Exception:
+                    st.warning("Error al procesar la selección de venta.")
         else:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
