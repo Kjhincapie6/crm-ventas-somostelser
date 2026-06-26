@@ -410,6 +410,9 @@ with tab1:
                 <p style="margin: 5px 0 0 0; font-size: 0.85em;"><i>{random.choice(frases)}</i></p>
             </div>
             """, unsafe_allow_html=True)
+        # ==============================
+        # Documentos cliente
+        # ==============================
 
         st.subheader("📎 Documentos del Cliente")
 
@@ -421,61 +424,28 @@ with tab1:
 
         if archivo_subido:
             st.success(f"📎 {len(archivo_subido)} documento(s) seleccionado(s)")
-
+            
+    # Guardar Venta 
     guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
 
-    if guardar:
-        if n_doc and nombre:
-
-            carpeta_documentos = "documentos_clientes"
-
-            if not os.path.exists(carpeta_documentos):
-                os.makedirs(carpeta_documentos)
-
-            archivos_guardados = []
-
-            if archivo_subido:
-                for archivo_doc in archivo_subido:
-                    nombre_archivo = f"{n_doc}_{archivo_doc.name}"
-                    ruta_archivo = os.path.join(
-                        carpeta_documentos,
-                        nombre_archivo
-                    )
-
-                    with open(ruta_archivo, "wb") as f:
-                        f.write(archivo_doc.getbuffer())
-
-                    archivos_guardados.append(nombre_archivo)
-
-            archivo = "crm_sistema_maestro.csv"
-            df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
-
-            nueva_fila = pd.DataFrame([{
-                'ID_VENTA': len(df_ex) + 1,
-                'ASESOR': st.session_state.correo_asesor,
-                'ESTADO': estado,
-                'DIVISION': div,
-                'NIT': n_doc,
-                'CLIENTE': nombre,
-                'SERVICIO': servicio,
-                'VALOR_TOTAL': valor,
-                'BITACORA': bitacora,
-                'DOCUMENTOS': ";".join(archivos_guardados),
-                'ESTADO_FINANCIERO': (
-                    "APROBADO" if valor >= 35000 else "REVISION"
-                )
-            }])
-
-            pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(
-                archivo,
-                index=False
-            )
-
-            st.success("✅ Venta registrada correctamente.")
-            st.rerun()
-
-        else:
-            st.error("⚠️ Faltan datos obligatorios.")
+if guardar:
+    if n_doc and nombre:
+        # ... (todo tu código de guardado y archivos permanece igual) ...
+        
+        # Guardado en CSV
+        pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
+        
+        st.success("✅ Venta registrada correctamente.")
+        
+        # --- AQUÍ LA LÓGICA DE LIMPIEZA ---
+        # Debes incluir todas las keys que usaste en tus st.text_input, st.selectbox, etc.
+        st.session_state["input_nombre"] = ""  # Ajusta según el key que definiste
+        st.session_state["input_doc"] = ""     # Ajusta según el key que definiste
+        # ... repite para cada campo ...
+        
+        st.rerun() # Esto recargará la página y los campos aparecerán vacíos
+    else:
+        st.error("⚠️ Faltan datos obligatorios.")
 # ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
