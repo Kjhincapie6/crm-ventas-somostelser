@@ -190,21 +190,42 @@ st.title("📡 Portal de Ventas Somos Telser")
 st.subheader("Gestión Inteligente de Contratos B2B")
 
 # --- LAS PESTAÑAS ---
-# Definimos las pestañas base (siempre visibles)
+# 1. Definimos las pestañas base
 nombres_pestanas = ["Registrar Venta", "Actualizar Estado de Venta"]
 
-# Si es administrador, añadimos la tercera
-if st.session_state.get('es_admin', False):
+# 2. Verificación de Administrador (usando el correo para mayor seguridad)
+es_admin = st.session_state.get('correo_asesor') == "ADMIN@SOMOSTELSER.COM"
+
+if es_admin:
     nombres_pestanas.append("Base de Datos")
 
-# Creamos las pestañas dinámicamente
+# 3. Creamos las pestañas dinámicamente
 tabs = st.tabs(nombres_pestanas)
 
-# Asignamos las pestañas a variables para que tu código siga funcionando igual
+# 4. Asignamos variables de forma segura
 tab1 = tabs[0]
 tab2 = tabs[1]
-if st.session_state.get('es_admin', False):
+
+if es_admin:
     tab3 = tabs[2]
+
+# ------------------------------------------
+# USO DE LAS PESTAÑAS (Protegiendo el acceso)
+# ------------------------------------------
+
+with tab1:
+    # ... tu código de registro ...
+    pass
+
+with tab2:
+    # ... tu código de actualización ...
+    pass
+
+if es_admin:
+    with tab3:
+        # AQUÍ VA TODO TU CÓDIGO DEL DASHBOARD
+        st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
+        # ... resto de tu lógica de gráficos ...
 
 # ------------------------------------------
 # 1. DEFINICIÓN DE DATOS (fuera del tab1)
