@@ -232,7 +232,7 @@ if es_admin:
 # ------------------------------------------
 UBICACIONES_COL = {
     "Amazonas": ["Leticia", "Puerto Nariño"],
-    "Antioquia": ["Medellín", "Envigado", "Itagüí", "Bello", "Rionegro", "Sabaneta", "La Estrella", "Caldas"],
+    "Antioquia": ["Medellín", "Envigado", "Itagüí", "Bello", "Rionegro", "Sabaneta", "La Estrella", "Caldas","Retiro"],
     "Arauca": ["Arauca", "Tame", "Saravena"],
     "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia", "Malambo"],
     "Bolívar": ["Cartagena", "Magangué", "Turbaco"],
@@ -531,13 +531,14 @@ with tab2:
 # ==========================================
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ==========================================
-with tab3:
-    st.subheader("Análisis Centralizado")
-    
-    archivo = "crm_sistema_maestro.csv"
-    
-    if os.path.exists(archivo):
-        df = pd.read_csv(archivo)
+if es_admin:
+    with tab3:
+        st.subheader("Análisis Centralizado")
+        
+        archivo = "crm_sistema_maestro.csv"
+        
+        if os.path.exists(archivo):
+            df = pd.read_csv(archivo)
             
         if not df.empty:
             # 1. Métricas Rápidas
