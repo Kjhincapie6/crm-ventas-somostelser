@@ -577,36 +577,32 @@ if es_admin:
             df['ESTADO_NORMALIZADO'] = df['ESTADO'].replace('Instalado', 'Activado')
             df_filtrado = df[df['ESTADO_NORMALIZADO'].isin(['Activado', 'Anulado'])]
             
-           # (Asegúrate de que este código esté dentro de tu bloque 'if es_admin: with tab3:')
 
-st.markdown("#### 📊 Portafolio: Activadas vs Anuladas por Servicio")
+            # (Asegúrate de que este código esté dentro de tu bloque 'if es_admin: with tab3:')
+            st.markdown("#### 📊 Portafolio: Activadas vs Anuladas por Servicio")
 
-# (Asegúrate de que este código esté dentro de tu bloque 'if es_admin: with tab3:')
+            # 1. Primero, creamos df_filtrado normalizando los nombres
+            # (Asegúrate de tener esta línea antes de agrupar)
+            df['ESTADO_NORMALIZADO'] = df['ESTADO'].replace('Instalado', 'Activado')
+            df_filtrado = df[df['ESTADO_NORMALIZADO'].isin(['Activado', 'Anulado'])]
 
-st.markdown("#### 📊 Portafolio: Activadas vs Anuladas por Servicio")
-
-# 1. Primero, creamos df_filtrado normalizando los nombres
-# (Asegúrate de tener esta línea antes de agrupar)
-df['ESTADO_NORMALIZADO'] = df['ESTADO'].replace('Instalado', 'Activado')
-df_filtrado = df[df['ESTADO_NORMALIZADO'].isin(['Activado', 'Anulado'])]
-
-# 2. Tu código de agrupación (¡Está perfecto!)
-portafolio_grouped = df_filtrado.groupby(['PORTAFOLIO', 'ESTADO_NORMALIZADO']).size().reset_index(name='CANTIDAD')
+            # 2. Tu código de agrupación (¡Está perfecto!)
+            portafolio_grouped = df_filtrado.groupby(['PORTAFOLIO', 'ESTADO_NORMALIZADO']).size().reset_index(name='CANTIDAD')
             
-# 3. Creación del gráfico
-chart2 = alt.Chart(portafolio_grouped).mark_bar().encode(
-    x=alt.X('PORTAFOLIO:N', title="Servicio"),
-    xOffset='ESTADO_NORMALIZADO:N',
-    y='CANTIDAD:Q',
-    color=alt.Color('ESTADO_NORMALIZADO:N', 
-                    legend=alt.Legend(title="Estado"),
-                    scale=alt.Scale(domain=['Activado', 'Anulado'], 
-                                    range=['#00a0e3', '#231f20'])),
-    tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD'] # Opcional: para ver los datos al pasar el mouse
-).properties(height=300)
+            # 3. Creación del gráfico
+            chart2 = alt.Chart(portafolio_grouped).mark_bar().encode(
+                x=alt.X('PORTAFOLIO:N', title="Servicio"),
+                xOffset='ESTADO_NORMALIZADO:N',
+                y='CANTIDAD:Q',
+                color=alt.Color('ESTADO_NORMALIZADO:N', 
+                                legend=alt.Legend(title="Estado"),
+                                scale=alt.Scale(domain=['Activado', 'Anulado'], 
+                                                range=['#00a0e3', '#231f20'])),
+                tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD'] # Opcional: para ver los datos al pasar el mouse
+                ).properties(height=300)
 
-# 4. LA LÍNEA MÁS IMPORTANTE: Mostrar el gráfico en Streamlit
-st.altair_chart(chart2, use_container_width=True)
+            # 4. LA LÍNEA MÁS IMPORTANTE: Mostrar el gráfico en Streamlit
+            st.altair_chart(chart2, use_container_width=True)
                 # Tooltip para ver los detalles al pasar el mouse
                 tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD']
             ).properties(height=300)
