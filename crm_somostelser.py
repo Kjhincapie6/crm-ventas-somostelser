@@ -436,19 +436,25 @@ with tab2:
     else:
         df_update = pd.read_csv("crm_sistema_maestro.csv")
         
-        # Parches de seguridad
-        if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "En proceso de firma"
-        if 'ID_VENTA' not in df_update.columns: df_update['ID_VENTA'] = range(1, len(df_update) + 1)
-        if 'CLIENTE' not in df_update.columns: df_update['CLIENTE'] = "Cliente Desconocido"
-        df_update["ID_VENTA"] = df_update["ID_VENTA"].astype(int)
+        # --- RED DE SEGURIDAD: CREAR COLUMNAS SI NO EXISTEN ---
+        columnas_requeridas = ['ESTADO', 'ID_VENTA', 'CLIENTE', 'ASESOR']
+        for col in columnas_requeridas:
+            if col not in df_update.columns:
+                df_update[col] = "Sin dato"
+        
+        # Parches de seguridad y formato
+        df_update["ID_VENTA"] = df_update["ID_VENTA"].astype(float).astype(int)
 
         # Filtro por asesor
-        df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor] if not es_admin else df_update
+        if not es_admin:
+            df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
+        else:
+            df_mis_ventas = df_update
 
         if df_mis_ventas.empty:
             st.warning("No tienes ventas registradas para actualizar.")
         else:
-            opciones_ventas = df_mis_ventas["ID_VENTA"].astype(str) + " - " + df_mis_ventas["CLIENTE"]
+            opciones_ventas = df_mis_ventas["ID_VENTA"].astype(str) + " - " + df_mis_ventas["CLIENTE"].astype(str)
             venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
 
             if venta_seleccionada:
