@@ -7,9 +7,7 @@ import altair as alt
 from datetime import date
 
 # DEBE IR AQUÍ, ANTES DE CUALQUIER OTRA COSA
-st.set_page_config(page_title="Portal de Ventas Somos Telser", layout="wide")
-
-# ... luego el resto de tu código
+st.write("Si ves este mensaje, el problema no es el set_page_config, sino otro comando que se está ejecutando antes.")
 
 # ==========================================
 # TELEGRAM
