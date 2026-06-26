@@ -192,19 +192,6 @@ st.subheader("Gestión Inteligente de Contratos B2B")
 # --- LAS PESTAÑAS ---
 tab1, tab2, tab3 = st.tabs(["📝 Registrar Venta", "🔄 Actualizar Estado de Venta", "📊 Base de Datos"])
 
-st.write("Si ves este mensaje, el problema no es el set_page_config, sino otro comando que se está ejecutando antes.")
-st.markdown("""
-    <style>
-    :root { --brand-blue: #00a0e3; --brand-black: #231f20; }
-    .stSelectbox > div[data-baseweb="select"] > div:focus-within,
-    .stTextInput > div > div > input:focus {
-        border-color: var(--brand-blue) !important;
-        box-shadow: 0 0 5px var(--brand-blue) !important;
-    }
-    h1, h2, h3 { color: var(--brand-black) !important; }
-    </style>
-""", unsafe_allow_html=True)
-
 # ------------------------------------------
 # 1. DEFINICIÓN DE DATOS (fuera del tab1)
 # ------------------------------------------
