@@ -252,8 +252,8 @@ with c2:
         lineas = st.number_input(titulo_cantidad, min_value=1, value=1, key="lineas_tab1")
             
         # El popover ahora queda contenido dentro de este bloque, sin mover nada más
-        if div == "Móvil":
-            with st.popover("📱 Configurar Líneas", use_container_width=True):
+    if div == "Móvil":
+        with st.popover("📱 Configurar Líneas", use_container_width=True):
                 # ... campos del popover ...
                 # ... campos del popover ...
         
