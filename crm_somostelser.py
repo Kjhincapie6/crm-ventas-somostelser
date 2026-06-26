@@ -233,58 +233,38 @@ UBICACIONES_COL = {
 # ------------------------------------------
 # 2. PESTAÑA 1 INTEGRADA
 # ------------------------------------------
-c1, c2 = st.columns([1, 1], gap="large") # gap="large" da espacio entre columnas
+with tab1:
+    div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
 
-with c1:
-    st.markdown("### 🏢 Datos del Cliente")
-    with st.container(border=True): # Borde para fijar la estructura
-        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CC", "CE", "PPT"], key="t_doc_tab1")
-        n_doc = st.text_input("Documento:", key="n_doc_tab1")
-        nombre = st.text_input("Razón Social/Nombre:", key="nombre_tab1")
-        dir = st.text_input("Dirección:", key="dir_tab1")
-        # ... el resto de tus campos aquí ...
+    c1, c2 = st.columns(2)
 
-with c2:
-    st.markdown("### 📊 Estado y Gestión")
-    with st.container(border=True): # Borde para que todo quede alineado
-        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Activado", "Anulado"], key="estado_tab1")
-        servicio = st.selectbox("Servicio:", list(tarifas.keys()), key="servicio_tab1")
-        lineas = st.number_input(titulo_cantidad, min_value=1, value=1, key="lineas_tab1")
-            
-        # El popover ahora queda contenido dentro de este bloque, sin mover nada más
-    if div == "Móvil":
-        with st.popover("📱 Configurar Líneas", use_container_width=True):
-                # ... campos del popover ...
-                # ... campos del popover ...
+    with c1:
+        st.subheader("🏢 Datos del Cliente")
+        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
+        n_doc = st.text_input("Número de Documento:")
+        nombre = st.text_input("Razón Social o Nombre:")
+        dir = st.text_input("Dirección:")
+        barrio = st.text_input("Barrio:")
         
-        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], key="estado_tab1")
-        servicio = st.selectbox("Servicio:", list(tarifas.keys()) if 'tarifas' in locals() else ["Plan Tigo"], key="servicio_tab1")
+        # --- SELECTORES CON BÚSQUEDA PREDICTIVA ---
+        depto = st.selectbox(
+            "Departamento:", 
+            options=sorted(list(UBICACIONES_COL.keys())),
+            index=None, 
+            placeholder="Escribe para buscar departamento..."
+        )
         
-        # --- CIERRE MANUAL ---
-        if st.button("💾 Finalizar y Guardar Venta", key="btn_finalizar_tab1", use_container_width=True):
-            if n_doc and nombre:
-                # Aquí guardamos todo en el CSV
-                archivo = "crm_sistema_maestro.csv"
-                df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
-                
-                nueva_fila = pd.DataFrame([{
-                    'ID_VENTA': len(df_ex) + 1,
-                    'CLIENTE': nombre,
-                    'NIT': n_doc,
-                    'TIPO_PERSONA': tipo_persona,
-                    'DIVISION': div,
-                    'CANTIDAD': datos_moviles["cantidad"],
-                    'TIPO_GESTION': datos_moviles["tipo"],
-                    'OPERADOR': datos_moviles["operador"],
-                    'NUM_LINEA': datos_moviles["num_linea"],
-                    'ESTADO': estado
-                }])
-                
-                pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
-                st.balloons()
-                st.success("✅ Venta registrada correctamente con todos los datos.")
-            else:
-                st.error("⚠️ Debes ingresar al menos el documento y nombre del titular.")
+        # Lógica para el selector de municipio
+        if depto:
+            muni = st.selectbox(
+                "Municipio:", 
+                options=sorted(UBICACIONES_COL[depto]),
+                index=None,
+                placeholder="Escribe para buscar municipio..."
+            )
+        else:
+            # Mostramos un selector vacío y deshabilitado para mantener el orden visual
+            muni = st.selectbox("Municipio:", options=[], disabled=True, placeholder="Selecciona primero un depto")
         
         # ------------------------------------------
         
