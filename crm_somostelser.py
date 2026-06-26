@@ -429,22 +429,6 @@ with tab1:
 # PESTAÑA 1: Botn de guardado  y limpieza del panel 
 # ==================================================
 # 2. El botón de guardar
-if st.button("💾 Guardar Venta", use_container_width=True):
-    if n_doc and nombre:
-        # ... (Tu lógica de archivos y guardado en CSV que ya tienes) ...
-        # ... pd.concat([df_ex, nueva_fila], ...).to_csv(...) ...
-
-        st.success("✅ Venta registrada correctamente.")
-        
-        # 3. AQUÍ ES DONDE SE LIMPIA: Reseteamos los valores en session_state
-        st.session_state["nombre_input"] = ""
-        st.session_state["doc_input"] = ""
-        # Repite esta línea para cada uno de tus otros campos (servicio, valor, etc.)
-        
-        # 4. Forzamos una actualización visual sin perder el estado de otras cosas
-        st.rerun()
-    else:
-        st.error("⚠️ Faltan datos obligatorios.")
 # ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
@@ -469,10 +453,10 @@ with tab2:
             opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
             venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
             
-            # --- LÓGICA DE ACTUALIZACIÓN CON CORRECCIÓN DE DECIMALES ---
-            if venta_seleccionada:
+            # --- LÓGICA DE ACTUALIZACIÓN ---
+            if venta_seleccionada and " - " in venta_seleccionada:
                 try:
-                    # Corrección: usamos int(float()) para manejar números como "311.0"
+                    # Corrección: int(float()) para evitar errores con decimales (ej: 311.0)
                     id_venta = int(float(venta_seleccionada.split(" - ")[0]))
                     estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
                     
@@ -496,8 +480,10 @@ with tab2:
                         # 3. Éxito
                         st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
                         st.rerun()
-                except Exception as e:
-                    st.warning("Error al procesar la selección de venta. Asegúrate de que el ID sea correcto.")
+                except Exception:
+                    st.warning("Error al procesar la selección de venta.")
+            else:
+                st.warning("Selecciona una venta válida.")
         else:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
