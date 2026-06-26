@@ -624,21 +624,24 @@ if es_admin:
             else:
                 st.info("No hay datos suficientes para generar un análisis automático.")
             
-            # 3. Dataframe interactivo
-            st.markdown("### 📋 Base de Datos Somostelser")
-            st.dataframe(df, use_container_width=True)
-
+# ==========================================
+# GESTIÓN DE ANÁLISIS CENTRALIZADO (Solo Admin)
+# ==========================================
 if es_admin:
-    with tab3: # O simplemente añádelo donde prefieras
+    with tab3:
         st.subheader("📊 Base de Datos Actual")
-        # ... resto de tu código
         
+        # Fíjate cómo este 'if' y su 'else' están en la misma línea vertical
         if os.path.exists("crm_sistema_maestro.csv"):
             df_verificar = pd.read_csv("crm_sistema_maestro.csv")
-            st.dataframe(df_verificar) # Esto muestra la tabla completa
-        
-        # Botón para descargar la base de datos y revisarla en Excel
-        csv = df_verificar.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Descargar Base de Datos (CSV)", data=csv, file_name="crm_respaldo.csv")
-    else:
-        st.warning("El archivo 'crm_sistema_maestro.csv' aún no ha sido creado.")
+            
+            # 1. Mostramos la tabla interactiva una sola vez
+            st.markdown("### 📋 Base de Datos Somostelser")
+            st.dataframe(df_verificar, use_container_width=True)
+            
+            # 2. Botón para descargar la base de datos y revisarla en Excel
+            csv = df_verificar.to_csv(index=False).encode('utf-8')
+            st.download_button("📥 Descargar Base de Datos (CSV)", data=csv, file_name="crm_respaldo.csv")
+            
+        else: # <--- Este else está perfectamente alineado con el if os.path.exists
+            st.warning("El archivo 'crm_sistema_maestro.csv' aún no ha sido creado.")
