@@ -272,23 +272,29 @@ with tab1:
         movil_cli = st.text_input("Contacto autorizado:")
         tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
-    with c2:
-       st.subheader("📊 Estado y Plan")
-        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
-        bitacora = st.text_area("📝 Notas / Bitácora:")
-        
-        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
-        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
-        # 🔄 Título dinámico: "Líneas" para Móvil, "Cantidad" para Fijo
-        titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
-        lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
-        # --- NUEVA LÓGICA: LÍNEA MÓVIL PARA FULL TIGO ---
-        plan_movil_asociado = None
-        if div == "Fijo" and "Full Tigo" in servicio:
+  with c2:
+    st.subheader("📊 Estado y Plan")
+    estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+    bitacora = st.text_area("📝 Notas / Bitácora:")
+    
+    tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
+    servicio = st.selectbox("Servicio:", list(tarifas.keys()))
+    
+    # 🔄 Título dinámico: "Líneas" para Móvil, "Cantidad" para Fijo
+    titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
+    lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
+    
+    # --- NUEVA LÓGICA: LÍNEA MÓVIL PARA FULL TIGO ---
+    plan_movil_asociado = None
+    if div == "Fijo" and "Full Tigo" in servicio:
         incluye_movil = st.checkbox("📱 ¿Incluye línea móvil?")
-            if incluye_movil:
-                plan_movil_asociado = "Plan Datos Tigo Empresarial 6.12 (Ilim GB)"
-                st.info(f"✨ Plan móvil asociado: **{plan_movil_asociado}**")
+        if incluye_movil:
+            plan_movil_asociado = "Plan Datos Tigo Empresarial 6.12 (Ilim GB)"
+            st.info(f"✨ Plan móvil asociado: **{plan_movil_asociado}**")
+    
+    # ------------------------------------------------
+    # (AQUÍ DEBE SEGUIR INMEDIATAMENTE TU CÁLCULO FINANCIERO DINÁMICO)
+    # dcto = 30 if lineas >= 9 else ...
         
         st.subheader("📊 Estado y Plan")
         estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
