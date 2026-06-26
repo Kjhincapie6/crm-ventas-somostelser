@@ -579,6 +579,7 @@ with tab2:
                 except Exception as e:
                     st.error(f"Error al procesar: {e}")
 # ==========================================
+# ==========================================
 # PESTAÑA 3: DASHBOARD Y GESTIÓN DE DATOS (SEGURIDAD ADMIN)
 # ==========================================
 if st.session_state.get('correo_asesor') == "ADMIN@SOMOSTELSER.COM":
