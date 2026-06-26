@@ -285,7 +285,10 @@ with tab1:
         
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
         servicio = st.selectbox("Servicio:", list(tarifas.keys()))
-        lineas = st.number_input("Líneas:", min_value=1, value=1)
+        
+        # 🔄 Título dinámico: Si es Móvil dice "Líneas:", si no, dice "Cantidad:"
+        titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
+        lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
         
         # CÁLCULO FINANCIERO DINÁMICO
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
