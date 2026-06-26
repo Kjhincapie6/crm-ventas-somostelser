@@ -628,9 +628,10 @@ if es_admin:
             st.markdown("### 📋 Base de Datos Somostelser")
             st.dataframe(df, use_container_width=True)
 
-wif es_admin:
+if es_admin:
     with tab3: # O simplemente añádelo donde prefieras
         st.subheader("📊 Base de Datos Actual")
+        # ... resto de tu código
         
         if os.path.exists("crm_sistema_maestro.csv"):
             df_verificar = pd.read_csv("crm_sistema_maestro.csv")
