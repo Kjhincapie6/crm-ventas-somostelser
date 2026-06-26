@@ -497,6 +497,27 @@ with tab2:
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ==========================================
 with tab3:
+    # 🔐 Validación de acceso exclusivo para administradores
+    if 'es_admin' in st.session_state and st.session_state.es_admin:
+        st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
+        
+        archivo = "crm_sistema_maestro.csv"
+        if os.path.exists(archivo):
+            df = pd.read_csv(archivo)
+            # ... (aquí va todo tu código de gráficos y métricas que ya tienes) ...
+            
+            # Verificación adicional de la base de datos
+            st.subheader("📋 Base de Datos Maestro")
+            st.dataframe(df, use_container_width=True)
+            
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button("📥 Descargar Base de Datos", data=csv, file_name="crm_respaldo.csv")
+        else:
+            st.warning("El archivo de datos no ha sido creado.")
+            
+    else:
+        # Mensaje para usuarios que no son admin
+        st.error("🚫 Acceso denegado: Esta sección es exclusiva para administradores.")
     st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
     
     archivo = "crm_sistema_maestro.csv"
