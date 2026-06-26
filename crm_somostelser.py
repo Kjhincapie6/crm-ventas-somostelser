@@ -274,35 +274,34 @@ with tab1:
 
     with c2:
         st.subheader("👤 Representante Legal")
-        nom_rep = st.text_input("Nombre Rep. Legal:", key="nom_rep_tab1")
-        cc_rep = st.text_input("Cédula Rep. Legal:", key="cc_rep_tab1")
-        mail_rep = st.text_input("Correo Rep. Legal:", key="mail_rep_tab1")
-        tel_rep = st.text_input("Móvil Rep. Legal:", key="tel_rep_tab1")
+        nom_rep = st.text_input("Nombre Rep. Legal:")
+        cc_rep = st.text_input("Cédula Rep. Legal:")
+        mail_rep = st.text_input("Correo Rep. Legal:")
+        tel_rep = st.text_input("Móvil Rep. Legal:")
         
         st.subheader("📊 Estado y Plan")
-        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], key="estado_tab1")
-        bitacora = st.text_area("📝 Notas / Bitácora:", key="bitacora_tab1")
+        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+        bitacora = st.text_area("📝 Notas / Bitácora:")
         
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
-        servicio = st.selectbox("Servicio:", list(tarifas.keys()), key="servicio_tab1")
+        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
         
-        # 1. Definimos la variable ANTES de usarla
+        # 🔄 Título dinámico: Si es Móvil dice "Líneas:", si no, dice "Cantidad:"
         titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
-        lineas = st.number_input(titulo_cantidad, min_value=1, value=1, key="lineas_tab1")
-
-        # --- LÓGICA FULL TIGO ---
+        lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
+        # --- NUEVA LÓGICA: LÍNEA MÓVIL PARA FULL TIGO ---
+        plan_movil_asociado = None
         if div == "Fijo" and "Full Tigo" in servicio:
-            incluye_movil = st.checkbox("📱 ¿Incluye línea móvil?", key="chk_full_tigo_tab1")
+            incluye_movil = st.checkbox("📱 ¿Incluye línea móvil?")
             if incluye_movil:
                 plan_movil_asociado = "Plan Datos Tigo Empresarial 6.12 (Ilim GB)"
                 st.info(f"✨ Plan móvil asociado: **{plan_movil_asociado}**")
         
-        # 2. Ahora sí hacemos el cálculo (lineas ya está definida arriba)
+        # CÁLCULO FINANCIERO DINÁMICO
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
         
-        if valor > 0:
-            st.markdown(f'<div style="background-color: #e1f5fe; padding: 10px; border-radius: 5px;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</div>', unsafe_allow_html=True) # PANEL DE VALOR COMERCIAL
+        # PANEL DE VALOR COMERCIAL
         frases = [
             "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
             "💎 La calidad de tu servicio es nuestra mayor ventaja.",
