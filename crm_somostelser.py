@@ -603,11 +603,7 @@ if es_admin:
             
             # 4. Mostrar el gráfico en Streamlit
             st.altair_chart(chart2, use_container_width=True)
-                # Tooltip para ver los detalles al pasar el mouse
-                tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD']
-            ).properties(height=300)
-            
-            st.altair_chart(chart2, use_container_width=True)
+    
             # --- PANEL DE ANÁLISIS AUTOMÁTICO ---
             st.markdown("### 💡 Análisis Crítico y Mejoras")
             
