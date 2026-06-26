@@ -500,22 +500,14 @@ with tab2:
             opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
             venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
             
-        # Línea 505: Tu validación
-        if venta_seleccionada and " - " in venta_seleccionada:
-            # TODO ESTO debe ir desplazado a la derecha (4 espacios)
-            id_venta = int(venta_seleccionada.split(" - ")[0])
-            estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
-        
-            st.info(f"📌 Estado Actual: **{estado_actual}**")
-        
-        # El resto de tu lógica (como el selectbox de nuevo_estado) 
-        # también debe estar aquí adentro
-            else:
-                st.warning("La selección no tiene un formato válido.")
+            # Validación de selección
+            if venta_seleccionada and " - " in venta_seleccionada:
+                id_venta = int(venta_seleccionada.split(" - ")[0])
                 estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
                 
                 st.info(f"📌 Estado Actual: **{estado_actual}**")
                 
+                # --- Lógica de actualización (Dentro del IF) ---
                 nuevo_estado = st.selectbox(
                     "Cambiar estado a:", 
                     ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
@@ -534,6 +526,8 @@ with tab2:
                     # 3. Éxito
                     st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
                     st.rerun()
+            else:
+                st.warning("La selección no tiene un formato válido.")
         else:
             st.warning("No tienes ventas registradas para actualizar.")
     else:
