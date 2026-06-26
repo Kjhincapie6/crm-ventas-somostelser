@@ -502,10 +502,7 @@ with tab2:
                         st.divider()
 
                         # -------- BOTÓN --------
-                        guardar = st.button(
-                            "💾 Guardar Venta",
-                            key="btn_guardar_venta"
-                        )
+                        guardar = st.button("💾 Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
 
                         if guardar:
 
