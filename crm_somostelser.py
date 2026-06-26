@@ -428,14 +428,6 @@ with tab1:
 # ==================================================
 # PESTAÑA 1: Botn de guardado  y limpieza del panel 
 # ==================================================
-
-# --- PESTAÑA 1: INGRESO DE VENTA ---
-
-# 1. Asegúrate de definir tus campos así para que funcionen con el reseteo:
-nombre = st.text_input("Razón Social o Nombre:", value=st.session_state.get("nombre_input", ""), key="nombre_input")
-n_doc = st.text_input("Número de Documento:", value=st.session_state.get("doc_input", ""), key="doc_input")
-# ... (define aquí el resto de tus campos usando value=st.session_state.get("key", "") y key="key")
-
 # 2. El botón de guardar
 if st.button("💾 Guardar Venta", use_container_width=True):
     if n_doc and nombre:
