@@ -395,58 +395,6 @@ with tab1:
 # ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
-with tab2:
-    st.subheader("🔄 Actualizar Seguimiento de Venta")
-    
-    if os.path.exists("crm_sistema_maestro.csv"):
-        df_update = pd.read_csv("crm_sistema_maestro.csv")
-        
-        # Parches de seguridad
-        if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "En proceso de firma"
-        if 'ID_VENTA' not in df_update.columns: df_update['ID_VENTA'] = range(1, len(df_update) + 1)
-        if 'CLIENTE' not in df_update.columns: df_update['CLIENTE'] = "Cliente Desconocido"
-        
-        # Filtro de Asesor
-        if not es_admin and 'ASESOR' in df_update.columns:
-            df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
-        else:
-            df_mis_ventas = df_update
-            
-        if not df_mis_ventas.empty:
-            opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
-            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
-            
-            if venta_seleccionada:
-                id_venta = int(venta_seleccionada.split(" - ")[0])
-                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
-                
-                st.info(f"📌 Estado Actual: **{estado_actual}**")
-                
-                nuevo_estado = st.selectbox(
-                    "Cambiar estado a:", 
-                    ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
-                    key="select_nuevo_estado_tab2"
-                )
-                
-                if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2"):
-                    # 1. Guardar en CSV
-                    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
-                    df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                    
-                    # 2. Notificar Telegram
-                    mensaje = f"✅ Venta {id_venta} actualizada.\nNuevo estado: {nuevo_estado}"
-                    enviar_telegram(mensaje)
-                    
-                    # 3. Éxito
-                    st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
-                    st.rerun()
-        else:
-            st.warning("No tienes ventas registradas para actualizar.")
-    else:
-        st.info("Aún no hay base de datos creada.")
-# ==========================================
-# PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
-# ==========================================
 with tab3:
     st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
     
@@ -459,52 +407,55 @@ with tab3:
             # 1. Métricas Rápidas
             c1, c2, c3 = st.columns(3)
             c1.metric("Total Registros", len(df))
+            
+            # Ajuste: usamos 'Instalado' que es lo que aparece en tu captura
             instaladas = len(df[df['ESTADO'] == 'Instalado'])
             c2.metric("Ventas Instaladas", instaladas)
+            
             fijos = len(df[df['PORTAFOLIO'] == 'FIJO'])
             moviles = len(df[df['PORTAFOLIO'] == 'MOVIL'])
             c3.metric("Fijo vs Móvil", f"{fijos} | {moviles}")
             
             st.divider()
             
-            # 2. Gráficos
-            col1, col2 = st.columns(2)
+            # --- GRÁFICOS APILADOS (UNO DEBAJO DEL OTRO) ---
             
-            with col1:
-                st.markdown("#### 📈 Ventas por Estado")
-                estado_data = df['ESTADO'].value_counts().reset_index()
-                estado_data.columns = ['ESTADO', 'CANTIDAD']
-                chart1 = alt.Chart(estado_data).mark_bar(color='#00a0e3').encode(
-                    x=alt.X('ESTADO', sort='-y'),
-                    y='CANTIDAD'
-                )
-                st.altair_chart(chart1, use_container_width=True)
-                
-            with col2:
-                st.markdown("#### 📊 Portafolio: Activadas vs Anuladas")
-                # Filtramos solo Activado y Anulado
-                df_filtrado = df[df['ESTADO'].isin(['Activado', 'Anulado'])]
-                # Agrupamos por Portafolio y Estado
-                portafolio_grouped = df_filtrado.groupby(['PORTAFOLIO', 'ESTADO']).size().reset_index(name='CANTIDAD')
-                
-                # Gráfico de barras agrupadas
-                chart2 = alt.Chart(portafolio_grouped).mark_bar().encode(
-                    x='ESTADO:N',
-                    xOffset='ESTADO:N',
-                    y='CANTIDAD:Q',
-                    color=alt.Color('ESTADO:N', scale=alt.Scale(domain=['Activado', 'Anulado'], range=['#00a0e3', '#231f20'])),
-                    column=alt.Column('PORTAFOLIO:N', header=alt.Header(titleOrient='bottom', labelOrient='bottom'))
-                ).properties(width=100)
-                
-                st.altair_chart(chart2, use_container_width=True)
+            # Gráfico 1: Ventas por Estado
+            st.markdown("#### 📈 Ventas por Estado")
+            estado_data = df['ESTADO'].value_counts().reset_index()
+            estado_data.columns = ['ESTADO', 'CANTIDAD']
+            
+            chart1 = alt.Chart(estado_data).mark_bar(color='#00a0e3').encode(
+                x=alt.X('ESTADO', sort='-y'),
+                y='CANTIDAD'
+            )
+            st.altair_chart(chart1, use_container_width=True)
+            
+            st.markdown("---") # Divisor sutil entre gráficos
+            
+            # Gráfico 2: Portafolio (Activadas vs Anuladas)
+            st.markdown("#### 📊 Portafolio: Activadas vs Anuladas")
+            
+            # Normalizamos nombres (usando 'Instalado' como el nombre real de Activado)
+            # Ajusta 'Instalado' si en tu CSV el valor es exactamente 'Activado'
+            df['ESTADO_NORMALIZADO'] = df['ESTADO'].replace('Instalado', 'Activado')
+            df_filtrado = df[df['ESTADO_NORMALIZADO'].isin(['Activado', 'Anulado'])]
+            
+            portafolio_grouped = df_filtrado.groupby(['PORTAFOLIO', 'ESTADO_NORMALIZADO']).size().reset_index(name='CANTIDAD')
+            
+            chart2 = alt.Chart(portafolio_grouped).mark_bar().encode(
+                x=alt.X('ESTADO_NORMALIZADO:N', title="Estado"),
+                xOffset='ESTADO_NORMALIZADO:N',
+                y='CANTIDAD:Q',
+                color=alt.Color('ESTADO_NORMALIZADO:N', 
+                                scale=alt.Scale(domain=['Activado', 'Anulado'], 
+                                                range=['#00a0e3', '#231f20'])),
+                column=alt.Column('PORTAFOLIO:N', title=None)
+            )
+            st.altair_chart(chart2, use_container_width=True)
             
             st.divider()
             
             # 3. Dataframe interactivo
             st.markdown("### 📋 Base de Datos Somostelser")
             st.dataframe(df, use_container_width=True)
-            
-        else:
-            st.warning("El archivo CSV no tiene datos.")
-    else:
-        st.error(f"No se encuentra el archivo {archivo}.")
