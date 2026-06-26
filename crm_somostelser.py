@@ -274,7 +274,6 @@ with tab1:
 
         st.subheader("⚙️ Gestión Técnica") 
         # --- VENTANA FLOTANTE (POPOVER) ---
-        # Solo se activa si la división es MÓVIL
         datos_moviles = {"tipo": "N/A", "op": "N/A", "num": "N/A", "cant": 1}
        # Asegúrate de que esta línea esté alineada con el código de arriba
     if 'lista_lineas' not in st.session_state:
