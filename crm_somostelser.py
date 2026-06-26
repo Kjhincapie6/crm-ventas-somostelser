@@ -433,28 +433,32 @@ with tab3:
             
             st.markdown("---") # Divisor sutil entre gráficos
             
-            # Gráfico 2: Portafolio (Activadas vs Anuladas)
-            st.markdown("#### 📊 Portafolio: Activadas vs Anuladas")
+            # Gráfico 2: Portafolio Agrupado (Fijo/Móvil + Activado/Anulado)
+            st.markdown("#### 📊 Portafolio: Activadas vs Anuladas por Servicio")
             
-            # Normalizamos nombres (usando 'Instalado' como el nombre real de Activado)
-            # Ajusta 'Instalado' si en tu CSV el valor es exactamente 'Activado'
+            # Normalizamos nombres
             df['ESTADO_NORMALIZADO'] = df['ESTADO'].replace('Instalado', 'Activado')
             df_filtrado = df[df['ESTADO_NORMALIZADO'].isin(['Activado', 'Anulado'])]
             
+            # Agrupamos por ambos para tener la relación exacta
             portafolio_grouped = df_filtrado.groupby(['PORTAFOLIO', 'ESTADO_NORMALIZADO']).size().reset_index(name='CANTIDAD')
             
             chart2 = alt.Chart(portafolio_grouped).mark_bar().encode(
-                x=alt.X('ESTADO_NORMALIZADO:N', title="Estado"),
+                # En el eje X ponemos ambos: Portafolio y Estado
+                x=alt.X('PORTAFOLIO:N', title="Servicio"),
+                # xOffset separa las barras dentro de cada Servicio
                 xOffset='ESTADO_NORMALIZADO:N',
                 y='CANTIDAD:Q',
+                # El color indica si es Activado o Anulado
                 color=alt.Color('ESTADO_NORMALIZADO:N', 
+                                legend=alt.Legend(title="Estado"),
                                 scale=alt.Scale(domain=['Activado', 'Anulado'], 
                                                 range=['#00a0e3', '#231f20'])),
-                column=alt.Column('PORTAFOLIO:N', title=None)
-            )
-            st.altair_chart(chart2, use_container_width=True)
+                # Tooltip para ver los detalles al pasar el mouse
+                tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD']
+            ).properties(height=300)
             
-            st.divider()
+            st.altair_chart(chart2, use_container_width=True)
             
             # 3. Dataframe interactivo
             st.markdown("### 📋 Base de Datos Somostelser")
