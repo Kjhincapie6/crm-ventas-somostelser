@@ -579,93 +579,57 @@ with tab2:
                 except Exception as e:
                     st.error(f"Error al procesar: {e}")
 # ==========================================
-# PESTAÑA 3: DASHBOARD Y GESTIÓN DE DATOS
+# PESTAÑA 3: DASHBOARD Y GESTIÓN DE DATOS (SEGURIDAD ADMIN)
 # ==========================================
-with tab3:
-    st.subheader("📊 Gestión de Análisis Centralizado")
-    
-    archivo = "crm_sistema_maestro.csv"
-    
-    if os.path.exists(archivo):
-        df = pd.read_csv(archivo)
+if st.session_state.get('correo_asesor') == "ADMIN@SOMOSTELSER.COM":
+    with tab3:
+        st.subheader("📊 Gestión de Análisis Centralizado")
         
-        if not df.empty:
-            # 1. Métricas Rápidas
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Total Registros", len(df))
+        archivo = "crm_sistema_maestro.csv"
+        
+        if os.path.exists(archivo):
+            df = pd.read_csv(archivo)
             
-            # Ajuste de seguridad: verificar columnas
-            if 'ESTADO' in df.columns:
-                instaladas = len(df[df['ESTADO'] == 'Instalado'])
-                c2.metric("Ventas Instaladas", instaladas)
-            
-            if 'PORTAFOLIO' in df.columns:
-                fijos = len(df[df['PORTAFOLIO'] == 'FIJO'])
-                moviles = len(df[df['PORTAFOLIO'] == 'MOVIL'])
-                c3.metric("Fijo vs Móvil", f"{fijos} | {moviles}")
-            
-            st.divider()
-            
-            # 2. Gráficos
-            st.markdown("#### 📈 Ventas por Estado")
-            estado_data = df['ESTADO'].value_counts().reset_index()
-            estado_data.columns = ['ESTADO', 'CANTIDAD']
-            
-            chart1 = alt.Chart(estado_data).mark_bar(color='#00a0e3').encode(
-                x=alt.X('ESTADO', sort='-y'),
-                y='CANTIDAD'
-            )
-            st.altair_chart(chart1, use_container_width=True)
-            
-            st.markdown("---")
-            
-            st.markdown("#### 📊 Portafolio: Activadas vs Anuladas por Servicio")
-            df['ESTADO_NORMALIZADO'] = df['ESTADO'].replace('Instalado', 'Activado')
-            df_filtrado = df[df['ESTADO_NORMALIZADO'].isin(['Activado', 'Anulado'])]
-            
-            if not df_filtrado.empty and 'PORTAFOLIO' in df_filtrado.columns:
-                portafolio_grouped = df_filtrado.groupby(['PORTAFOLIO', 'ESTADO_NORMALIZADO']).size().reset_index(name='CANTIDAD')
+            if not df.empty:
+                # --- 1. MÉTRICAS ---
+                c1, c2, c3 = st.columns(3)
+                c1.metric("Total Registros", len(df))
                 
-                chart2 = alt.Chart(portafolio_grouped).mark_bar().encode(
-                    x=alt.X('PORTAFOLIO:N', title="Servicio"),
-                    xOffset='ESTADO_NORMALIZADO:N',
-                    y='CANTIDAD:Q',
-                    color=alt.Color('ESTADO_NORMALIZADO:N', 
-                                    legend=alt.Legend(title="Estado"),
-                                    scale=alt.Scale(domain=['Activado', 'Anulado'], 
-                                                    range=['#00a0e3', '#231f20'])),
-                    tooltip=['PORTAFOLIO', 'ESTADO_NORMALIZADO', 'CANTIDAD']
-                ).properties(height=300)
-                st.altair_chart(chart2, use_container_width=True)
-            
-            # 3. Análisis Crítico
-            st.markdown("### 💡 Análisis Crítico y Mejoras")
-            total_ventas = len(df_filtrado)
-            if total_ventas > 0:
-                tasa_anulacion = len(df[df['ESTADO'] == 'Anulado']) / len(df) * 100
-                c_a1, c_a2 = st.columns(2)
-                with c_a1:
-                    st.markdown("**Observaciones:**")
-                    if tasa_anulacion > 20:
-                        st.warning(f"⚠️ Tasa de anulación alta ({tasa_anulacion:.1f}%).")
-                    else:
-                        st.success("✅ Tasa de anulación dentro de límites aceptables.")
-                with c_a2:
-                    st.markdown("**Oportunidades de Mejora:**")
-                    if 'fijos' in locals() and 'moviles' in locals():
-                        if fijos > moviles:
-                            st.write("• El portafolio **Fijo** es el motor actual.")
-                        else:
-                            st.write("• El portafolio **Móvil** tiene tracción.")
-            
-            # 4. Base de Datos interactiva y descarga (Todo integrado aquí)
-            st.markdown("### 📋 Base de Datos Somostelser")
-            st.dataframe(df, use_container_width=True)
-            
-            csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button("📥 Descargar Base de Datos (CSV)", data=csv, file_name="crm_respaldo.csv")
-            
+                if 'ESTADO' in df.columns:
+                    instaladas = len(df[df['ESTADO'] == 'Instalado'])
+                    c2.metric("Ventas Instaladas", instaladas)
+                
+                if 'PORTAFOLIO' in df.columns:
+                    fijos = len(df[df['PORTAFOLIO'] == 'FIJO'])
+                    moviles = len(df[df['PORTAFOLIO'] == 'MOVIL'])
+                    c3.metric("Fijo vs Móvil", f"{fijos} | {moviles}")
+                
+                st.divider()
+                
+                # --- 2. GRÁFICOS ---
+                st.markdown("#### 📈 Ventas por Estado")
+                estado_data = df['ESTADO'].value_counts().reset_index()
+                estado_data.columns = ['ESTADO', 'CANTIDAD']
+                
+                chart1 = alt.Chart(estado_data).mark_bar(color='#00a0e3').encode(
+                    x=alt.X('ESTADO', sort='-y'),
+                    y='CANTIDAD'
+                )
+                st.altair_chart(chart1, use_container_width=True)
+                
+                st.markdown("---")
+                
+                # --- 3. BASE DE DATOS Y DESCARGA (ÚNICA) ---
+                st.markdown("### 📋 Base de Datos Somostelser")
+                st.dataframe(df, use_container_width=True)
+                
+                csv = df.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    "📥 Descargar Base de Datos (CSV)", 
+                    data=csv, 
+                    file_name="crm_respaldo.csv"
+                )
+            else:
+                st.info("El archivo CSV está vacío.")
         else:
-            st.info("El archivo CSV está vacío.")
-    else:
-        st.warning("El archivo 'crm_sistema_maestro.csv' aún no ha sido creado.")
+            st.warning("El archivo 'crm_sistema_maestro.csv' aún no ha sido creado.")
