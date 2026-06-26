@@ -283,7 +283,6 @@ with tab1:
     # El 'with' del popover debe tener EXACTAMENTE la misma sangría que el 'if' de arriba
     with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
         # Estos inputs temporales capturan los datos de una sola línea
-        cant = st.number_input("Cantidad de líneas:", min_value=1, value=1, key="cant_m_tab1")
         tipo = st.radio("Tipo de gestión:", ["Portabilidad", "Línea Nueva", "Línea Existente"], key="gest_m_tab1")
         op = "N/A"
         if tipo == "Portabilidad":
