@@ -274,42 +274,35 @@ with tab1:
 
     with c2:
         st.subheader("👤 Representante Legal")
-        nom_rep = st.text_input("Nombre Rep. Legal:")
-        cc_rep = st.text_input("Cédula Rep. Legal:")
-        mail_rep = st.text_input("Correo Rep. Legal:")
-        tel_rep = st.text_input("Móvil Rep. Legal:")
+        nom_rep = st.text_input("Nombre Rep. Legal:", key="nom_rep_tab1")
+        cc_rep = st.text_input("Cédula Rep. Legal:", key="cc_rep_tab1")
+        mail_rep = st.text_input("Correo Rep. Legal:", key="mail_rep_tab1")
+        tel_rep = st.text_input("Móvil Rep. Legal:", key="tel_rep_tab1")
         
         st.subheader("📊 Estado y Plan")
-        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
-        bitacora = st.text_area("📝 Notas / Bitácora:")
+        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], key="estado_tab1")
+        bitacora = st.text_area("📝 Notas / Bitácora:", key="bitacora_tab1")
         
         tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
-        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
+        servicio = st.selectbox("Servicio:", list(tarifas.keys()), key="servicio_tab1")
         
-        # --- LOGICA MOVIL (POPOVER) ---
-        tipo_gestion = "N/A"
-        operador_origen = "N/A"
-        num_linea = "N/A"
-        
-        if div == "Móvil":
-            with st.popover("📱 Configurar Líneas Móviles"):
-                tipo_gestion = st.radio("Tipo de Gestión", ["Portabilidad", "Línea Nueva", "Línea Existente"], key="gestion_tab1")
-                if tipo_gestion == "Portabilidad":
-                    operador_origen = st.selectbox("Operador Origen", ["Claro", "Movistar", "Móvil Éxito", "Wom"], key="op_tab1")
-                num_linea = st.text_input("Número de Línea:", key="num_linea_tab1")
-        
-        # Full Tigo
+        # 1. Definimos la variable ANTES de usarla
+        titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
+        lineas = st.number_input(titulo_cantidad, min_value=1, value=1, key="lineas_tab1")
+
+        # --- LÓGICA FULL TIGO ---
         if div == "Fijo" and "Full Tigo" in servicio:
             incluye_movil = st.checkbox("📱 ¿Incluye línea móvil?", key="chk_full_tigo_tab1")
             if incluye_movil:
-                st.info("✨ Plan asociado: Plan Datos Tigo Empresarial 6.12")
+                plan_movil_asociado = "Plan Datos Tigo Empresarial 6.12 (Ilim GB)"
+                st.info(f"✨ Plan móvil asociado: **{plan_movil_asociado}**")
         
-        # Cálculos
+        # 2. Ahora sí hacemos el cálculo (lineas ya está definida arriba)
         dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
         valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
+        
         if valor > 0:
-            st.markdown(f'<div style="background-color: #e1f5fe; padding: 10px; border-radius: 5px;">💰 <b>Total:</b> ${valor:,.0f} COP</div>', unsafe_allow_html=True)
-        # PANEL DE VALOR COMERCIAL
+            st.markdown(f'<div style="background-color: #e1f5fe; padding: 10px; border-radius: 5px;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</div>', unsafe_allow_html=True) # PANEL DE VALOR COMERCIAL
         frases = [
             "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
             "💎 La calidad de tu servicio es nuestra mayor ventaja.",
