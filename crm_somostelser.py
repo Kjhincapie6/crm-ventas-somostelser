@@ -579,11 +579,20 @@ with tab2:
                 except Exception as e:
                     st.error(f"Error al procesar: {e}")
 # ==========================================
-# ==========================================
 # PESTAÑA 3: DASHBOARD Y GESTIÓN DE DATOS
 # ==========================================
 with tab3:
     st.subheader("📊 Gestión de Análisis Centralizado")
+    
+    archivo = "crm_sistema_maestro.csv"
+    
+    if os.path.exists(archivo):
+        df = pd.read_csv(archivo)
+        
+        if not df.empty:
+            # 1. Métricas Rápidas
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Total Registros", len(df))
             
             # Ajuste de seguridad: verificar columnas
             if 'ESTADO' in df.columns:
