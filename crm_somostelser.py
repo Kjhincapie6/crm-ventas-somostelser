@@ -428,10 +428,6 @@ with tab1:
 # ==================================================
 # PESTAÑA 1: Botn de guardado  y limpieza del panel 
 # ==================================================
-# 2. El botón de guardar
-# ==========================================
-# PESTAÑA 2: ACTUALIZAR EL ESTADO
-# ==========================================
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
     
