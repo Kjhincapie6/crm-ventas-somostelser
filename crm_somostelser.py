@@ -233,44 +233,141 @@ UBICACIONES_COL = {
 # ------------------------------------------
 # 2. PESTAÑA 1 INTEGRADA
 # ------------------------------------------
+# ------------------------------------------
+# 2. PESTAÑA 1 INTEGRADA
+# ------------------------------------------
 with tab1:
     div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
 
     c1, c2 = st.columns(2)
 
     with c1:
-        st.subheader("🏢 Datos del Cliente")
-        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
+        st.subheader("🏢 Datos del Titular / Cliente")
+        tipo_persona = st.selectbox("Tipo de Persona:", ["Persona Jurídica", "Persona Natural"])
+        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CC", "CE", "PPT"])
         n_doc = st.text_input("Número de Documento:")
-        nombre = st.text_input("Razón Social o Nombre:")
+        nombre = st.text_input("Razón Social o Nombre Titular:")
         dir = st.text_input("Dirección:")
         barrio = st.text_input("Barrio:")
         
         # --- SELECTORES CON BÚSQUEDA PREDICTIVA ---
-        depto = st.selectbox(
-            "Departamento:", 
-            options=sorted(list(UBICACIONES_COL.keys())),
-            index=None, 
-            placeholder="Escribe para buscar departamento..."
-        )
-        
-        # Lógica para el selector de municipio
+        depto = st.selectbox("Departamento:", options=sorted(list(UBICACIONES_COL.keys())), index=None, placeholder="Escribe para buscar departamento...")
         if depto:
-            muni = st.selectbox(
-                "Municipio:", 
-                options=sorted(UBICACIONES_COL[depto]),
-                index=None,
-                placeholder="Escribe para buscar municipio..."
-            )
+            muni = st.selectbox("Municipio:", options=sorted(UBICACIONES_COL[depto]), index=None, placeholder="Escribe para buscar municipio...")
         else:
-            # Mostramos un selector vacío y deshabilitado para mantener el orden visual
             muni = st.selectbox("Municipio:", options=[], disabled=True, placeholder="Selecciona primero un depto")
-        
-        # ------------------------------------------
         
         email_cli = st.text_input("Email contacto:")
         movil_cli = st.text_input("Contacto autorizado:")
-        tel_contacto = st.text_input("Móvil Contacto autorizado:")
+
+    with c2:
+        # Lógica para ocultar Representante Legal si es Persona Natural
+        if tipo_persona == "Persona Jurídica":
+            st.subheader("👤 Representante Legal")
+            nom_rep = st.text_input("Nombre Rep. Legal:")
+            cc_rep = st.text_input("Cédula Rep. Legal:")
+        else:
+            nom_rep = nombre
+            cc_rep = n_doc
+            
+        st.subheader("📊 Estado y Plan")
+        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"])
+        bitacora = st.text_area("📝 Notas / Bitácora:")
+        
+        tarifas = PLANES_MOVIL if div == "Móvil" else PLANES_FIJO
+        servicio = st.selectbox("Servicio:", list(tarifas.keys()))
+        
+        titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
+        lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
+        
+        # --- VENTANA EMERGENTE PARA LÍNEAS MÓVILES (POPOVER) ---
+        tipo_gestion = ""
+        operador_origen = ""
+        num_linea = ""
+        
+        if div == "Móvil":
+            with st.popover("📱 Configurar Líneas Móviles"):
+                tipo_gestion = st.radio("Tipo de Gestión", ["Portabilidad", "Línea Nueva", "Línea Existente"])
+                if tipo_gestion == "Portabilidad":
+                    operador_origen = st.selectbox("Operador Origen", ["Claro", "Movistar", "Móvil Éxito", "Wom"])
+                
+                num_linea = st.text_input("Número de Línea a gestionar:")
+                st.info("Al presionar 'Finalizar y Guardar' abajo, esta información quedará registrada.")
+        
+        # Lógica de Full Tigo
+        if div == "Fijo" and "Full Tigo" in servicio:
+            incluye_movil = st.checkbox("📱 ¿Incluye línea móvil?")
+            if incluye_movil:
+                plan_movil_asociado = "Plan Datos Tigo Empresarial 6.12 (Ilim GB)"
+                st.info(f"✨ Plan móvil asociado: **{plan_movil_asociado}**")
+        
+        # CÁLCULO FINANCIERO DINÁMICO
+        dcto = 30 if lineas >= 9 else (25 if lineas >= 6 else (20 if lineas >= 3 else (10 if lineas == 2 else 0)))
+        valor = (tarifas[servicio] * lineas) * (1 - dcto/100)
+        
+        if valor > 0:
+            st.markdown(f"""
+            <div style="background-color: #e1f5fe; padding: 12px; border-radius: 10px; border-left: 5px solid #0288d1; margin-bottom: 15px;">
+                <p style="margin: 0; font-size: 1.1em; color: #01579b;">💰 <b>Total Estimado:</b> ${valor:,.0f} COP</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.subheader("📎 Documentos del Cliente")
+        archivo_subido = st.file_uploader("Adjuntar documentos", type=["pdf", "png", "jpg", "jpeg", "docx", "xlsx"], accept_multiple_files=True)
+
+    # --- CIERRE MANUAL Y GUARDADO ---
+    guardar = st.button("💾 Finalizar y Guardar Venta", key="btn_guardar_venta_tab1", use_container_width=True)
+
+    if guardar:
+        if n_doc and nombre:
+            # 1. Guardar archivos si existen
+            carpeta_documentos = "documentos_clientes"
+            if not os.path.exists(carpeta_documentos):
+                os.makedirs(carpeta_documentos)
+
+            archivos_guardados = []
+            if archivo_subido:
+                for archivo_doc in archivo_subido:
+                    nombre_archivo = f"{n_doc}_{archivo_doc.name}"
+                    ruta_archivo = os.path.join(carpeta_documentos, nombre_archivo)
+                    with open(ruta_archivo, "wb") as f:
+                        f.write(archivo_doc.getbuffer())
+                    archivos_guardados.append(nombre_archivo)
+
+            # 2. Guardar en Base de Datos (CSV)
+            archivo = "crm_sistema_maestro.csv"
+            df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
+
+            nueva_fila = pd.DataFrame([{
+                'ID_VENTA': len(df_ex) + 1,
+                'ASESOR': st.session_state.correo_asesor,
+                'ESTADO': estado,
+                'DIVISION': div,
+                'TIPO_PERSONA': tipo_persona,
+                'NIT': n_doc,
+                'CLIENTE': nombre,
+                'SERVICIO': servicio,
+                'CANTIDAD_LINEAS': lineas,
+                'TIPO_GESTION': tipo_gestion,      # Nuevo dato móvil
+                'OPERADOR_ORIGEN': operador_origen, # Nuevo dato móvil
+                'NUM_LINEA': num_linea,             # Nuevo dato móvil
+                'VALOR_TOTAL': valor,
+                'BITACORA': bitacora,
+                'DOCUMENTOS': ";".join(archivos_guardados),
+                'ESTADO_FINANCIERO': "APROBADO" if valor >= 35000 else "REVISION"
+            }])
+
+            pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
+
+            st.balloons()
+            st.success("✅ ¡Venta registrada correctamente y almacenada en la base de datos!")
+        else:
+            st.error("⚠️ Faltan datos obligatorios: Número de Documento y Razón Social/Nombre.")
+            
+# A PARTIR DE AQUÍ DEBE SEGUIR TU PESTAÑA 2:
+# ==========================================
+# PESTAÑA 2: ACTUALIZAR EL ESTADO
+# ==========================================)
 
     with c2:
         st.subheader("👤 Representante Legal")
