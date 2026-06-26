@@ -628,12 +628,13 @@ if es_admin:
             st.markdown("### 📋 Base de Datos Somostelser")
             st.dataframe(df, use_container_width=True)
 
-with tab3: # O simplemente añádelo donde prefieras
-    st.subheader("📊 Base de Datos Actual")
-    
-    if os.path.exists("crm_sistema_maestro.csv"):
-        df_verificar = pd.read_csv("crm_sistema_maestro.csv")
-        st.dataframe(df_verificar) # Esto muestra la tabla completa
+wif es_admin:
+    with tab3: # O simplemente añádelo donde prefieras
+        st.subheader("📊 Base de Datos Actual")
+        
+        if os.path.exists("crm_sistema_maestro.csv"):
+            df_verificar = pd.read_csv("crm_sistema_maestro.csv")
+            st.dataframe(df_verificar) # Esto muestra la tabla completa
         
         # Botón para descargar la base de datos y revisarla en Excel
         csv = df_verificar.to_csv(index=False).encode('utf-8')
