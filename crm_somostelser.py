@@ -234,37 +234,67 @@ UBICACIONES_COL = {
 # 2. PESTAÑA 1 INTEGRADA
 # ------------------------------------------
 with tab1:
-    div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
+    div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio_tab1", horizontal=True)
 
     c1, c2 = st.columns(2)
 
     with c1:
         st.subheader("🏢 Datos del Cliente")
-        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
-        n_doc = st.text_input("Número de Documento:")
-        nombre = st.text_input("Razón Social o Nombre:")
-        dir = st.text_input("Dirección:")
-        barrio = st.text_input("Barrio:")
+        tipo_persona = st.selectbox("Tipo de Persona:", ["Persona Natural", "Persona Jurídica"], key="tipo_persona_tab1")
+        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CC", "CE", "PPT"], key="t_doc_tab1")
+        n_doc = st.text_input("Número de Documento:", key="n_doc_tab1")
+        nombre = st.text_input("Razón Social o Nombre:", key="nombre_tab1")
         
-        # --- SELECTORES CON BÚSQUEDA PREDICTIVA ---
-        depto = st.selectbox(
-            "Departamento:", 
-            options=sorted(list(UBICACIONES_COL.keys())),
-            index=None, 
-            placeholder="Escribe para buscar departamento..."
-        )
+        # --- Configuración de Líneas Móviles (VENTANA ADICIONAL) ---
+        # Solo aparece si la división es Móvil
+        datos_moviles = {"tipo": "N/A", "operador": "N/A", "num_linea": "N/A", "cantidad": 1}
         
-        # Lógica para el selector de municipio
-        if depto:
-            muni = st.selectbox(
-                "Municipio:", 
-                options=sorted(UBICACIONES_COL[depto]),
-                index=None,
-                placeholder="Escribe para buscar municipio..."
-            )
-        else:
-            # Mostramos un selector vacío y deshabilitado para mantener el orden visual
-            muni = st.selectbox("Municipio:", options=[], disabled=True, placeholder="Selecciona primero un depto")
+        if div == "Móvil":
+            with st.popover("📱 Configurar Líneas Móviles"):
+                st.write("### Detalles de la línea")
+                datos_moviles["cantidad"] = st.number_input("Cantidad de líneas:", min_value=1, value=1, key="cant_lineas_tab1")
+                datos_moviles["tipo"] = st.radio("Tipo de gestión:", ["Portabilidad", "Línea Nueva", "Línea Existente"], key="tipo_gest_tab1")
+                
+                if datos_moviles["tipo"] == "Portabilidad":
+                    datos_moviles["operador"] = st.selectbox("Operador Origen:", ["Claro", "Movistar", "Móvil Éxito", "Wom"], key="op_origen_tab1")
+                
+                datos_moviles["num_linea"] = st.text_input("Número de línea (ej: 3001234567):", key="num_linea_tab1")
+                st.info(f"✅ Configurado: {datos_moviles['cantidad']} líneas ({datos_moviles['tipo']})")
+
+    with c2:
+        st.subheader("👤 Datos Complementarios")
+        if tipo_persona == "Persona Jurídica":
+            nom_rep = st.text_input("Nombre Rep. Legal:", key="nom_rep_tab1")
+            cc_rep = st.text_input("Cédula Rep. Legal:", key="cc_rep_tab1")
+        
+        estado = st.selectbox("Estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], key="estado_tab1")
+        servicio = st.selectbox("Servicio:", list(tarifas.keys()) if 'tarifas' in locals() else ["Plan Tigo"], key="servicio_tab1")
+        
+        # --- CIERRE MANUAL ---
+        if st.button("💾 Finalizar y Guardar Venta", key="btn_finalizar_tab1", use_container_width=True):
+            if n_doc and nombre:
+                # Aquí guardamos todo en el CSV
+                archivo = "crm_sistema_maestro.csv"
+                df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
+                
+                nueva_fila = pd.DataFrame([{
+                    'ID_VENTA': len(df_ex) + 1,
+                    'CLIENTE': nombre,
+                    'NIT': n_doc,
+                    'TIPO_PERSONA': tipo_persona,
+                    'DIVISION': div,
+                    'CANTIDAD': datos_moviles["cantidad"],
+                    'TIPO_GESTION': datos_moviles["tipo"],
+                    'OPERADOR': datos_moviles["operador"],
+                    'NUM_LINEA': datos_moviles["num_linea"],
+                    'ESTADO': estado
+                }])
+                
+                pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
+                st.balloons()
+                st.success("✅ Venta registrada correctamente con todos los datos.")
+            else:
+                st.error("⚠️ Debes ingresar al menos el documento y nombre del titular.")
         
         # ------------------------------------------
         
