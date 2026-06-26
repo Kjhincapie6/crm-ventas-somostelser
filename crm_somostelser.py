@@ -234,57 +234,38 @@ UBICACIONES_COL = {
 # 2. PESTAÑA 1 INTEGRADA
 # ------------------------------------------
 with tab1:
-    div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio_clean", horizontal=True)
+    div = st.radio("Seleccione División:", ["Móvil", "Fijo"], key="div_radio", horizontal=True)
+
     c1, c2 = st.columns(2)
 
     with c1:
         st.subheader("🏢 Datos del Cliente")
-        tipo_pers = st.selectbox("Tipo de Persona:", ["Natural", "Jurídica"], key="tipo_p_tab1")
-        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CC", "CE", "PPT"], key="t_doc_tab1")
-        n_doc = st.text_input("Número de Documento:", key="n_doc_tab1")
-        nombre = st.text_input("Nombre / Razón Social:", key="nombre_tab1")
-
-    with c2:
-        st.subheader("⚙️ Gestión Técnica")
+        t_doc = st.selectbox("Tipo Doc:", ["NIT", "CV", "CE", "PPT"])
+        n_doc = st.text_input("Número de Documento:")
+        nombre = st.text_input("Razón Social o Nombre:")
+        dir = st.text_input("Dirección:")
+        barrio = st.text_input("Barrio:")
         
-        # --- VENTANA FLOTANTE (POPOVER) ---
-        # Solo se activa si la división es MÓVIL
-        datos_moviles = {"tipo": "N/A", "op": "N/A", "num": "N/A", "cant": 1}
+        # --- SELECTORES CON BÚSQUEDA PREDICTIVA ---
+        depto = st.selectbox(
+            "Departamento:", 
+            options=sorted(list(UBICACIONES_COL.keys())),
+            index=None, 
+            placeholder="Escribe para buscar departamento..."
+        )
         
-        if div == "Móvil":
-            with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
-                datos_moviles["cant"] = st.number_input("Cantidad de líneas:", min_value=1, value=1, key="cant_m_tab1")
-                datos_moviles["tipo"] = st.radio("Tipo de gestión:", ["Portabilidad", "Línea Nueva", "Línea Existente"], key="gest_m_tab1")
-                if datos_moviles["tipo"] == "Portabilidad":
-                    datos_moviles["op"] = st.selectbox("Operador Origen:", ["Claro", "Movistar", "Móvil Éxito", "Wom"], key="op_m_tab1")
-                datos_moviles["num"] = st.text_input("Número de línea:", key="num_m_tab1")
+        # Lógica para el selector de municipio
+        if depto:
+            muni = st.selectbox(
+                "Municipio:", 
+                options=sorted(UBICACIONES_COL[depto]),
+                index=None,
+                placeholder="Escribe para buscar municipio..."
+            )
         else:
-            st.info("La gestión móvil no aplica para división Fija.")
-            datos_moviles["cant"] = st.number_input("Cantidad:", min_value=1, value=1, key="cant_f_tab1")
-
-        # --- BOTÓN DE CIERRE MANUAL ---
-        if st.button("💾 Registrar y Cerrar Venta", key="btn_save_tab1", type="primary", use_container_width=True):
-            if n_doc and nombre:
-                # Lógica de guardado en CSV
-                archivo = "crm_sistema_maestro.csv"
-                df_ex = pd.read_csv(archivo) if os.path.exists(archivo) else pd.DataFrame()
-                
-                nueva_fila = pd.DataFrame([{
-                    'CLIENTE': nombre,
-                    'NIT': n_doc,
-                    'TIPO_PERSONA': tipo_pers,
-                    'DIVISION': div,
-                    'CANTIDAD_LINEAS': datos_moviles["cant"],
-                    'TIPO_GESTION': datos_moviles["tipo"],
-                    'OPERADOR': datos_moviles["op"],
-                    'NUM_LINEA': datos_moviles["num"]
-                }])
-                
-                pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(archivo, index=False)
-                st.success("✅ Venta guardada exitosamente.")
-                st.rerun() # Esto refresca la app para limpiar el formulario
-            else:
-                st.error("⚠️ Faltan datos del titular.")
+            # Mostramos un selector vacío y deshabilitado para mantener el orden visual
+            muni = st.selectbox("Municipio:", options=[], disabled=True, placeholder="Selecciona primero un depto")
+        
         # ------------------------------------------
         
         email_cli = st.text_input("Email contacto:")
