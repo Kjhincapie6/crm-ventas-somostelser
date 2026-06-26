@@ -329,7 +329,7 @@ with tab1:
             st.session_state.lista_lineas.append(nueva_linea)
             st.success(f"Línea {num} agregada a la lista")
         else:
-            st.info("La gestión móvil no aplica para división Fija.")
+            st.info("La gestión móvil aplica tambien para Full tigo.")
             datos_moviles["cant"] = st.number_input("Cantidad:", min_value=1, value=1, key="cant_f_tab1")
 
         # --- BOTÓN DE CIERRE MANUAL ---
