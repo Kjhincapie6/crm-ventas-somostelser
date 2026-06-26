@@ -634,14 +634,4 @@ with tab3:
                 ).properties(height=300)
                 st.altair_chart(chart2, use_container_width=True)
 
-            # --- 4. BASE DE DATOS Y DESCARGA ---
-            st.markdown("### 📋 Base de Datos Somostelser")
-            st.dataframe(df, use_container_width=True)
-            
-            csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button("📥 Descargar Base de Datos (CSV)", data=csv, file_name="crm_respaldo.csv")
-            
-        else:
-            st.info("El archivo CSV está vacío.")
-    else:
-        st.warning("El archivo 'crm_sistema_maestro.csv' no existe.")
+          
