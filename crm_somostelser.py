@@ -242,7 +242,6 @@ with c1:
             nombre = st.text_input("Razón Social/Nombre:", key="nombre_tab1")
             dir = st.text_input("Dirección:", key="dir_tab1")
             # ... el resto de tus campos aquí ...
-
     with c2:
         st.markdown("### 📊 Estado y Gestión")
         with st.container(border=True): # Borde para que todo quede alineado
