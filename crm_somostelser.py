@@ -270,7 +270,7 @@ with tab1:
         
         email_cli = st.text_input("Email contacto:")
         movil_cli = st.text_input("Contacto autorizado:")
-        tel_contacto = st.text_input("Móvil Contacto autorizado:")}
+        tel_contacto = st.text_input("Móvil Contacto autorizado:")
 
         st.subheader("⚙️ Gestión Técnica") 
         # --- VENTANA FLOTANTE (POPOVER) ---
