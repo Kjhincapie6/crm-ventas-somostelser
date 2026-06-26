@@ -280,18 +280,6 @@ with tab1:
         titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
         lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
         
-        # --- NUEVA LÓGICA: LÍNEA MÓVIL PARA FULL TIGO ---
-        plan_movil_asociado = None
-        # Verificamos si es Fijo y si "Full Tigo" está en el nombre del plan seleccionado
-        if div == "Fijo" and "Full Tigo" in servicio:
-            incluye_movil = st.checkbox("📱 ¿Incluye línea móvil?")
-            if incluye_movil:
-                plan_movil_asociado = "Plan Datos Tigo Empresarial 6.12 (Ilim GB)"
-                # Mostramos un mensaje azul bonito con el plan asignado
-                st.info(f"✨ Plan móvil asociado: **{plan_movil_asociado}**")
-        # ------------------------------------------------
-    # ------------------------------------------------
-        
         # Título dinámico: "Líneas" para Móvil, "Cantidad" para Fijo
         titulo_cantidad = "Líneas:" if div == "Móvil" else "Cantidad:"
         lineas = st.number_input(titulo_cantidad, min_value=1, value=1)
