@@ -518,7 +518,7 @@ with tab1:
         else:
             st.error("⚠️ Faltan datos obligatorios.")
 # ==========================================
-# PESTAÑA 2: ACTUALIZAR EL ESTADO
+# PESTAÑA 2: ACTUALIZAR EL ESTADO (BLOQUE ÚNICO)
 # ==========================================
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
@@ -526,6 +526,7 @@ with tab2:
     if not os.path.exists("crm_sistema_maestro.csv"):
         st.info("Aún no hay base de datos creada.")
     else:
+        # Carga el archivo una sola vez
         df_update = pd.read_csv("crm_sistema_maestro.csv")
         
         # --- RED DE SEGURIDAD (Columnas y Tipos) ---
@@ -549,11 +550,12 @@ with tab2:
             opciones_ventas = (df_mis_ventas["ID_VENTA"].astype(str) + " - " + df_mis_ventas["CLIENTE"].astype(str)).tolist()
             
             # --- KEY ÚNICA PARA TAB 2 ---
-            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas, key="select_venta_update_tab2")
+            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas, key="select_venta_update_final_tab2")
             
             if venta_seleccionada:
                 try:
                     id_venta = int(venta_seleccionada.split(" - ")[0])
+                    # Buscamos la fila correcta en el dataframe original
                     venta = df_update[df_update['ID_VENTA'] == id_venta]
                     
                     if not venta.empty:
@@ -563,11 +565,11 @@ with tab2:
                         nuevo_estado = st.selectbox(
                             "Cambiar estado a:", 
                             ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
-                            key="select_nuevo_estado_tab2"
+                            key="select_nuevo_estado_final_tab2"
                         )
                         
-                        # --- KEY ÚNICA PARA BOTÓN ---
-                        if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2_v2"):
+                        # --- BOTÓN ÚNICO ---
+                        if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2_v3"):
                             df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
                             df_update.to_csv("crm_sistema_maestro.csv", index=False)
                             
