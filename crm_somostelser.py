@@ -210,63 +210,22 @@ if es_admin:
     tab3 = tabs[2]
 
 # ------------------------------------------
-# USO DE LAS PESTAÑAS
+# USO DE LAS PESTAÑAS (Protegiendo el acceso)
 # ------------------------------------------
 
 with tab1:
-    # ... (Aquí va todo tu código de registro de venta que ya tenías)
-    st.write("Registro de Ventas")
+    # ... tu código de registro ...
+    pass
 
 with tab2:
-    st.subheader("🔄 Actualizar Seguimiento de Venta")
-    
-    if not os.path.exists("crm_sistema_maestro.csv"):
-        st.info("Aún no hay base de datos creada.")
-    else:
-        df_update = pd.read_csv("crm_sistema_maestro.csv")
-        
-        # Red de seguridad para columnas
-        for col in ['ESTADO', 'ID_VENTA', 'CLIENTE', 'ASESOR']:
-            if col not in df_update.columns: df_update[col] = "Sin dato"
-        
-        df_update["ID_VENTA"] = pd.to_numeric(df_update["ID_VENTA"], errors="coerce").fillna(0).astype(int)
-        
-        df_mis_ventas = df_update if es_admin else df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
-        
-        if df_mis_ventas.empty:
-            st.warning("No tienes ventas registradas.")
-        else:
-            opciones_ventas = df_mis_ventas["ID_VENTA"].astype(str) + " - " + df_mis_ventas["CLIENTE"].astype(str)
-            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
-
-            if venta_seleccionada:
-                try:
-                    id_venta = int(float(venta_seleccionada.split(" - ")[0]))
-                    venta = df_update[df_update["ID_VENTA"] == id_venta]
-                    
-                    if not venta.empty:
-                        estado_actual = venta.iloc[0]["ESTADO"]
-                        st.info(f"📌 Estado actual: **{estado_actual}**")
-                        
-                        nuevo_estado = st.selectbox("Cambiar estado:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], key="new_state_tab2")
-                        
-                        if st.button("💾 Guardar Actualización", key="btn_update_tab2"):
-                            df_update.loc[df_update["ID_VENTA"] == id_venta, "ESTADO"] = nuevo_estado
-                            df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                            enviar_telegram(f"✅ Venta {id_venta} actualizada a: {nuevo_estado}")
-                            st.success("✅ Guardado.")
-                            st.rerun()
-                except Exception as e:
-                    st.error(f"Error: {e}")
+    # ... tu código de actualización ...
+    pass
 
 if es_admin:
     with tab3:
-        st.subheader("📊 Dashboard y Base de Datos")
-        if os.path.exists("crm_sistema_maestro.csv"):
-            df = pd.read_csv("crm_sistema_maestro.csv")
-            st.dataframe(df, use_container_width=True)
-            if st.button("📥 Descargar Base de Datos"):
-                st.download_button("Descargar", data=df.to_csv(index=False), file_name="crm_respaldo.csv")
+        # AQUÍ VA TODO TU CÓDIGO DEL DASHBOARD
+        st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
+        # ... resto de tu lógica de gráficos ...
 
 # ------------------------------------------
 # 1. DEFINICIÓN DE DATOS (fuera del tab1)
@@ -518,44 +477,57 @@ with tab1:
         else:
             st.error("⚠️ Faltan datos obligatorios.")
 # ==========================================
-# PESTAÑA 2: ACTUALIZAR EL ESTADO (BLOQUE ÚNICO)
+# PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
-      
-        # Convertir ID a numérico
-        df_update["ID_VENTA"] = pd.to_numeric(df_update["ID_VENTA"], errors="coerce").fillna(0).astype(int)
+with tab2:
+    st.subheader("🔄 Actualizar Seguimiento de Venta")
+    
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_update = pd.read_csv("crm_sistema_maestro.csv")
+        
+        # Parches de seguridad
+        if 'ESTADO' not in df_update.columns: df_update['ESTADO'] = "En proceso de firma"
+        if 'ID_VENTA' not in df_update.columns: df_update['ID_VENTA'] = range(1, len(df_update) + 1)
+        if 'CLIENTE' not in df_update.columns: df_update['CLIENTE'] = "Cliente Desconocido"
         
         # Filtro de Asesor
-        df_mis_ventas = df_update if es_admin else df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
-        
-        if df_mis_ventas.empty:
-            st.warning("No tienes ventas registradas para actualizar.")
+        if not es_admin and 'ASESOR' in df_update.columns:
+            df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
         else:
-            opciones_ventas = (df_mis_ventas["ID_VENTA"].astype(str) + " - " + df_mis_ventas["CLIENTE"].astype(str)).tolist()
+            df_mis_ventas = df_update
             
-            # Key única para este selectbox
-            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas, key="select_venta_update_unico")
+        if not df_mis_ventas.empty:
+            opciones_ventas = df_mis_ventas['ID_VENTA'].astype(str) + " - " + df_mis_ventas['CLIENTE']
+            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas.tolist(), key="select_venta_update")
             
             if venta_seleccionada:
-                try:
-                    id_venta = int(venta_seleccionada.split(" - ")[0])
-                    venta = df_update[df_update['ID_VENTA'] == id_venta]
+                id_venta = int(venta_seleccionada.split(" - ")[0])
+                estado_actual = df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'].values[0]
+                
+                st.info(f"📌 Estado Actual: **{estado_actual}**")
+                
+                nuevo_estado = st.selectbox(
+                    "Cambiar estado a:", 
+                    ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
+                    key="select_nuevo_estado_tab2"
+                )
+                
+                if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2"):
+                    # 1. Guardar en CSV
+                    df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
+                    df_update.to_csv("crm_sistema_maestro.csv", index=False)
                     
-                    if not venta.empty:
-                        estado_actual = venta.iloc[0]['ESTADO']
-                        st.info(f"📌 Estado Actual: **{estado_actual}**")
-                        
-                        nuevo_estado = st.selectbox("Cambiar estado a:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], key="nuevo_estado_unico")
-                        
-                        if st.button("🔄 Guardar y Notificar", key="btn_guardar_unico"):
-                            df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
-                            df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                            enviar_telegram(f"✅ Venta {id_venta} actualizada.\nNuevo estado: {nuevo_estado}")
-                            st.success("✅ Actualizado correctamente.")
-                            st.rerun()
-                    else:
-                        st.error("No se encontró la venta.")
-                except Exception as e:
-                    st.error(f"Error: {e}")
+                    # 2. Notificar Telegram
+                    mensaje = f"✅ Venta {id_venta} actualizada.\nNuevo estado: {nuevo_estado}"
+                    enviar_telegram(mensaje)
+                    
+                    # 3. Éxito
+                    st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
+                    st.rerun()
+        else:
+            st.warning("No tienes ventas registradas para actualizar.")
+    else:
+        st.info("Aún no hay base de datos creada.")
 # ==========================================
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ==========================================
@@ -651,5 +623,19 @@ with tab3:
             else:
                 st.info("No hay datos suficientes para generar un análisis automático.")
             
+            # 3. Dataframe interactivo
+            st.markdown("### 📋 Base de Datos Somostelser")
+            st.dataframe(df, use_container_width=True)
 
-
+with tab3: # O simplemente añádelo donde prefieras
+    st.subheader("📊 Base de Datos Actual")
+    
+    if os.path.exists("crm_sistema_maestro.csv"):
+        df_verificar = pd.read_csv("crm_sistema_maestro.csv")
+        st.dataframe(df_verificar) # Esto muestra la tabla completa
+        
+        # Botón para descargar la base de datos y revisarla en Excel
+        csv = df_verificar.to_csv(index=False).encode('utf-8')
+        st.download_button("📥 Descargar Base de Datos (CSV)", data=csv, file_name="crm_respaldo.csv")
+    else:
+        st.warning("El archivo 'crm_sistema_maestro.csv' aún no ha sido creado.")
