@@ -273,7 +273,7 @@ if es_admin:
 # ------------------------------------------
 UBICACIONES_COL = {
     "Amazonas": ["Leticia", "Puerto Nariño"],
-    "Antioquia": ["Medellín", "Envigado", "Itagüí", "Bello", "Rionegro", "Sabaneta", "La Estrella", "Caldas"],
+    "Antioquia": ["Medellín", "Envigado", "Itagüí", "Bello", "Rionegro", "Sabaneta", "La Estrella", "Caldas" , "Retiro"],
     "Arauca": ["Arauca", "Tame", "Saravena"],
     "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia", "Malambo"],
     "Bolívar": ["Cartagena", "Magangué", "Turbaco"],
