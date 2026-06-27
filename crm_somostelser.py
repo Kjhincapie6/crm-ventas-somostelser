@@ -620,22 +620,8 @@ with tab3:
                         st.write("• El portafolio **Fijo** es el motor actual. Enfocar campañas de cross-selling en clientes Móviles.")
                     else:
                         st.write("• El portafolio **Móvil** tiene tracción. Evaluar ofertas de fidelización para clientes Fijos.")
+
+            st.download_button("📥 Descargar Base de Datos (CSV)", data=csv, file_name="crm_respaldo.csv")
             else:
                 st.info("No hay datos suficientes para generar un análisis automático.")
-            
-            # 3. Dataframe interactivo
-            st.markdown("### 📋 Base de Datos Somostelser")
-            st.dataframe(df, use_container_width=True)
-
-with tab3: # O simplemente añádelo donde prefieras
-    st.subheader("📊 Base de Datos Actual")
-    
-    if os.path.exists("crm_sistema_maestro.csv"):
-        df_verificar = pd.read_csv("crm_sistema_maestro.csv")
-        st.dataframe(df_verificar) # Esto muestra la tabla completa
-        
-        # Botón para descargar la base de datos y revisarla en Excel
-        csv = df_verificar.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Descargar Base de Datos (CSV)", data=csv, file_name="crm_respaldo.csv")
-    else:
-        st.warning("El archivo 'crm_sistema_maestro.csv' aún no ha sido creado.")
+          
