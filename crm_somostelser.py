@@ -568,7 +568,6 @@ with tab2:
                         st.error("No se encontró la venta.")
                 except Exception as e:
                     st.error(f"Error: {e}")
-
 # ==========================================
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ==========================================
