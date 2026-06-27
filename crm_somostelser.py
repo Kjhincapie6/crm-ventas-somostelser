@@ -526,60 +526,48 @@ with tab2:
     if not os.path.exists("crm_sistema_maestro.csv"):
         st.info("Aún no hay base de datos creada.")
     else:
-        # Carga el archivo una sola vez
         df_update = pd.read_csv("crm_sistema_maestro.csv")
         
-        # --- RED DE SEGURIDAD (Columnas y Tipos) ---
+        # Red de seguridad
         columnas_req = ['ESTADO', 'ID_VENTA', 'CLIENTE', 'ASESOR']
         for col in columnas_req:
             if col not in df_update.columns: df_update[col] = "Sin dato"
-            
-        # Convertir ID a numérico seguro evitando errores
+        
+        # Convertir ID a numérico
         df_update["ID_VENTA"] = pd.to_numeric(df_update["ID_VENTA"], errors="coerce").fillna(0).astype(int)
         
         # Filtro de Asesor
-        if not es_admin:
-            df_mis_ventas = df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
-        else:
-            df_mis_ventas = df_update
-            
+        df_mis_ventas = df_update if es_admin else df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
+        
         if df_mis_ventas.empty:
             st.warning("No tienes ventas registradas para actualizar.")
         else:
-            # Creamos opciones usando claves únicas para evitar duplicados
             opciones_ventas = (df_mis_ventas["ID_VENTA"].astype(str) + " - " + df_mis_ventas["CLIENTE"].astype(str)).tolist()
             
-            # --- KEY ÚNICA PARA TAB 2 ---
-            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas, key="select_venta_update_final_tab2")
+            # Key única para este selectbox
+            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas, key="select_venta_update_unico")
             
             if venta_seleccionada:
                 try:
                     id_venta = int(venta_seleccionada.split(" - ")[0])
-                    # Buscamos la fila correcta en el dataframe original
                     venta = df_update[df_update['ID_VENTA'] == id_venta]
                     
                     if not venta.empty:
                         estado_actual = venta.iloc[0]['ESTADO']
                         st.info(f"📌 Estado Actual: **{estado_actual}**")
                         
-                        nuevo_estado = st.selectbox(
-                            "Cambiar estado a:", 
-                            ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"],
-                            key="select_nuevo_estado_final_tab2"
-                        )
+                        nuevo_estado = st.selectbox("Cambiar estado a:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], key="nuevo_estado_unico")
                         
-                        # --- BOTÓN ÚNICO ---
-                        if st.button("🔄 Guardar y Notificar", key="btn_guardar_final_tab2_v3"):
+                        if st.button("🔄 Guardar y Notificar", key="btn_guardar_unico"):
                             df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
                             df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                            
                             enviar_telegram(f"✅ Venta {id_venta} actualizada.\nNuevo estado: {nuevo_estado}")
-                            st.success(f"✅ Estado actualizado a '{nuevo_estado}' y notificado.")
+                            st.success("✅ Actualizado correctamente.")
                             st.rerun()
                     else:
                         st.error("No se encontró la venta.")
                 except Exception as e:
-                    st.error(f"Error al procesar: {e}")
+                    st.error(f"Error: {e}")
 
 # ==========================================
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
