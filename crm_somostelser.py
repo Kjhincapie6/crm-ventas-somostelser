@@ -518,9 +518,20 @@ with tab1:
         else:
             st.error("⚠️ Faltan datos obligatorios.")
 # ==========================================
-# PESTAÑA 2: ACTUALIZAR EL ESTADO (BLOQUE ÚNICO)
+# PESTAÑA 2: ACTUALIZAR EL ESTADO
 # ==========================================
-      
+with tab2:
+    st.subheader("🔄 Actualizar Seguimiento de Venta")
+    
+    if not os.path.exists("crm_sistema_maestro.csv"):
+        st.info("Aún no hay base de datos creada.")
+    else:
+        df_update = pd.read_csv("crm_sistema_maestro.csv")
+        
+        # Red de seguridad para columnas
+        for col in ['ESTADO', 'ID_VENTA', 'CLIENTE', 'ASESOR']:
+            if col not in df_update.columns: df_update[col] = "Sin dato"
+        
         # Convertir ID a numérico
         df_update["ID_VENTA"] = pd.to_numeric(df_update["ID_VENTA"], errors="coerce").fillna(0).astype(int)
         
@@ -530,35 +541,42 @@ with tab1:
         if df_mis_ventas.empty:
             st.warning("No tienes ventas registradas para actualizar.")
         else:
-            opciones_ventas = (df_mis_ventas["ID_VENTA"].astype(str) + " - " + df_mis_ventas["CLIENTE"].astype(str)).tolist()
+            # --- CAMBIO AQUÍ: ID con formato 0001 + Nombre ---
+            df_mis_ventas = df_mis_ventas.copy()
+            df_mis_ventas['ID_FORMATO'] = df_mis_ventas['ID_VENTA'].astype(str).str.zfill(4)
+            df_mis_ventas['OPCION'] = df_mis_ventas['ID_FORMATO'] + " " + df_mis_ventas['CLIENTE']
             
-            # Key única para este selectbox
-            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones_ventas, key="select_venta_update_unico")
+            opciones = df_mis_ventas['OPCION'].tolist()
+            
+            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones, key="select_venta_update_tab2")
             
             if venta_seleccionada:
                 try:
-                    id_venta = int(venta_seleccionada.split(" - ")[0])
-                    venta = df_update[df_update['ID_VENTA'] == id_venta]
+                    # Extraer el ID basado en los primeros 4 caracteres
+                    id_seleccionado = int(venta_seleccionada[:4])
+                    venta = df_update[df_update["ID_VENTA"] == id_seleccionado]
                     
                     if not venta.empty:
-                        estado_actual = venta.iloc[0]['ESTADO']
-                        st.info(f"📌 Estado Actual: **{estado_actual}**")
+                        estado_actual = venta.iloc[0]["ESTADO"]
+                        st.info(f"📌 Estado actual: **{estado_actual}**")
                         
-                        nuevo_estado = st.selectbox("Cambiar estado a:", ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], key="nuevo_estado_unico")
+                        nuevo_estado = st.selectbox(
+                            "Cambiar estado:", 
+                            ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], 
+                            key="new_state_tab2"
+                        )
                         
-                        if st.button("🔄 Guardar y Notificar", key="btn_guardar_unico"):
-                            df_update.loc[df_update['ID_VENTA'] == id_venta, 'ESTADO'] = nuevo_estado
+                        if st.button("🔄 Guardar y Notificar", key="btn_update_tab2"):
+                            df_update.loc[df_update["ID_VENTA"] == id_seleccionado, "ESTADO"] = nuevo_estado
                             df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                            enviar_telegram(f"✅ Venta {id_venta} actualizada.\nNuevo estado: {nuevo_estado}")
-                            st.success("✅ Actualizado correctamente.")
+                            enviar_telegram(f"✅ Venta {id_seleccionado} actualizada a: {nuevo_estado}")
+                            st.success("✅ Guardado y notificado.")
                             st.rerun()
-                    else:
-                        st.error("No se encontró la venta.")
                 except Exception as e:
-                    st.error(f"Error: {e}")
-# ==========================================
+                    st.error(f"Error al procesar: {e}")
+# ===============================================
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
-# ==========================================
+# ===============================================
 with tab3:
     st.subheader("📊 Dashboard: Gestión de Ventas Somostelser")
     
