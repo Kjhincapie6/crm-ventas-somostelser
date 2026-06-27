@@ -547,6 +547,17 @@ if es_admin and tab3 is not None:
         else:
             df = pd.read_csv(CSV_PATH)
 
+            # ── Red de seguridad: garantizar columnas mínimas ─────
+            COLS_REQUERIDAS = {
+                "ESTADO": "Sin dato", "ASESOR": "Sin dato",
+                "CLIENTE": "Sin dato", "SERVICIO": "Sin dato",
+                "VALOR_TOTAL": 0, "DIVISION": "Sin dato",
+                "PORTAFOLIO": "Sin dato", "ID_VENTA": 0,
+            }
+            for col, val_default in COLS_REQUERIDAS.items():
+                if col not in df.columns:
+                    df[col] = val_default
+
             if df.empty:
                 st.info("La base de datos está vacía.")
             else:
@@ -555,12 +566,21 @@ if es_admin and tab3 is not None:
                 m1.metric("📁 Total Registros", len(df))
                 m2.metric("✅ Activadas", len(df[df["ESTADO"].isin(["Activado", "Instalado"])]))
 
-                col_div = "PORTAFOLIO" if "PORTAFOLIO" in df.columns else "DIVISION"
-                val_fijo   = "FIJO"  if "PORTAFOLIO" in df.columns else "Fijo"
-                val_movil  = "MOVIL" if "PORTAFOLIO" in df.columns else "Móvil"
-                n_fijo  = len(df[df[col_div] == val_fijo])
-                n_movil = len(df[df[col_div] == val_movil])
-                m3.metric("📡 Fijo", n_fijo)
+                # Detectar columna de portafolio disponible
+                if "PORTAFOLIO" in df.columns and df["PORTAFOLIO"].isin(["FIJO","MOVIL"]).any():
+                    col_div  = "PORTAFOLIO"
+                    val_fijo  = "FIJO"
+                    val_movil = "MOVIL"
+                elif "DIVISION" in df.columns:
+                    col_div  = "DIVISION"
+                    val_fijo  = "Fijo"
+                    val_movil = "Móvil"
+                else:
+                    col_div  = None
+
+                n_fijo  = len(df[df[col_div] == val_fijo])  if col_div else 0
+                n_movil = len(df[df[col_div] == val_movil]) if col_div else 0
+                m3.metric("📡 Fijo",  n_fijo)
                 m4.metric("📱 Móvil", n_movil)
 
                 st.divider()
@@ -579,26 +599,29 @@ if es_admin and tab3 is not None:
                 st.markdown("---")
 
                 # ── Gráfico 2: Portafolio Activado vs Anulado ─────
-                st.markdown("#### 📊 Portafolio: Activadas vs Anuladas")
-                df["ESTADO_NORM"] = df["ESTADO"].replace("Instalado", "Activado")
-                df_g2 = df[df["ESTADO_NORM"].isin(["Activado", "Anulado"])]
-                if not df_g2.empty:
-                    g2_data = df_g2.groupby([col_div, "ESTADO_NORM"]).size().reset_index(name="CANTIDAD")
-                    grafico2 = alt.Chart(g2_data).mark_bar().encode(
-                        x=alt.X(f"{col_div}:N", title="Portafolio"),
-                        xOffset="ESTADO_NORM:N",
-                        y=alt.Y("CANTIDAD:Q"),
-                        color=alt.Color(
-                            "ESTADO_NORM:N",
-                            legend=alt.Legend(title="Estado"),
-                            scale=alt.Scale(
-                                domain=["Activado", "Anulado"],
-                                range=["#00a0e3", "#231f20"]
+                if col_div:
+                    st.markdown("#### 📊 Portafolio: Activadas vs Anuladas")
+                    df["ESTADO_NORM"] = df["ESTADO"].replace("Instalado", "Activado")
+                    df_g2 = df[df["ESTADO_NORM"].isin(["Activado", "Anulado"])]
+                    if not df_g2.empty:
+                        g2_data = df_g2.groupby([col_div, "ESTADO_NORM"]).size().reset_index(name="CANTIDAD")
+                        grafico2 = alt.Chart(g2_data).mark_bar().encode(
+                            x=alt.X(f"{col_div}:N", title="Portafolio"),
+                            xOffset="ESTADO_NORM:N",
+                            y=alt.Y("CANTIDAD:Q"),
+                            color=alt.Color(
+                                "ESTADO_NORM:N",
+                                legend=alt.Legend(title="Estado"),
+                                scale=alt.Scale(
+                                    domain=["Activado", "Anulado"],
+                                    range=["#00a0e3", "#231f20"],
+                                ),
                             ),
-                        ),
-                        tooltip=[col_div, "ESTADO_NORM", "CANTIDAD"],
-                    ).properties(height=280)
-                    st.altair_chart(grafico2, use_container_width=True)
+                            tooltip=[col_div, "ESTADO_NORM", "CANTIDAD"],
+                        ).properties(height=280)
+                        st.altair_chart(grafico2, use_container_width=True)
+                    else:
+                        st.info("Aún no hay ventas Activadas o Anuladas para graficar.")
 
                 st.markdown("---")
 
@@ -624,18 +647,22 @@ if es_admin and tab3 is not None:
                 # ── Tabla completa con filtros ────────────────────
                 st.markdown("#### 🗃️ Base de Datos Completa")
 
-                # Filtro rápido por asesor (solo admin lo ve)
-                asesores = ["Todos"] + sorted(df["ASESOR"].dropna().unique().tolist())
-                filtro_asesor = st.selectbox("Filtrar por asesor:", asesores, key="filtro_asesor_tab3")
-                df_tabla = df if filtro_asesor == "Todos" else df[df["ASESOR"] == filtro_asesor]
+                # Filtro por asesor — seguro aunque la columna venga vacía
+                lista_asesores = df["ASESOR"].dropna().unique().tolist()
+                asesores_opts  = ["Todos"] + sorted([str(a) for a in lista_asesores if str(a) != "Sin dato"])
+                filtro_asesor  = st.selectbox("Filtrar por asesor:", asesores_opts, key="filtro_asesor_tab3")
+                df_tabla = df.copy() if filtro_asesor == "Todos" else df[df["ASESOR"].astype(str) == filtro_asesor]
 
+                # Filtro por estado
+                estados_disponibles = df["ESTADO"].dropna().unique().tolist()
                 filtro_estado = st.multiselect(
                     "Filtrar por estado:",
-                    options=df["ESTADO"].dropna().unique().tolist(),
-                    default=df["ESTADO"].dropna().unique().tolist(),
+                    options=estados_disponibles,
+                    default=estados_disponibles,
                     key="filtro_estado_tab3",
                 )
-                df_tabla = df_tabla[df_tabla["ESTADO"].isin(filtro_estado)]
+                if filtro_estado:
+                    df_tabla = df_tabla[df_tabla["ESTADO"].isin(filtro_estado)]
 
                 st.dataframe(df_tabla, use_container_width=True, height=400)
 
