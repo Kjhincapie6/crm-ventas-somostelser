@@ -520,19 +520,7 @@ with tab1:
 # ==========================================
 # PESTAÑA 2: ACTUALIZAR EL ESTADO (BLOQUE ÚNICO)
 # ==========================================
-with tab2:
-    st.subheader("🔄 Actualizar Seguimiento de Venta")
-    
-    if not os.path.exists("crm_sistema_maestro.csv"):
-        st.info("Aún no hay base de datos creada.")
-    else:
-        df_update = pd.read_csv("crm_sistema_maestro.csv")
-        
-        # Red de seguridad
-        columnas_req = ['ESTADO', 'ID_VENTA', 'CLIENTE', 'ASESOR']
-        for col in columnas_req:
-            if col not in df_update.columns: df_update[col] = "Sin dato"
-        
+      
         # Convertir ID a numérico
         df_update["ID_VENTA"] = pd.to_numeric(df_update["ID_VENTA"], errors="coerce").fillna(0).astype(int)
         
