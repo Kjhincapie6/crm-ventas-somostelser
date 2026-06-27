@@ -454,13 +454,45 @@ with tab1:
             pd.concat([df_ex, nueva_fila], ignore_index=True).to_csv(CSV_PATH, index=False)
             st.session_state.lista_lineas = []
 
+            # ── Notificación base: venta registrada ──────────────
             enviar_telegram(
                 f"🆕 Nueva venta registrada\n"
-                f"Asesor: {st.session_state.correo_asesor}\n"
-                f"Cliente: {nombre} | {n_doc}\n"
-                f"Servicio: {servicio}\n"
-                f"Valor: ${valor:,.0f} COP | Estado: {estado}"
+                f"━━━━━━━━━━━━━━━━━━━━━\n"
+                f"👤 Asesor: {st.session_state.correo_asesor}\n"
+                f"🏢 Cliente: {nombre} | NIT: {n_doc}\n"
+                f"📦 Servicio: {servicio}\n"
+                f"💰 Valor: ${valor:,.0f} COP\n"
+                f"📌 Estado: {estado}"
             )
+
+            # ── Notificación de seguimiento según estado ──────────
+            ESTADOS_SEGUIMIENTO = {
+                "Cotizado": (
+                    "📋 SEGUIMIENTO REQUERIDO — Cotización enviada\n"
+                    "━━━━━━━━━━━━━━━━━━━━━\n"
+                    "El cliente recibió la cotización. Hacer seguimiento para resolver dudas y avanzar al cierre.\n"
+                ),
+                "En proceso de firma": (
+                    "✍️ SEGUIMIENTO REQUERIDO — En proceso de firma\n"
+                    "━━━━━━━━━━━━━━━━━━━━━\n"
+                    "El cliente está revisando el contrato. Asegurarse de que no haya obstáculos para la firma.\n"
+                ),
+                "Anulado": (
+                    "❌ ALERTA — Venta Anulada\n"
+                    "━━━━━━━━━━━━━━━━━━━━━\n"
+                    "Esta venta fue marcada como Anulada. Se recomienda contactar al cliente para entender el motivo.\n"
+                ),
+            }
+
+            if estado in ESTADOS_SEGUIMIENTO:
+                enviar_telegram(
+                    f"{ESTADOS_SEGUIMIENTO[estado]}"
+                    f"👤 Asesor: {st.session_state.correo_asesor}\n"
+                    f"🏢 Cliente: {nombre}\n"
+                    f"📞 Tipo seguimiento: {tipo_seg}\n"
+                    f"📅 Fecha programada: {fecha_seg}"
+                )
+
             st.success("✅ Venta registrada correctamente.")
             st.rerun()
 
@@ -526,12 +558,47 @@ with tab2:
                             texto_actual + f"\n[{date.today()}] {nota_adicional.strip()}"
                         )
                     df_upd.to_csv(CSV_PATH, index=False)
+
+                    # ── Notificación base: cambio de estado ──────────
                     enviar_telegram(
                         f"🔄 Venta #{str(id_sel).zfill(4)} actualizada\n"
-                        f"Cliente: {fila.get('CLIENTE','N/A')}\n"
-                        f"Nuevo estado: {nuevo_estado}\n"
-                        f"Asesor: {st.session_state.correo_asesor}"
+                        f"━━━━━━━━━━━━━━━━━━━━━\n"
+                        f"🏢 Cliente: {fila.get('CLIENTE','N/A')}\n"
+                        f"📌 Nuevo estado: {nuevo_estado}\n"
+                        f"👤 Asesor: {st.session_state.correo_asesor}"
                     )
+
+                    # ── Notificación de seguimiento según nuevo estado ─
+                    fecha_seg_venta  = fila.get("FECHA_SEGUIMIENTO", "No definida")
+                    tipo_seg_venta   = fila.get("TIPO_SEGUIMIENTO",  "No definido")
+
+                    MENSAJES_SEGUIMIENTO = {
+                        "Cotizado": (
+                            "📋 SEGUIMIENTO REQUERIDO — Cotización enviada\n"
+                            "━━━━━━━━━━━━━━━━━━━━━\n"
+                            "El cliente recibió la cotización. Hacer seguimiento para resolver dudas y avanzar al cierre.\n"
+                        ),
+                        "En proceso de firma": (
+                            "✍️ SEGUIMIENTO REQUERIDO — En proceso de firma\n"
+                            "━━━━━━━━━━━━━━━━━━━━━\n"
+                            "El cliente está revisando el contrato. Asegurarse de que no haya obstáculos para la firma.\n"
+                        ),
+                        "Anulado": (
+                            "❌ ALERTA — Venta Anulada\n"
+                            "━━━━━━━━━━━━━━━━━━━━━\n"
+                            "Esta venta fue marcada como Anulada. Se recomienda contactar al cliente para entender el motivo.\n"
+                        ),
+                    }
+
+                    if nuevo_estado in MENSAJES_SEGUIMIENTO:
+                        enviar_telegram(
+                            f"{MENSAJES_SEGUIMIENTO[nuevo_estado]}"
+                            f"🏢 Cliente: {fila.get('CLIENTE','N/A')}\n"
+                            f"👤 Asesor: {st.session_state.correo_asesor}\n"
+                            f"📞 Tipo seguimiento: {tipo_seg_venta}\n"
+                            f"📅 Fecha programada: {fecha_seg_venta}"
+                        )
+
                     st.success("✅ Estado actualizado y notificado.")
                     st.rerun()
 
