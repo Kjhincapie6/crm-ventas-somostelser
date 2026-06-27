@@ -517,9 +517,9 @@ with tab1:
 
         else:
             st.error("⚠️ Faltan datos obligatorios.")
-# ==========================================
-# PESTAÑA 2: ACTUALIZAR EL ESTADO
-# ==========================================
+# ==========================================================
+# PESTAÑA 2: ACTUALIZAR EL ESTADO (BLOQUE ÚNICO Y CORREGIDO)
+# ==========================================================
 with tab2:
     st.subheader("🔄 Actualizar Seguimiento de Venta")
     
@@ -528,52 +528,49 @@ with tab2:
     else:
         df_update = pd.read_csv("crm_sistema_maestro.csv")
         
-        # Red de seguridad para columnas
+        # Red de seguridad para asegurar columnas
         for col in ['ESTADO', 'ID_VENTA', 'CLIENTE', 'ASESOR']:
             if col not in df_update.columns: df_update[col] = "Sin dato"
         
         # Convertir ID a numérico
         df_update["ID_VENTA"] = pd.to_numeric(df_update["ID_VENTA"], errors="coerce").fillna(0).astype(int)
         
-        # Filtro de Asesor
+        # Filtro de acceso
         df_mis_ventas = df_update if es_admin else df_update[df_update['ASESOR'] == st.session_state.correo_asesor]
         
         if df_mis_ventas.empty:
             st.warning("No tienes ventas registradas para actualizar.")
         else:
-            # --- CAMBIO AQUÍ: ID con formato 0001 + Nombre ---
+            # --- NUEVO FORMATO: 0001 NombreCliente ---
             df_mis_ventas = df_mis_ventas.copy()
-            df_mis_ventas['ID_FORMATO'] = df_mis_ventas['ID_VENTA'].astype(str).str.zfill(4)
-            df_mis_ventas['OPCION'] = df_mis_ventas['ID_FORMATO'] + " " + df_mis_ventas['CLIENTE']
+            df_mis_ventas['ID_FMT'] = df_mis_ventas['ID_VENTA'].astype(str).str.zfill(4)
+            df_mis_ventas['OPCION'] = df_mis_ventas['ID_FMT'] + " " + df_mis_ventas['CLIENTE']
             
             opciones = df_mis_ventas['OPCION'].tolist()
             
-            venta_seleccionada = st.selectbox("Selecciona la venta:", opciones, key="select_venta_update_tab2")
+            # Key única para evitar errores de duplicidad
+            seleccion = st.selectbox("Selecciona la venta:", opciones, key="sel_venta_unique_key")
             
-            if venta_seleccionada:
-                try:
-                    # Extraer el ID basado en los primeros 4 caracteres
-                    id_seleccionado = int(venta_seleccionada[:4])
-                    venta = df_update[df_update["ID_VENTA"] == id_seleccionado]
+            if seleccion:
+                # Extraer ID (primeros 4 caracteres)
+                id_v = int(seleccion[:4])
+                venta = df_update[df_update["ID_VENTA"] == id_v]
+                
+                if not venta.empty:
+                    st.info(f"📌 Estado actual: **{venta.iloc[0]['ESTADO']}**")
                     
-                    if not venta.empty:
-                        estado_actual = venta.iloc[0]["ESTADO"]
-                        st.info(f"📌 Estado actual: **{estado_actual}**")
-                        
-                        nuevo_estado = st.selectbox(
-                            "Cambiar estado:", 
-                            ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], 
-                            key="new_state_tab2"
-                        )
-                        
-                        if st.button("🔄 Guardar y Notificar", key="btn_update_tab2"):
-                            df_update.loc[df_update["ID_VENTA"] == id_seleccionado, "ESTADO"] = nuevo_estado
-                            df_update.to_csv("crm_sistema_maestro.csv", index=False)
-                            enviar_telegram(f"✅ Venta {id_seleccionado} actualizada a: {nuevo_estado}")
-                            st.success("✅ Guardado y notificado.")
-                            st.rerun()
-                except Exception as e:
-                    st.error(f"Error al procesar: {e}")
+                    nuevo_estado = st.selectbox(
+                        "Cambiar estado a:", 
+                        ["Cotizado", "En proceso de firma", "Ingreso de pedido", "Activado", "Anulado"], 
+                        key="sel_nuevo_estado_unique_key"
+                    )
+                    
+                    if st.button("🔄 Guardar y Notificar", key="btn_update_unique_key"):
+                        df_update.loc[df_update["ID_VENTA"] == id_v, "ESTADO"] = nuevo_estado
+                        df_update.to_csv("crm_sistema_maestro.csv", index=False)
+                        enviar_telegram(f"✅ Venta {id_v} actualizada a: {nuevo_estado}")
+                        st.success("✅ Guardado y notificado.")
+                        st.rerun()
 # ===============================================
 # PESTAÑA 3: DASHBOARD Y VISUALIZACIÓN DE DATA
 # ===============================================
