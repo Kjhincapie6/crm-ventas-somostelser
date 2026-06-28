@@ -364,25 +364,6 @@ def sidebar_render(df: pd.DataFrame):
 
         st.markdown("<hr style='border-top:1px solid #e2e8f0; margin:10px 0;'>", unsafe_allow_html=True)
 
-        # Tareas pendientes
-        st.markdown("### 🔔 Tareas Pendientes")
-        
-        # ... aquí van las tareas o indicadores ...
-        
-        # Empuja el botón hacia la parte inferior del sidebar
-        st.markdown(
-            """
-            <div style="height:180px;"></div>
-            """,
-            unsafe_allow_html=True
-        )
-        
-        st.markdown("<hr style='border-top:1px solid #e2e8f0;'>", unsafe_allow_html=True)
-        
-        if st.button("🔴 Cerrar Sesión", key="btn_logout", use_container_width=True):
-            st.session_state.clear()
-            st.rerun()
-
         # Asistente de Ofertas
         st.markdown("### 🔎 Asistente de Ofertas")
         st.caption("Buscar precio:")
@@ -417,7 +398,24 @@ def sidebar_render(df: pd.DataFrame):
                 mime="text/csv",
                 key="btn_export_sidebar"
             )
-
+        # Tareas pendientes
+                st.markdown("### 🔔 Tareas Pendientes")
+                
+                # ... aquí van las tareas o indicadores ...
+                
+                # Empuja el botón hacia la parte inferior del sidebar
+                st.markdown(
+                    """
+                    <div style="height:180px;"></div>
+                    """,
+                    unsafe_allow_html=True
+                )
+                
+                st.markdown("<hr style='border-top:1px solid #e2e8f0;'>", unsafe_allow_html=True)
+                
+                if st.button("🔴 Cerrar Sesión", key="btn_logout", use_container_width=True):
+                    st.session_state.clear()
+                    st.rerun()
 # ════════════════════════════════════════════════════════════
 # TAB 1 — REGISTRAR VENTA
 # ════════════════════════════════════════════════════════════
