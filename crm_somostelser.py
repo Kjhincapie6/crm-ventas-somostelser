@@ -348,6 +348,8 @@ def check_auth():
 
 def sidebar_render(df: pd.DataFrame):
     with st.sidebar:
+
+        # Logo
         LOGO_LOCAL = "logo_somostelser.png"
         LOGO_GITHUB = "https://raw.githubusercontent.com/TU_USUARIO/TU_REPOSITORIO/main/imagenes/logo_somostelser.png"
 
@@ -360,61 +362,94 @@ def sidebar_render(df: pd.DataFrame):
 
         # Usuario conectado
         rol_label = "👑 Admin" if st.session_state.get("rol") == "admin" else "👤 Asesor"
-        st.markdown(f"**{rol_label}:** `{st.session_state.get('display', '')}`")
+        st.markdown(
+            f"**{rol_label}:** `{st.session_state.get('display', '')}`"
+        )
 
-        st.markdown("<hr style='border-top:1px solid #e2e8f0; margin:10px 0;'>", unsafe_allow_html=True)
-        # Tareas pendientes
-                st.markdown("### 🔔 Tareas Pendientes")
-                
-                # ... aquí van las tareas o indicadores ...
-                
-                # Empuja el botón hacia la parte inferior del sidebar
-                st.markdown(
-                    """
-                    <div style="height:180px;"></div>
-                    """,
-                    unsafe_allow_html=True
-                )
-                
-                st.markdown("<hr style='border-top:1px solid #e2e8f0;'>", unsafe_allow_html=True)
-                
-                if st.button("🔴 Cerrar Sesión", key="btn_logout", use_container_width=True):
-                    st.session_state.clear()
-                    st.rerun()
+        st.markdown(
+            "<hr style='border-top:1px solid #e2e8f0; margin:10px 0;'>",
+            unsafe_allow_html=True
+        )
 
-        # Asistente de Ofertas
+        # =====================================================
+        # ASISTENTE DE OFERTAS
+        # =====================================================
+
         st.markdown("### 🔎 Asistente de Ofertas")
         st.caption("Buscar precio:")
-        busqueda = st.text_input("", placeholder="Ej: 500Mbps, 6.10, 60GB", key="sidebar_busqueda", label_visibility="collapsed")
+
+        busqueda = st.text_input(
+            "",
+            placeholder="Ej: 500Mbps, 6.10, 60GB",
+            key="sidebar_busqueda",
+            label_visibility="collapsed"
+        )
 
         if busqueda.strip():
+
             resultados = []
-            term = busqueda.strip().lower()
+            termino = busqueda.strip().lower()
+
+            # Planes móviles
             for familia, planes in PLANES_MOVIL.items():
                 for plan, precio in planes.items():
-                    if term in plan.lower() or term in familia.lower():
-                        resultados.append(f"📱 {plan}: **${precio:,}**")
+
+                    if (
+                        termino in str(plan).lower()
+                        or termino in str(familia).lower()
+                    ):
+                        resultados.append(
+                            f"📱 {plan}: **${precio:,}**"
+                        )
+
+            # Planes fijos
             for plan, precio in PLANES_FIJO.items():
-                if term in plan.lower():
-                    resultados.append(f"🌐 {plan}: **${precio:,}**")
+
+                if termino in str(plan).lower():
+
+                    resultados.append(
+                        f"🌐 {plan}: **${precio:,}**"
+                    )
+
             if resultados:
                 for r in resultados[:5]:
                     st.markdown(r)
             else:
                 st.caption("Sin coincidencias.")
 
-        st.markdown("<hr style='border-top:1px solid #e2e8f0; margin:10px 0;'>", unsafe_allow_html=True)
+        st.markdown("---")
 
-        # Resumen
+        # =====================================================
+        # BOTÓN CERRAR SESIÓN
+        # =====================================================
+
+        if st.button(
+            "🔴 Cerrar Sesión",
+            key="btn_logout",
+            use_container_width=True
+        ):
+            st.session_state.clear()
+            st.rerun()
+
+        st.markdown("---")
+
+        # =====================================================
+        # RESUMEN
+        # =====================================================
+
         st.markdown("### 📊 Resumen")
+
         if not df.empty:
+
             csv_export = df.to_csv(index=False).encode("utf-8")
+
             st.download_button(
                 "📤 Exportar CRM",
                 data=csv_export,
                 file_name=f"crm_somostelser_{datetime.now().strftime('%Y%m%d')}.csv",
                 mime="text/csv",
-                key="btn_export_sidebar"
+                key="btn_export_sidebar",
+                use_container_width=True
             )
         
 # ════════════════════════════════════════════════════════════
