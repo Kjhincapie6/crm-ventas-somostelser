@@ -859,30 +859,31 @@ if es_admin and tab3 is not None:
                     ).properties(height=260),
                     use_container_width=True
                 )
-
-                st.markdown("---")
-                st.markdown("#### 📊 Activadas y Anuladas por Portafolio")
-
-                graf = (
-                    df[df["ESTADO"].isin(["Activado", "Anulado"])]
-                    .groupby(["PORTAFOLIO", "ESTADO"])
-                    .size()
-                    .reset_index(name="CANTIDAD")
-                )
-
-                st.altair_chart(
-                    alt.Chart(graf)
-                    .mark_bar()
-                    .encode(
-                    x=alt.X("PORTAFOLIO:N", title="Portafolio"),
-                    y=alt.Y("CANTIDAD:Q", title="Cantidad"),
-                    color=alt.Color("ESTADO:N"),
-                    tooltip=["PORTAFOLIO", "ESTADO", "CANTIDAD"],
-                    xOffset="ESTADO:N"
-                )
-                    .properties(height=320),
-                    use_container_width=True
-                )
+                # Ventas totales fijo y movil  instaladasa vs anuladas 
+               # --- GRÁFICO: ACTIVADAS VS ANULADAS POR PORTAFOLIO ---
+                st.markdown("#### 📊 Portafolio: Activadas vs. Anuladas")
+                
+                # Normalizamos los estados para el gráfico
+                df['ESTADO_NORM'] = df['ESTADO'].replace({'Instalado': 'Activado', 'Ingreso de pedido': 'En Proceso'})
+                df_grafico = df[df['ESTADO_NORM'].isin(['Activado', 'Anulado'])]
+                
+                if not df_grafico.empty:
+                    g2_data = df_grafico.groupby(['PORTAFOLIO', 'ESTADO_NORM']).size().reset_index(name='CANTIDAD')
+                    
+                    grafico2 = alt.Chart(g2_data).mark_bar().encode(
+                        x=alt.X('PORTAFOLIO:N', title="Servicio"),
+                        xOffset='ESTADO_NORM:N',
+                        y=alt.Y('CANTIDAD:Q', title="Cantidad de Ventas"),
+                        color=alt.Color('ESTADO_NORM:N', 
+                                        legend=alt.Legend(title="Estado Final"),
+                                        scale=alt.Scale(domain=['Activado', 'Anulado'], 
+                                                        range=['#00a0e3', '#231f20'])), # Azul Somos Telser y Gris Oscuro
+                        tooltip=['PORTAFOLIO', 'ESTADO_NORM', 'CANTIDAD']
+                    ).properties(height=300)
+                    
+                    st.altair_chart(grafico2, use_container_width=True)
+                else:
+                    st.info("No hay suficientes datos de Activadas/Anuladas para mostrar el gráfico.")
 
                 # Análisis
                 st.markdown("### 💡 Análisis y Recomendaciones")
