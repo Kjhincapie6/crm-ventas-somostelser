@@ -744,15 +744,15 @@ def tab_base_datos(df: pd.DataFrame):
  
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
-        st.markdown(f"<div style='font-size:11px; color:#64748b;'>📋 Registros</div><div style='font-size:32px; font-weight:800;'>{total}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size:11px; color:#231f20;'>📋 Registros</div><div style='font-size:32px; font-weight:800;'>{total}</div>", unsafe_allow_html=True)
     with col2:
-        st.markdown(f"<div style='font-size:11px; color:#64748b;'>✅ Activadas</div><div style='font-size:32px; font-weight:800;'>{activadas}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size:11px; color:#231f20;'>✅ Activadas</div><div style='font-size:32px; font-weight:800;'>{activadas}</div>", unsafe_allow_html=True)
     with col3:
-        st.markdown(f"<div style='font-size:11px; color:#64748b;'>💰 Ingresos</div><div style='font-size:32px; font-weight:800;'>{ingresos_fmt}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size:11px; color:#231f20;'>💰 Ingresos</div><div style='font-size:32px; font-weight:800;'>{ingresos_fmt}</div>", unsafe_allow_html=True)
     with col4:
-        st.markdown(f"<div style='font-size:11px; color:#64748b;'>🌐 Fijo</div><div style='font-size:32px; font-weight:800;'>{fijo_c}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size:11px; color:#231f20;'>🌐 Fijo</div><div style='font-size:32px; font-weight:800;'>{fijo_c}</div>", unsafe_allow_html=True)
     with col5:
-        st.markdown(f"<div style='font-size:11px; color:#64748b;'>📱 Móvil</div><div style='font-size:32px; font-weight:800;'>{movil_c}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size:11px; color:#231f20;'>📱 Móvil</div><div style='font-size:32px; font-weight:800;'>{movil_c}</div>", unsafe_allow_html=True)
  
     st.markdown("---")
  
