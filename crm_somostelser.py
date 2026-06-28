@@ -772,79 +772,79 @@ def tab_base_datos(df: pd.DataFrame):
     st.markdown("---")
  
     # ── Gráfica 3: Activadas, Instaladas y Anuladas por Portafolio ──────────────
-
-st.markdown("#### 📊 Activadas, Instaladas y Anuladas por Portafolio")
-
-# Filtrar únicamente los estados de interés
-df_aa = df[df["ESTADO"].isin(["Activado", "Instalado", "Anulado"])].copy()
-
-# Agrupar información
-graf = (
-    df_aa.groupby(["PORTAFOLIO", "ESTADO"])
-         .size()
-         .reset_index(name="CANTIDAD")
-)
-
-if not graf.empty:
-
-    fig_aa = px.bar(
-        graf,
-        x="PORTAFOLIO",
-        y="CANTIDAD",
-        color="ESTADO",
-        text="CANTIDAD",
-        barmode="group",
-        template="plotly_white",
-        color_discrete_map={
-            "Activado": "#00a0e3",   # Azul corporativo
-            "Instalado": "#00a0e3",  # Azul corporativo
-            "Anulado": "#231f20"     # Negro del logo
-        },
-        labels={
-            "PORTAFOLIO": "Portafolio",
-            "CANTIDAD": "Cantidad",
-            "ESTADO": "Estado"
-        },
-        category_orders={
-            "ESTADO": ["Activado", "Instalado", "Anulado"]
-        }
-    )
-
-    fig_aa.update_traces(
-        textposition="outside",
-        textfont_size=12
-    )
-
-    fig_aa.update_layout(
-        height=350,
-        margin=dict(l=20, r=20, t=20, b=20),
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        font=dict(
-            family="Arial",
-            size=13,
-            color="#231f20"
-        ),
-        xaxis_title="Portafolio",
-        yaxis_title="Cantidad",
-        legend_title="Estado",
-        bargap=0.25
-    )
-
-    fig_aa.update_xaxes(
-        tickangle=0,
-        showgrid=False
-    )
-
-    fig_aa.update_yaxes(
-        showgrid=True,
-        gridcolor="#e5e7eb"
-    )
-
-    st.plotly_chart(fig_aa, use_container_width=True)
-
-else:
-    st.info("Sin datos para mostrar.")
+        
+        st.markdown("#### 📊 Activadas, Instaladas y Anuladas por Portafolio")
+        
+        # Filtrar únicamente los estados de interés
+        df_aa = df[df["ESTADO"].isin(["Activado", "Instalado", "Anulado"])].copy()
+        
+        # Agrupar información
+        graf = (
+            df_aa.groupby(["PORTAFOLIO", "ESTADO"])
+                 .size()
+                 .reset_index(name="CANTIDAD")
+        )
+        
+        if not graf.empty:
+        
+            fig_aa = px.bar(
+                graf,
+                x="PORTAFOLIO",
+                y="CANTIDAD",
+                color="ESTADO",
+                text="CANTIDAD",
+                barmode="group",
+                template="plotly_white",
+                color_discrete_map={
+                    "Activado": "#00a0e3",   # Azul corporativo
+                    "Instalado": "#00a0e3",  # Azul corporativo
+                    "Anulado": "#231f20"     # Negro del logo
+                },
+                labels={
+                    "PORTAFOLIO": "Portafolio",
+                    "CANTIDAD": "Cantidad",
+                    "ESTADO": "Estado"
+                },
+                category_orders={
+                    "ESTADO": ["Activado", "Instalado", "Anulado"]
+                }
+            )
+        
+            fig_aa.update_traces(
+                textposition="outside",
+                textfont_size=12
+            )
+        
+            fig_aa.update_layout(
+                height=350,
+                margin=dict(l=20, r=20, t=20, b=20),
+                plot_bgcolor="white",
+                paper_bgcolor="white",
+                font=dict(
+                    family="Arial",
+                    size=13,
+                    color="#231f20"
+                ),
+                xaxis_title="Portafolio",
+                yaxis_title="Cantidad",
+                legend_title="Estado",
+                bargap=0.25
+            )
+        
+            fig_aa.update_xaxes(
+                tickangle=0,
+                showgrid=False
+            )
+        
+            fig_aa.update_yaxes(
+                showgrid=True,
+                gridcolor="#e5e7eb"
+            )
+        
+            st.plotly_chart(fig_aa, use_container_width=True)
+        
+        else:
+            st.info("Sin datos para mostrar.")
      
         # ── Análisis y Recomendaciones ────────────────────────
         st.markdown("#### 💡 Análisis y Recomendaciones")
