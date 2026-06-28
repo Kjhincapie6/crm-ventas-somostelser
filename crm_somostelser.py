@@ -345,19 +345,16 @@ def check_auth():
 # ════════════════════════════════════════════════════════════
 # SIDEBAR
 # ════════════════════════════════════════════════════════════
-
 def sidebar_render(df: pd.DataFrame):
-   with st.sidebar:
-    LOGO_LOCAL = "logo_somostelser.png"
-    LOGO_GITHUB = "https://raw.githubusercontent.com/USUARIO/REPOSITORIO/main/imagenes/logo_somostelser.png"
+    with st.sidebar:
 
-    if os.path.exists(LOGO_LOCAL):
-        st.image(LOGO_LOCAL, use_container_width=True)
-    else:
-        st.image(LOGO_GITHUB, use_container_width=True)
+        LOGO_URL = "..."
 
-    rol_label = "👑 Admin" if es_admin else "👤 Asesor"
-    st.markdown(f"**{rol_label}:** `{st.session_state.correo_asesor}`")
+        st.image(LOGO_URL, use_container_width=True)
+
+            rol_emoji = "👑" if st.session_state.get("rol") == "admin" else "👤"
+            st.markdown(...)
+       
         # Usuario
         rol_emoji = "👑" if st.session_state.get("rol") == "admin" else "👤"
         st.markdown(
