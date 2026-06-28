@@ -731,8 +731,15 @@ with tab2:
             seleccion = st.selectbox("Selecciona la venta:", df_vista["OPCION"].tolist(), key="sel_venta_tab2")
 
             if seleccion:
-                id_sel = int(seleccion[:4])
-                fila   = df_upd[df_upd["ID_VENTA"] == id_sel].iloc[0]
+                id_sel = int(seleccion.split(" — ")[0])
+
+                registro = df_upd[df_upd["ID_VENTA"] == id_sel]
+
+                if registro.empty:
+                    st.error(f"No se encontró la venta con ID {id_sel}.")
+                    st.stop()
+
+                fila = registro.iloc[0]
 
                 st.markdown("---")
                 ci1, ci2 = st.columns(2)
