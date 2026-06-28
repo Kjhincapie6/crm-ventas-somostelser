@@ -28,7 +28,7 @@ import io
 # CONFIGURACIÓN
 # ─────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="CRM Somostelser – Tigo Business",
+    page_title="SaaS Somostelser – Tigo Business",
     page_icon="📡",
     layout="wide",
     initial_sidebar_state="expanded"
