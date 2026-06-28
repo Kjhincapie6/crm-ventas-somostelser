@@ -781,19 +781,21 @@ def tab_base_datos(df: pd.DataFrame):
     
     st.markdown("---")
     
-    # ── Gráfica 3: Activadas, Instaladas y Anuladas por Portafolio ──────────────
+       # ── Gráfica 3: Activadas, Instaladas y Anuladas por Portafolio ──────────────
     st.markdown("#### 📊 Activadas, Instaladas y Anuladas por Portafolio")
-    
+
+    # Filtrar únicamente los estados de interés
     df_aa = df[df["ESTADO"].isin(["Activado", "Instalado", "Anulado"])].copy()
-    
+
+    # Agrupar por Portafolio y Estado
     graf = (
         df_aa.groupby(["PORTAFOLIO", "ESTADO"])
-             .size()
-             .reset_index(name="CANTIDAD")
+        .size()
+        .reset_index(name="CANTIDAD")
     )
-    
+
     if not graf.empty:
-    
+
         fig_aa = px.bar(
             graf,
             x="PORTAFOLIO",
@@ -816,12 +818,12 @@ def tab_base_datos(df: pd.DataFrame):
                 "ESTADO": ["Activado", "Instalado", "Anulado"]
             }
         )
-    
+
         fig_aa.update_traces(
             textposition="outside",
             textfont_size=12
         )
-    
+
         fig_aa.update_layout(
             height=350,
             margin=dict(l=20, r=20, t=20, b=20),
@@ -837,17 +839,23 @@ def tab_base_datos(df: pd.DataFrame):
             legend_title="Estado",
             bargap=0.25
         )
-    
-        fig_aa.update_xaxes(tickangle=0)
-        fig_aa.update_yaxes(gridcolor="#e5e7eb")
-    
+
+        fig_aa.update_xaxes(
+            tickangle=0,
+            showgrid=False
+        )
+
+        fig_aa.update_yaxes(
+            showgrid=True,
+            gridcolor="#e5e7eb"
+        )
+
         st.plotly_chart(fig_aa, use_container_width=True)
-    
+
     else:
         st.info("Sin datos para mostrar.")
-    
+
     st.markdown("---")
-         
         # ── Análisis y Recomendaciones ────────────────────────
         st.markdown("#### 💡 Análisis y Recomendaciones")
         col_obs, col_oport = st.columns(2)
