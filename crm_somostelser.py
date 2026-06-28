@@ -815,7 +815,7 @@ def tab_base_datos(df: pd.DataFrame):
             barmode="group",
             template="plotly_white",
             color_discrete_map={
-                "Activado" , "Instalado": "#00a0e3",   # Azul corporativo
+                ("Activado" , "Instalado"): "#00a0e3",   # Azul corporativo
                 "Anulado": "#231f20"     # Negro del logo
             },
             labels={
