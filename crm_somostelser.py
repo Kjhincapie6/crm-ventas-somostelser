@@ -771,85 +771,80 @@ def tab_base_datos(df: pd.DataFrame):
  
     st.markdown("---")
  
-    # ── Gráfica 2: Ventas por Asesor ─────────────────────
-    st.markdown("#### 👤 Ventas por Asesor")
-    try:
-        df_asesor = df.copy()
-        df_asesor["VALOR_NUM"] = pd.to_numeric(df_asesor["VALOR_TOTAL"], errors="coerce").fillna(0)
-        por_asesor = df_asesor.groupby("ASESOR")["VALOR_NUM"].sum().reset_index()
-        por_asesor.columns = ["Asesor", "Valor Total COP"]
-        fig_asesor = px.bar(por_asesor, x="Asesor", y="Valor Total COP",
-                            color_discrete_sequence=["#00aaff"],
-                            template="plotly_white")
-        fig_asesor.update_layout(height=280, showlegend=False,
-                                  margin=dict(l=0, r=0, t=10, b=80))
-        fig_asesor.update_xaxes(tickangle=45)
-        st.plotly_chart(fig_asesor, use_container_width=True)
-    except Exception as e:
-        st.warning(f"No se pudo generar gráfica de asesor: {e}")
- 
-    st.markdown("---")
- 
-    # ── Gráfica 3: Activadas y Anuladas por Portafolio ───────────────────────
+    # ── Gráfica 3: Activadas, Instaladas y Anuladas por Portafolio ──────────────
 
-    st.markdown("#### 📊 Activadas, Instalados y Anuladas por Portafolio")
-    
-    # Filtrar únicamente los estados que interesan
-    df_aa = df[df["ESTADO"].isin(["Activado", "Instalado", "Anulado"])].copy()
-    
-    # Agrupar por Portafolio y Estado
-    graf = (
-        df_aa.groupby(["PORTAFOLIO", "ESTADO"])
-             .size()
-             .reset_index(name="CANTIDAD")
+st.markdown("#### 📊 Activadas, Instaladas y Anuladas por Portafolio")
+
+# Filtrar únicamente los estados de interés
+df_aa = df[df["ESTADO"].isin(["Activado", "Instalado", "Anulado"])].copy()
+
+# Agrupar información
+graf = (
+    df_aa.groupby(["PORTAFOLIO", "ESTADO"])
+         .size()
+         .reset_index(name="CANTIDAD")
+)
+
+if not graf.empty:
+
+    fig_aa = px.bar(
+        graf,
+        x="PORTAFOLIO",
+        y="CANTIDAD",
+        color="ESTADO",
+        text="CANTIDAD",
+        barmode="group",
+        template="plotly_white",
+        color_discrete_map={
+            "Activado": "#00a0e3",   # Azul corporativo
+            "Instalado": "#00a0e3",  # Azul corporativo
+            "Anulado": "#231f20"     # Negro del logo
+        },
+        labels={
+            "PORTAFOLIO": "Portafolio",
+            "CANTIDAD": "Cantidad",
+            "ESTADO": "Estado"
+        },
+        category_orders={
+            "ESTADO": ["Activado", "Instalado", "Anulado"]
+        }
     )
-    
-    if not graf.empty:
-    
-        fig_aa = px.bar(
-            graf,
-            x="PORTAFOLIO",
-            y="CANTIDAD",
-            color="ESTADO",
-            text="CANTIDAD",
-            barmode="group",
-            template="plotly_white",
-            color_discrete_map={
-                "Activado": "#00a0e3",
-                "Instalado": "#00a0e3",
-                "Anulado": "#231f20"
-            }
-            },
-            labels={
-                "PORTAFOLIO": "Portafolio",
-                "CANTIDAD": "Cantidad",
-                "ESTADO": "Estado"
-            }
-        )
-    
-        fig_aa.update_traces(
-            textposition="outside"
-        )
-    
-        fig_aa.update_layout(
-            height=340,
-            margin=dict(l=10, r=10, t=20, b=20),
-            plot_bgcolor="white",
-            paper_bgcolor="white",
-            font=dict(
-                family="Arial",
-                size=13,
-                color="#231f20"
-            ),
-            xaxis_title="Portafolio",
-            yaxis_title="Cantidad",
-            legend_title="Estado"
-        )
-    
-        st.plotly_chart(fig_aa, use_container_width=True)
-    
-    else:
-        st.info("Sin datos de Activadas y Anuladas.")
+
+    fig_aa.update_traces(
+        textposition="outside",
+        textfont_size=12
+    )
+
+    fig_aa.update_layout(
+        height=350,
+        margin=dict(l=20, r=20, t=20, b=20),
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(
+            family="Arial",
+            size=13,
+            color="#231f20"
+        ),
+        xaxis_title="Portafolio",
+        yaxis_title="Cantidad",
+        legend_title="Estado",
+        bargap=0.25
+    )
+
+    fig_aa.update_xaxes(
+        tickangle=0,
+        showgrid=False
+    )
+
+    fig_aa.update_yaxes(
+        showgrid=True,
+        gridcolor="#e5e7eb"
+    )
+
+    st.plotly_chart(fig_aa, use_container_width=True)
+
+else:
+    st.info("Sin datos para mostrar.")
      
         # ── Análisis y Recomendaciones ────────────────────────
         st.markdown("#### 💡 Análisis y Recomendaciones")
