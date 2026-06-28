@@ -716,7 +716,6 @@ def tab_actualizar_estado(df: pd.DataFrame):
             st.error("❌ No se pudo actualizar.")
 
 # ════════════════════════════════════════════════════════════
-# ════════════════════════════════════════════════════════════
 # TAB 3 — BASE DE DATOS / DASHBOARD
 # ════════════════════════════════════════════════════════════
  
@@ -792,72 +791,20 @@ def tab_base_datos(df: pd.DataFrame):
     st.markdown("---")
  
     # ── Gráfica 3: Activadas y Anuladas por Portafolio ───
-st.write(
-    df.groupby(["PORTAFOLIO", "ESTADO"])
-      .size()
-      .reset_index(name="Cantidad")
-)
-
-st.markdown("#### 📊 Activadas y Anuladas por Portafolio")
-
-# Agrupar correctamente la información
-df_aa = (
-    df[df["ESTADO"].isin(["Activado", "Anulado"])]
-    .groupby(["PORTAFOLIO", "ESTADO"])
-    .size()
-    .reset_index(name="Cantidad")
-)
-
-if not df_aa.empty:
-
-    fig_aa = px.bar(
-        df_aa,
-        x="PORTAFOLIO",
-        y="Cantidad",
-        color="ESTADO",
-        text="Cantidad",
-        barmode="group",
-        template="plotly_white",
-        color_discrete_map={
-            "Activado": "#00a0e3",   # Azul corporativo
-            "Anulado": "#231f20"     # Negro / Gris oscuro del logo
-        },
-        labels={
-            "PORTAFOLIO": "Portafolio",
-            "Cantidad": "Cantidad",
-            "ESTADO": "Estado"
-        }
-    )
-
-    fig_aa.update_layout(
-        height=340,
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        font=dict(
-            color="#231f20",
-            size=13
-        ),
-        legend_title="Estado",
-        margin=dict(l=10, r=10, t=20, b=20)
-    )
-
-    fig_aa.update_xaxes(
-        tickangle=0,
-        title="Portafolio"
-    )
-
-    fig_aa.update_yaxes(
-        title="Cantidad"
-    )
-
-    fig_aa.update_traces(
-        textposition="outside"
-    )
-
-    st.plotly_chart(fig_aa, use_container_width=True)
-
-else:
-    st.info("Sin datos de Activadas y Anuladas.")
+    st.markdown("#### 📊 Activadas y Anuladas por Portafolio")
+    df_aa = df[df["ESTADO"].isin(["Activado", "Anulado"])].copy()
+    if not df_aa.empty:
+        fig_aa = px.bar(df_aa, x="PORTAFOLIO", color="ESTADO",
+                        barmode="group",
+                        color_discrete_map={"Activado": "#00aaff", "Anulado": "#1e3a8a"},
+                        template="plotly_white",
+                        labels={"PORTAFOLIO": "Portafolio", "count": "Cantidad"})
+        fig_aa.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=40))
+        st.plotly_chart(fig_aa, use_container_width=True)
+    else:
+        st.info("Sin datos de Activadas/Anuladas.")
+ 
+    st.markdown("---")
  
     # ── Análisis y Recomendaciones ────────────────────────
     st.markdown("#### 💡 Análisis y Recomendaciones")
