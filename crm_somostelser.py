@@ -792,6 +792,11 @@ def tab_base_datos(df: pd.DataFrame):
     st.markdown("---")
  
     # ── Gráfica 3: Activadas y Anuladas por Portafolio ───
+st.write(
+    df.groupby(["PORTAFOLIO", "ESTADO"])
+      .size()
+      .reset_index(name="Cantidad")
+)
 
 st.markdown("#### 📊 Activadas y Anuladas por Portafolio")
 
