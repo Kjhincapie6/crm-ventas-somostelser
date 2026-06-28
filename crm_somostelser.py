@@ -791,7 +791,7 @@ def tab_base_datos(df: pd.DataFrame):
     st.markdown("---")
  
     # ── Gráfica 3: Activadas y Anuladas por Portafolio ───
-    st.markdown("#### 📊 Activadas y Anuladas por Portafolio")
+    st.markdown("#### 📊Activadas, Instaladas y Anuladas por Portafolio")
     df_aa = df[df["ESTADO"].isin(["Activado", "Anulado"])].copy()
     if not df_aa.empty:
         fig_aa = px.bar(df_aa, x="PORTAFOLIO", color="ESTADO",
