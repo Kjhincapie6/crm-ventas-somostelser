@@ -1,0 +1,14 @@
+{
+  "Amazonas": ["Leticia", "Puerto Nariño", "Tarapacá"],
+  "Antioquia": ["Medellín", "Envigado", "Itagüí", "Sabaneta", "Bello", "Rionegro"],
+  "Arauca": ["Arauca", "Arauquita", "Cravo Norte", "Fortul", "Puerto Rondón", "Saravena", "Tame"],
+  "Atlántico": ["Barranquilla", "Soledad", "Puerto Colombia", "Malambo"],
+  "Bolívar": ["Cartagena", "Magangué", "Turbaco"],
+  "Boyacá": ["Tunja", "Duitama", "Sogamoso", "Chiquinquirá"],
+  "Caldas": ["Manizales", "La Dorada", "Chinchiná"],
+  "Cesar": ["Valledupar", "Aguachica"],
+  "Cundinamarca": ["Bogotá", "Soacha", "Chía", "Cajicá", "Zipaquirá"],
+  "Nariño": ["Pasto", "Ipiales"],
+  "Santander": ["Bucaramanga", "Floridablanca", "Girón", "Piedecuesta", "Barrancabermeja"],
+  "Valle del Cauca": ["Cali", "Palmira", "Buga", "Buenaventura", "Cartago"]
+}
