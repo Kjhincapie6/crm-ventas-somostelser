@@ -716,85 +716,197 @@ def tab_actualizar_estado(df: pd.DataFrame):
             st.error("❌ No se pudo actualizar.")
 
 # ════════════════════════════════════════════════════════════
-# TAB 3 — BASE DE DATOS / DASHBOARD (COLORES SOMOS TELSER)
+# TAB 3 — BASE DE DATOS / DASHBOARD
 # ════════════════════════════════════════════════════════════
-
+ 
 def tab_base_datos(df: pd.DataFrame):
     rol = st.session_state.get("rol", "asesor")
     nombre_rol = "Administrador" if rol == "admin" else "Asesor"
-    
-    # Fuente limpia y profesional
-    st.markdown(f"<h3 style='color:#231f20;'>📊 Dashboard y Base de Datos — Vista {nombre_rol}</h3>", unsafe_allow_html=True)
-
+    st.markdown(f"### 📊 Dashboard y Base de Datos — Vista {nombre_rol}")
+ 
     if df.empty:
         st.info("📭 Sin datos aún.")
         return
-
+ 
     # ── KPIs principales ──────────────────────────────────
-    total      = len(df)
-    activadas  = len(df[df["ESTADO"] == "Activado"])
+    total     = len(df)
+    activadas = len(df[df["ESTADO"] == "Activado"])
     instalados = len(df[df["ESTADO"] == "Instalado"])
-    anulados   = len(df[df["ESTADO"] == "Anulado"])
-    fijo_c     = len(df[df["PORTAFOLIO"] == "FIJO"])
-    movil_c    = len(df[df["PORTAFOLIO"] == "MOVIL"])
-
+    anulados  = len(df[df["ESTADO"] == "Anulado"])
+    fijo_c    = len(df[df["PORTAFOLIO"] == "FIJO"])
+    movil_c   = len(df[df["PORTAFOLIO"] == "MOVIL"])
+ 
     try:
         ingresos = df["VALOR_TOTAL"].apply(lambda x: float(str(x)) if str(x).replace('.','').isdigit() else 0).sum()
         ingresos_fmt = f"${ingresos:,.0f}"
     except Exception:
         ingresos_fmt = "$0"
-
-    # Estilo de tarjetas Kpi con colores corporativos
-    kpi_style = "font-size:11px; color:#231f20; font-weight:bold;"
-    val_style = "font-size:32px; font-weight:800; color:#00a0e3;"
-
+ 
     col1, col2, col3, col4, col5 = st.columns(5)
-    col1.markdown(f"<div style='{kpi_style}'>📋 Registros</div><div style='{val_style}'>{total}</div>", unsafe_allow_html=True)
-    col2.markdown(f"<div style='{kpi_style}'>✅ Activadas</div><div style='{val_style}'>{activadas}</div>", unsafe_allow_html=True)
-    col3.markdown(f"<div style='{kpi_style}'>💰 Ingresos</div><div style='{val_style}'>{ingresos_fmt}</div>", unsafe_allow_html=True)
-    col4.markdown(f"<div style='{kpi_style}'>🌐 Fijo</div><div style='{val_style}'>{fijo_c}</div>", unsafe_allow_html=True)
-    col5.markdown(f"<div style='{kpi_style}'>📱 Móvil</div><div style='{val_style}'>{movil_c}</div>", unsafe_allow_html=True)
-
+    with col1:
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>📋 Registros</div><div style='font-size:32px; font-weight:800;'>{total}</div>", unsafe_allow_html=True)
+    with col2:
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>✅ Activadas</div><div style='font-size:32px; font-weight:800;'>{activadas}</div>", unsafe_allow_html=True)
+    with col3:
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>💰 Ingresos</div><div style='font-size:32px; font-weight:800;'>{ingresos_fmt}</div>", unsafe_allow_html=True)
+    with col4:
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>🌐 Fijo</div><div style='font-size:32px; font-weight:800;'>{fijo_c}</div>", unsafe_allow_html=True)
+    with col5:
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>📱 Móvil</div><div style='font-size:32px; font-weight:800;'>{movil_c}</div>", unsafe_allow_html=True)
+ 
     st.markdown("---")
-
-    # ── Gráfica 1: Ventas por Estado (Color #00a0e3) ─────────────────────
-    st.markdown("<h4 style='color:#231f20;'>📈 Ventas por Estado</h4>", unsafe_allow_html=True)
+ 
+    # ── Gráfica 1: Ventas por Estado ─────────────────────
+    st.markdown("#### 📈 Ventas por Estado")
     conteo_estado = df["ESTADO"].value_counts().reset_index()
     conteo_estado.columns = ["Estado", "Cantidad"]
     fig_estado = px.bar(conteo_estado, x="Estado", y="Cantidad",
-                        color_discrete_sequence=["#00a0e3"],
+                        color_discrete_sequence=["#00aaff"],
                         template="plotly_white")
-    fig_estado.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=50))
+    fig_estado.update_layout(height=300, showlegend=False,
+                              xaxis_title="Estado", yaxis_title="Cantidad",
+                              margin=dict(l=0, r=0, t=10, b=80))
+    fig_estado.update_xaxes(tickangle=45)
     st.plotly_chart(fig_estado, use_container_width=True)
-
+ 
     st.markdown("---")
-
+ 
     # ── Gráfica 2: Ventas por Asesor ─────────────────────
-    st.markdown("<h4 style='color:#231f20;'>👤 Ventas por Asesor</h4>", unsafe_allow_html=True)
+    st.markdown("#### 👤 Ventas por Asesor")
     try:
         df_asesor = df.copy()
         df_asesor["VALOR_NUM"] = pd.to_numeric(df_asesor["VALOR_TOTAL"], errors="coerce").fillna(0)
         por_asesor = df_asesor.groupby("ASESOR")["VALOR_NUM"].sum().reset_index()
         por_asesor.columns = ["Asesor", "Valor Total COP"]
         fig_asesor = px.bar(por_asesor, x="Asesor", y="Valor Total COP",
-                            color_discrete_sequence=["#00a0e3"],
+                            color_discrete_sequence=["#00aaff"],
                             template="plotly_white")
-        fig_asesor.update_layout(height=280, margin=dict(l=0, r=0, t=10, b=50))
+        fig_asesor.update_layout(height=280, showlegend=False,
+                                  margin=dict(l=0, r=0, t=10, b=80))
+        fig_asesor.update_xaxes(tickangle=45)
         st.plotly_chart(fig_asesor, use_container_width=True)
     except Exception as e:
-        st.warning("No se pudo generar gráfica de asesor.")
-
+        st.warning(f"No se pudo generar gráfica de asesor: {e}")
+ 
     st.markdown("---")
-
-    # ── Gráfica 3: Activadas y Anuladas (Azul y Gris Oscuro) ───
-    st.markdown("<h4 style='color:#231f20;'>📊 Activadas y Anuladas por Portafolio</h4>", unsafe_allow_html=True)
+ 
+    # ── Gráfica 3: Activadas y Anuladas por Portafolio ───
+    st.markdown("#### 📊 Activadas y Anuladas por Portafolio")
     df_aa = df[df["ESTADO"].isin(["Activado", "Anulado"])].copy()
     if not df_aa.empty:
         fig_aa = px.bar(df_aa, x="PORTAFOLIO", color="ESTADO",
                         barmode="group",
-                        color_discrete_map={"Activado": "#00a0e3", "Anulado": "#231f20"},
-                        template="plotly_white")
+                        color_discrete_map={"Activado": "#00aaff", "Anulado": "#1e3a8a"},
+                        template="plotly_white",
+                        labels={"PORTAFOLIO": "Portafolio", "count": "Cantidad"})
         fig_aa.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=40))
         st.plotly_chart(fig_aa, use_container_width=True)
     else:
         st.info("Sin datos de Activadas/Anuladas.")
+ 
+    st.markdown("---")
+ 
+    # ── Análisis y Recomendaciones ────────────────────────
+    st.markdown("#### 💡 Análisis y Recomendaciones")
+    col_obs, col_oport = st.columns(2)
+    tasa_anulacion = (anulados / total * 100) if total > 0 else 0
+    with col_obs:
+        st.markdown("**Observación:**")
+        if tasa_anulacion > 25:
+            st.warning(f"⚠️ Tasa de anulación alta: {tasa_anulacion:.1f}%. Revisar proceso de validación.")
+        elif tasa_anulacion > 15:
+            st.info(f"ℹ️ Tasa de anulación moderada: {tasa_anulacion:.1f}%. Monitorear.")
+        else:
+            st.success(f"✅ Tasa de anulación normal: {tasa_anulacion:.1f}%.")
+    with col_oport:
+        st.markdown("**Oportunidad:**")
+        if fijo_c > movil_c:
+            st.markdown("• Portafolio **Fijo** lidera. Potenciar cross-selling hacia clientes **Móviles**.")
+        else:
+            st.markdown("• Portafolio **Móvil** lidera. Potenciar cross-selling hacia clientes **Fijos**.")
+ 
+    st.markdown("---")
+ 
+    # ── Base de Datos Completa ────────────────────────────
+    st.markdown("#### 🗃️ Base de Datos Completa")
+ 
+    # Filtros solo para admin
+    if rol == "admin":
+        asesores_lista = ["Todos"] + sorted(df["ASESOR"].dropna().unique().tolist())
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            f_asesor = st.selectbox("Filtrar por asesor:", asesores_lista, key="db_asesor")
+        with col_f2:
+            estados_lista = list(df["ESTADO"].dropna().unique())
+            f_estados = st.multiselect("Filtrar por estado:", estados_lista,
+                                        default=estados_lista, key="db_estados")
+        df_vista = df.copy()
+        if f_asesor != "Todos":
+            df_vista = df_vista[df_vista["ASESOR"] == f_asesor]
+        if f_estados:
+            df_vista = df_vista[df_vista["ESTADO"].isin(f_estados)]
+    else:
+        df_vista = df[df["ASESOR"] == st.session_state.get("usuario", "")]
+ 
+    cols_visibles = ["ID_VENTA","ESTADO","PORTAFOLIO","SERVICIO","ASESOR",
+                     "FECHA_REGISTRO","NIT","CLIENTE","TEL_CONTACTO","EMAIL_CLIENTE"]
+    cols_show = [c for c in cols_visibles if c in df_vista.columns]
+ 
+    st.dataframe(
+        df_vista[cols_show].sort_values("ID_VENTA", ascending=True),
+        use_container_width=True,
+        hide_index=False,
+    )
+ 
+    # Exportar vista
+    csv_vista = df_vista[cols_show].to_csv(index=False).encode("utf-8")
+    st.download_button(
+        "📥 Descargar Vista Actual",
+        data=csv_vista,
+        file_name=f"crm_vista_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+        mime="text/csv",
+        key="btn_dl_vista"
+    )
+ 
+# ════════════════════════════════════════════════════════════
+# MAIN
+# ════════════════════════════════════════════════════════════
+ 
+def main():
+    if "auth" not in st.session_state:
+        st.session_state["auth"] = False
+ 
+    check_auth()
+ 
+    # Cargar datos una sola vez
+    df = cargar_datos()
+ 
+    # Sidebar
+    sidebar_render(df)
+ 
+    # Encabezado principal (idéntico al original)
+    st.markdown("""
+    <h1 style="font-size:28px; font-weight:700; color:#1e293b; margin-bottom:2px;">
+      📡 Portal de Ventas Somos Telser
+    </h1>
+    <p style="font-size:14px; color:#64748b; margin-top:0; margin-bottom:16px;">
+      Gestión Inteligente de Contratos B2B
+    </p>
+    """, unsafe_allow_html=True)
+ 
+    # Tabs principales (idénticos al original)
+    tab1, tab2, tab3 = st.tabs(["📋 Registrar Venta", "🔄 Actualizar Estado", "📊 Base de Datos"])
+ 
+    with tab1:
+        tab_registrar_venta()
+ 
+    with tab2:
+        tab_actualizar_estado(df)
+ 
+    with tab3:
+        tab_base_datos(df)
+ 
+ 
+if __name__ == "__main__":
+    main()
+ 
