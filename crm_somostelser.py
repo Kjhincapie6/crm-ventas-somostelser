@@ -793,84 +793,84 @@ def tab_base_datos(df: pd.DataFrame):
     # ── Gráfica 3: Activadas y Anuladas por Portafolio ───
     # ── Gráfica 3: Activadas y Anuladas por Portafolio ───────────────────────
 
-st.markdown("#### 📊 Activadas y Anuladas por Portafolio")
-
-# Filtrar únicamente los estados que interesan
-df_aa = df[df["ESTADO"].isin(["Activado", "Anulado"])].copy()
-
-# Agrupar por Portafolio y Estado
-graf = (
-    df_aa.groupby(["PORTAFOLIO", "ESTADO"])
-         .size()
-         .reset_index(name="CANTIDAD")
-)
-
-if not graf.empty:
-
-    fig_aa = px.bar(
-        graf,
-        x="PORTAFOLIO",
-        y="CANTIDAD",
-        color="ESTADO",
-        text="CANTIDAD",
-        barmode="group",
-        template="plotly_white",
-        color_discrete_map={
-            "Activado": "#00a0e3",   # Azul corporativo
-            "Anulado": "#231f20"     # Negro del logo
-        },
-        labels={
-            "PORTAFOLIO": "Portafolio",
-            "CANTIDAD": "Cantidad",
-            "ESTADO": "Estado"
-        }
+    st.markdown("#### 📊 Activadas y Anuladas por Portafolio")
+    
+    # Filtrar únicamente los estados que interesan
+    df_aa = df[df["ESTADO"].isin(["Activado", "Anulado"])].copy()
+    
+    # Agrupar por Portafolio y Estado
+    graf = (
+        df_aa.groupby(["PORTAFOLIO", "ESTADO"])
+             .size()
+             .reset_index(name="CANTIDAD")
     )
-
-    fig_aa.update_traces(
-        textposition="outside"
-    )
-
-    fig_aa.update_layout(
-        height=340,
-        margin=dict(l=10, r=10, t=20, b=20),
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        font=dict(
-            family="Arial",
-            size=13,
-            color="#231f20"
-        ),
-        xaxis_title="Portafolio",
-        yaxis_title="Cantidad",
-        legend_title="Estado"
-    )
-
-    st.plotly_chart(fig_aa, use_container_width=True)
-
-else:
-    st.info("Sin datos de Activadas y Anuladas.")
- 
-    # ── Análisis y Recomendaciones ────────────────────────
-    st.markdown("#### 💡 Análisis y Recomendaciones")
-    col_obs, col_oport = st.columns(2)
-    tasa_anulacion = (anulados / total * 100) if total > 0 else 0
-    with col_obs:
-        st.markdown("**Observación:**")
-        if tasa_anulacion > 25:
-            st.warning(f"⚠️ Tasa de anulación alta: {tasa_anulacion:.1f}%. Revisar proceso de validación.")
-        elif tasa_anulacion > 15:
-            st.info(f"ℹ️ Tasa de anulación moderada: {tasa_anulacion:.1f}%. Monitorear.")
-        else:
-            st.success(f"✅ Tasa de anulación normal: {tasa_anulacion:.1f}%.")
-    with col_oport:
-        st.markdown("**Oportunidad:**")
-        if fijo_c > movil_c:
-            st.markdown("• Portafolio **Fijo** lidera. Potenciar cross-selling hacia clientes **Móviles**.")
-        else:
-            st.markdown("• Portafolio **Móvil** lidera. Potenciar cross-selling hacia clientes **Fijos**.")
- 
-    st.markdown("---")
- 
+    
+    if not graf.empty:
+    
+        fig_aa = px.bar(
+            graf,
+            x="PORTAFOLIO",
+            y="CANTIDAD",
+            color="ESTADO",
+            text="CANTIDAD",
+            barmode="group",
+            template="plotly_white",
+            color_discrete_map={
+                "Activado": "#00a0e3",   # Azul corporativo
+                "Anulado": "#231f20"     # Negro del logo
+            },
+            labels={
+                "PORTAFOLIO": "Portafolio",
+                "CANTIDAD": "Cantidad",
+                "ESTADO": "Estado"
+            }
+        )
+    
+        fig_aa.update_traces(
+            textposition="outside"
+        )
+    
+        fig_aa.update_layout(
+            height=340,
+            margin=dict(l=10, r=10, t=20, b=20),
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            font=dict(
+                family="Arial",
+                size=13,
+                color="#231f20"
+            ),
+            xaxis_title="Portafolio",
+            yaxis_title="Cantidad",
+            legend_title="Estado"
+        )
+    
+        st.plotly_chart(fig_aa, use_container_width=True)
+    
+    else:
+        st.info("Sin datos de Activadas y Anuladas.")
+     
+        # ── Análisis y Recomendaciones ────────────────────────
+        st.markdown("#### 💡 Análisis y Recomendaciones")
+        col_obs, col_oport = st.columns(2)
+        tasa_anulacion = (anulados / total * 100) if total > 0 else 0
+        with col_obs:
+            st.markdown("**Observación:**")
+            if tasa_anulacion > 25:
+                st.warning(f"⚠️ Tasa de anulación alta: {tasa_anulacion:.1f}%. Revisar proceso de validación.")
+            elif tasa_anulacion > 15:
+                st.info(f"ℹ️ Tasa de anulación moderada: {tasa_anulacion:.1f}%. Monitorear.")
+            else:
+                st.success(f"✅ Tasa de anulación normal: {tasa_anulacion:.1f}%.")
+        with col_oport:
+            st.markdown("**Oportunidad:**")
+            if fijo_c > movil_c:
+                st.markdown("• Portafolio **Fijo** lidera. Potenciar cross-selling hacia clientes **Móviles**.")
+            else:
+                st.markdown("• Portafolio **Móvil** lidera. Potenciar cross-selling hacia clientes **Fijos**.")
+     
+        st.markdown("---")
+     
     # ── Base de Datos Completa ────────────────────────────
     st.markdown("#### 🗃️ Base de Datos Completa")
  
