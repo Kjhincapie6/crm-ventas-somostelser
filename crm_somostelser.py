@@ -349,14 +349,11 @@ def check_auth():
 def sidebar_render(df: pd.DataFrame):
     with st.sidebar:
         # Logo texto ST Somos Telser (fiel al original)
-        st.markdown("""
-        <div style="text-align:center; padding:12px 8px 6px 8px; border:2px solid #00aaff;
-                    border-radius:8px; margin-bottom:12px;">
-          <div style="font-size:32px; font-weight:900; color:#00aaff; line-height:1;">ST<span style="font-size:14px;">•••</span></div>
-          <div style="font-size:18px; font-weight:800; color:#1e3a5f; line-height:1.1;">SOMOS<br>TEL<span style="color:#00aaff;">·</span>SER</div>
-          <div style="font-size:9px; color:#64748b; margin-top:3px;">Telecomunicaciones y Servicios</div>
-        </div>
-        """, unsafe_allow_html=True)
+        # Logo texto ST Somos Telser (fiel al original)
+         # Logo texto ST Somos Telser (fiel al original)
+            st.markdown("""
+            ...
+            """, unsafe_allow_html=True)   
 
         # Usuario
         rol_emoji = "👑" if st.session_state.get("rol") == "admin" else "👤"
