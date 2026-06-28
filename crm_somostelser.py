@@ -861,6 +861,28 @@ if es_admin and tab3 is not None:
                 )
 
                 st.markdown("---")
+                st.markdown("#### 📊 Activadas y Anuladas por Portafolio")
+
+                graf = (
+                    df[df["ESTADO"].isin(["Activado", "Anulado"])]
+                    .groupby(["PORTAFOLIO", "ESTADO"])
+                    .size()
+                    .reset_index(name="CANTIDAD")
+                )
+
+                st.altair_chart(
+                    alt.Chart(graf)
+                    .mark_bar()
+                    .encode(
+                    x=alt.X("PORTAFOLIO:N", title="Portafolio"),
+                    y=alt.Y("CANTIDAD:Q", title="Cantidad"),
+                    color=alt.Color("ESTADO:N"),
+                    tooltip=["PORTAFOLIO", "ESTADO", "CANTIDAD"],
+                    xOffset="ESTADO:N"
+                )
+                    .properties(height=320),
+                    use_container_width=True
+                )
 
                 # Análisis
                 st.markdown("### 💡 Análisis y Recomendaciones")
