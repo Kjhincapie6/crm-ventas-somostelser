@@ -790,13 +790,12 @@ def tab_base_datos(df: pd.DataFrame):
  
     st.markdown("---")
  
-    # ── Gráfica 3: Activadas y Anuladas por Portafolio ───
     # ── Gráfica 3: Activadas y Anuladas por Portafolio ───────────────────────
 
-    st.markdown("#### 📊 Activadas y Anuladas por Portafolio")
+    st.markdown("#### 📊 Activadas, Instalados y Anuladas por Portafolio")
     
     # Filtrar únicamente los estados que interesan
-    df_aa = df[df["ESTADO"].isin(["Activado", "Anulado"])].copy()
+    df_aa = df[df["ESTADO"].isin(["Activado", "Instalado", "Anulado"])].copy()
     
     # Agrupar por Portafolio y Estado
     graf = (
@@ -816,7 +815,7 @@ def tab_base_datos(df: pd.DataFrame):
             barmode="group",
             template="plotly_white",
             color_discrete_map={
-                "Activado": "#00a0e3",   # Azul corporativo
+                "Activado" , "Instalado": "#00a0e3",   # Azul corporativo
                 "Anulado": "#231f20"     # Negro del logo
             },
             labels={
