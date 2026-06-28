@@ -716,6 +716,7 @@ def tab_actualizar_estado(df: pd.DataFrame):
             st.error("❌ No se pudo actualizar.")
 
 # ════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════
 # TAB 3 — BASE DE DATOS / DASHBOARD
 # ════════════════════════════════════════════════════════════
  
@@ -744,15 +745,15 @@ def tab_base_datos(df: pd.DataFrame):
  
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
-        st.markdown(f"<div style='font-size:11px; color:#231f20;'>📋 Registros</div><div style='font-size:32px; font-weight:800;'>{total}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>📋 Registros</div><div style='font-size:32px; font-weight:800;'>{total}</div>", unsafe_allow_html=True)
     with col2:
-        st.markdown(f"<div style='font-size:11px; color:#231f20;'>✅ Activadas</div><div style='font-size:32px; font-weight:800;'>{activadas}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>✅ Activadas</div><div style='font-size:32px; font-weight:800;'>{activadas}</div>", unsafe_allow_html=True)
     with col3:
-        st.markdown(f"<div style='font-size:11px; color:#231f20;'>💰 Ingresos</div><div style='font-size:32px; font-weight:800;'>{ingresos_fmt}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>💰 Ingresos</div><div style='font-size:32px; font-weight:800;'>{ingresos_fmt}</div>", unsafe_allow_html=True)
     with col4:
-        st.markdown(f"<div style='font-size:11px; color:#231f20;'>🌐 Fijo</div><div style='font-size:32px; font-weight:800;'>{fijo_c}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>🌐 Fijo</div><div style='font-size:32px; font-weight:800;'>{fijo_c}</div>", unsafe_allow_html=True)
     with col5:
-        st.markdown(f"<div style='font-size:11px; color:#231f20;'>📱 Móvil</div><div style='font-size:32px; font-weight:800;'>{movil_c}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>📱 Móvil</div><div style='font-size:32px; font-weight:800;'>{movil_c}</div>", unsafe_allow_html=True)
  
     st.markdown("---")
  
@@ -761,7 +762,7 @@ def tab_base_datos(df: pd.DataFrame):
     conteo_estado = df["ESTADO"].value_counts().reset_index()
     conteo_estado.columns = ["Estado", "Cantidad"]
     fig_estado = px.bar(conteo_estado, x="Estado", y="Cantidad",
-                        color_discrete_sequence=["231f20"],
+                        color_discrete_sequence=["#00aaff"],
                         template="plotly_white")
     fig_estado.update_layout(height=300, showlegend=False,
                               xaxis_title="Estado", yaxis_title="Cantidad",
@@ -779,7 +780,7 @@ def tab_base_datos(df: pd.DataFrame):
         por_asesor = df_asesor.groupby("ASESOR")["VALOR_NUM"].sum().reset_index()
         por_asesor.columns = ["Asesor", "Valor Total COP"]
         fig_asesor = px.bar(por_asesor, x="Asesor", y="Valor Total COP",
-                            color_discrete_sequence=["231f20"],
+                            color_discrete_sequence=["#00aaff"],
                             template="plotly_white")
         fig_asesor.update_layout(height=280, showlegend=False,
                                   margin=dict(l=0, r=0, t=10, b=80))
