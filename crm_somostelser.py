@@ -797,4 +797,4 @@ def tab_base_datos(df: pd.DataFrame):
         fig_aa.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=40))
         st.plotly_chart(fig_aa, use_container_width=True)
     else:
-        st.info("Sin datos de Activadas/Anuladas.")
+        st.info("Sin datos de Activadas/Anuladas."))
