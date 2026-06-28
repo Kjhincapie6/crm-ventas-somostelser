@@ -855,27 +855,46 @@ def tab_base_datos(df: pd.DataFrame):
     else:
         st.info("Sin datos para mostrar.")
 
+       st.markdown("---")
+
+    # ── Análisis y Recomendaciones ─────────────────────────────
+    st.markdown("#### 💡 Análisis y Recomendaciones")
+
+    col_obs, col_oport = st.columns(2)
+
+    tasa_anulacion = (anulados / total * 100) if total > 0 else 0
+
+    with col_obs:
+        st.markdown("**Observación:**")
+
+        if tasa_anulacion > 25:
+            st.warning(
+                f"⚠️ Tasa de anulación alta: {tasa_anulacion:.1f}%. Revisar proceso de validación."
+            )
+
+        elif tasa_anulacion > 15:
+            st.info(
+                f"ℹ️ Tasa de anulación moderada: {tasa_anulacion:.1f}%. Monitorear."
+            )
+
+        else:
+            st.success(
+                f"✅ Tasa de anulación normal: {tasa_anulacion:.1f}%."
+            )
+
+    with col_oport:
+        st.markdown("**Oportunidad:**")
+
+        if fijo_c > movil_c:
+            st.markdown(
+                "• Portafolio **Fijo** lidera. Potenciar cross-selling hacia clientes **Móviles**."
+            )
+        else:
+            st.markdown(
+                "• Portafolio **Móvil** lidera. Potenciar cross-selling hacia clientes **Fijos**."
+            )
+
     st.markdown("---")
-        # ── Análisis y Recomendaciones ────────────────────────
-        st.markdown("#### 💡 Análisis y Recomendaciones")
-        col_obs, col_oport = st.columns(2)
-        tasa_anulacion = (anulados / total * 100) if total > 0 else 0
-        with col_obs:
-            st.markdown("**Observación:**")
-            if tasa_anulacion > 25:
-                st.warning(f"⚠️ Tasa de anulación alta: {tasa_anulacion:.1f}%. Revisar proceso de validación.")
-            elif tasa_anulacion > 15:
-                st.info(f"ℹ️ Tasa de anulación moderada: {tasa_anulacion:.1f}%. Monitorear.")
-            else:
-                st.success(f"✅ Tasa de anulación normal: {tasa_anulacion:.1f}%.")
-        with col_oport:
-            st.markdown("**Oportunidad:**")
-            if fijo_c > movil_c:
-                st.markdown("• Portafolio **Fijo** lidera. Potenciar cross-selling hacia clientes **Móviles**.")
-            else:
-                st.markdown("• Portafolio **Móvil** lidera. Potenciar cross-selling hacia clientes **Fijos**.")
-     
-        st.markdown("---")
      
     # ── Base de Datos Completa ────────────────────────────
     st.markdown("#### 🗃️ Base de Datos Completa")
