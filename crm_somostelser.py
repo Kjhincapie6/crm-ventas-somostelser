@@ -345,15 +345,15 @@ def check_auth():
 # ════════════════════════════════════════════════════════════
 # SIDEBAR
 # ════════════════════════════════════════════════════════════
-def sidebar_render(df: pd.DataFrame):
-    with st.sidebar:
-
-        LOGO_URL = "..."
-
-        st.image(LOGO_URL, use_container_width=True)
-
-            rol_emoji = "👑" if st.session_state.get("rol") == "admin" else "👤"
-            st.markdown(...)
+        def sidebar_render(df: pd.DataFrame):
+            with st.sidebar:
+        
+                LOGO_URL = "..."
+        
+                st.image(LOGO_URL, use_container_width=True)
+        
+                    rol_emoji = "👑" if st.session_state.get("rol") == "admin" else "👤"
+                    st.markdown(...)
        
         # Usuario
         rol_emoji = "👑" if st.session_state.get("rol") == "admin" else "👤"
