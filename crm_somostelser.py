@@ -761,7 +761,7 @@ def tab_base_datos(df: pd.DataFrame):
     conteo_estado = df["ESTADO"].value_counts().reset_index()
     conteo_estado.columns = ["Estado", "Cantidad"]
     fig_estado = px.bar(conteo_estado, x="Estado", y="Cantidad",
-                        color_discrete_sequence=["#00aaff"],
+                        color_discrete_sequence=["231f20"],
                         template="plotly_white")
     fig_estado.update_layout(height=300, showlegend=False,
                               xaxis_title="Estado", yaxis_title="Cantidad",
@@ -779,7 +779,7 @@ def tab_base_datos(df: pd.DataFrame):
         por_asesor = df_asesor.groupby("ASESOR")["VALOR_NUM"].sum().reset_index()
         por_asesor.columns = ["Asesor", "Valor Total COP"]
         fig_asesor = px.bar(por_asesor, x="Asesor", y="Valor Total COP",
-                            color_discrete_sequence=["#00aaff"],
+                            color_discrete_sequence=["231f20"],
                             template="plotly_white")
         fig_asesor.update_layout(height=280, showlegend=False,
                                   margin=dict(l=0, r=0, t=10, b=80))
