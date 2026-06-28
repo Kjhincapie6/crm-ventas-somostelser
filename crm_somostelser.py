@@ -345,30 +345,30 @@ def check_auth():
 # ════════════════════════════════════════════════════════════
 # SIDEBAR
 # ════════════════════════════════════════════════════════════
-        def sidebar_render(df: pd.DataFrame):
-            with st.sidebar:
-        
-                LOGO_URL = "..."
-        
-                st.image(LOGO_URL, use_container_width=True)
-        
-                    rol_emoji = "👑" if st.session_state.get("rol") == "admin" else "👤"
-                    st.markdown(...)
-       
-        # Usuario
-        rol_emoji = "👑" if st.session_state.get("rol") == "admin" else "👤"
-        st.markdown(
-            f"<div style='font-size:12px; color:#64748b;'>{rol_emoji} <b>{st.session_state.get('rol','').capitalize()}:</b> "
-            f"<span style='color:#00aaff; font-size:11px;'>{st.session_state.get('display','')}</span></div>",
-            unsafe_allow_html=True
-        )
+
+def sidebar_render(df: pd.DataFrame):
+    with st.sidebar:
+        LOGO_LOCAL = "logo_somostelser.png"
+        LOGO_GITHUB = "https://raw.githubusercontent.com/TU_USUARIO/TU_REPOSITORIO/main/imagenes/logo_somostelser.png"
+
+        if os.path.exists(LOGO_LOCAL):
+            st.image(LOGO_LOCAL, use_container_width=True)
+        else:
+            st.image(LOGO_GITHUB, use_container_width=True)
+
+        st.markdown("---")
+
+        # Usuario conectado
+        rol_label = "👑 Admin" if st.session_state.get("rol") == "admin" else "👤 Asesor"
+        st.markdown(f"**{rol_label}:** `{st.session_state.get('display', '')}`")
+
         st.markdown("<hr style='border-top:1px solid #e2e8f0; margin:10px 0;'>", unsafe_allow_html=True)
 
-        # Tareas Pendientes
+        # Tareas pendientes
         st.markdown("### 🔔 Tareas Pendientes")
+
         if st.button("🔴 Cerrar Sesión", key="btn_logout"):
-            for k in list(st.session_state.keys()):
-                del st.session_state[k]
+            st.session_state.clear()
             st.rerun()
 
         st.markdown("<hr style='border-top:1px solid #e2e8f0; margin:10px 0;'>", unsafe_allow_html=True)
