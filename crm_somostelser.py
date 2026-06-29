@@ -244,7 +244,7 @@ COLUMNAS = ["ID_VENTA","ESTADO","PORTAFOLIO","SERVICIO","ASESOR","FECHA_REGISTRO
 # ════════════════════════════════════════════════════════════
 # CAPA DE DATOS — Centralizada (preparada para migración SQL)
 # ════════════════════════════════════════════════════════════
-
+@st.cache_data
 def cargar_datos() -> pd.DataFrame:
     try:
         df = pd.read_csv(CSV_PATH, dtype=str)
