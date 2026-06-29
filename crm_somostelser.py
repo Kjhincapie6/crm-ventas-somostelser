@@ -734,17 +734,41 @@ def tab_registrar_venta():
     st.markdown("---")
     guardar_col = st.columns([1])[0]
     if st.button("💾 Guardar Venta", type="primary", use_container_width=True, key="btn_guardar_venta"):
+        
         # Validaciones
-        errores = []
-        if not num_doc.strip():  errores.append("Número de Documento es obligatorio.")
-        if not razon.strip():    errores.append("Razón Social o Nombre es obligatorio.")
-        if not depto:            errores.append("Departamento es obligatorio.")
-        if not municipio:        errores.append("Municipio es obligatorio.")
+       errores = []
 
-        if errores:
-            for e in errores:
-                st.error(f"❌ {e}")
-            st.stop()       
+       # Campos obligatorios
+       if not num_doc.strip():
+           errores.append("Número de Documento es obligatorio.")
+        
+       if not razon.strip():
+           errores.append("Razón Social o Nombre es obligatorio.")
+        
+       if not depto:
+           errores.append("Departamento es obligatorio.")
+        
+       if not municipio:
+           errores.append("Municipio es obligatorio.")
+        
+       # Gestión Técnica obligatoria para Móvil y Full Tigo
+       requiere_gestion = (
+           division == "Móvil"
+           or "Full Tigo" in plan_sel
+       )
+        
+       if requiere_gestion and not st.session_state.get("lista_lineas"):
+           errores.append(
+               "Debe registrar al menos una Gestión Técnica (Portabilidad, Línea Nueva o Línea Existente)."
+           )
+        
+       # Mostrar errores y detener el guardado
+       if errores:
+           for e in errores:
+               st.error(f"❌ {e}")
+           st.stop()
+                
+        ok, resultado = crear_venta(registro)      
 
         registro = {
             "ESTADO":           estado_ini,
