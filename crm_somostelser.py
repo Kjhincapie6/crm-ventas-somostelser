@@ -527,13 +527,21 @@ def tab_registrar_venta():
         nombre_contacto = st.text_input("Nombre contacto autorizado:", key="reg_nombre_contacto")
         movil_contacto  = st.text_input("Móvil contacto autorizado:", key="reg_movil_contacto")
 
-        # Gestión Técnica
-        st.markdown("### ⚙️ Gestión Técnica")
-        if division == "Móvil":
-            with st.expander("📋 Configurar Líneas Móviles (Click aquí) ▼"):
-                st.info("Configure las líneas en el panel derecho → Familia de plan.")
-        else:
-            st.caption("Internet fijo — sin líneas móviles.")
+    # --- Gestión Técnica Actualizada ---
+    st.markdown("### ⚙️ Gestión Técnica")
+    
+    # Añadimos la lógica para Fijo + Full Tigo
+    # Asumiendo que tienes un checkbox o input para 'Full Tigo'
+    es_full_tigo = st.checkbox("¿Tiene activado Full Tigo?", key="full_tigo_check")
+    
+    if division == "Móvil" or (division == "Fijo" and es_full_tigo):
+        with st.popover("📱 Configurar detalles (Clic aquí)"):
+            # Aquí reutilizas el mismo bloque de configuración de líneas
+            # que definimos antes
+            st.write("Configuración técnica activa")
+            # ... (bloque de configuración de líneas)
+    else:
+        st.caption("Internet fijo sin beneficios adicionales configurados.")
 
     with col_der:
         st.markdown("### 👤 Representante Legal")
