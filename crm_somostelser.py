@@ -857,9 +857,8 @@ def tab_registrar_venta():
             )
     
             enviar_telegram(msg)
-            limpiar_formulario()
-    
             st.cache_data.clear()
+            limpiar_formulario()
             st.rerun()
     
         else:
