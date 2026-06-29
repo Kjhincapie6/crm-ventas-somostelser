@@ -495,17 +495,21 @@ def sidebar_render(df: pd.DataFrame):
             )
         
 # ════════════════════════════════════════════════════════════
-# TAB 1 — REGISTRAR VENTA
+# TAB 1 — REGISTRAR VENTA (ORDENADO)
 # ════════════════════════════════════════════════════════════
 
 def tab_registrar_venta():
+    # Inicializar estado seguro
+    if "lista_lineas" not in st.session_state:
+        st.session_state.lista_lineas = []
+
     st.markdown("### Seleccione División:")
     division = st.radio("", ["Móvil", "Fijo"], horizontal=True, key="reg_division", label_visibility="collapsed")
-
     st.markdown("---")
 
     col_izq, col_der = st.columns(2)
 
+    # --- COLUMNA IZQUIERDA: DATOS CLIENTE ---
     with col_izq:
         st.markdown("### 📱 Datos del Cliente")
         tipo_doc = st.selectbox("Tipo Doc:", TIPOS_DOC, key="reg_tipo_doc")
@@ -515,89 +519,54 @@ def tab_registrar_venta():
         barrio    = st.text_input("Barrio:", key="reg_barrio")
 
         deptos = [""] + sorted(DEPARTAMENTOS_MUNICIPIOS.keys())
-        depto  = st.selectbox("Departamento:", deptos, key="reg_depto", placeholder="Escribe para buscar...")
-        if depto and depto in DEPARTAMENTOS_MUNICIPIOS:
-            municipios = [""] + DEPARTAMENTOS_MUNICIPIOS[depto]
-        else:
-            municipios = [""]
-        municipio = st.selectbox("Municipio:", municipios, key="reg_municipio",
-                                  disabled=(not depto))
+        depto  = st.selectbox("Departamento:", deptos, key="reg_depto")
+        
+        municipios = [""] + DEPARTAMENTOS_MUNICIPIOS.get(depto, []) if depto else [""]
+        municipio = st.selectbox("Municipio:", municipios, key="reg_municipio", disabled=(not depto))
 
         email_contacto  = st.text_input("Email contacto:", key="reg_email_contacto")
         nombre_contacto = st.text_input("Nombre contacto autorizado:", key="reg_nombre_contacto")
         movil_contacto  = st.text_input("Móvil contacto autorizado:", key="reg_movil_contacto")
 
-    # Inicializar la lista una sola vez
-if "lista_lineas" not in st.session_state:
-    st.session_state.lista_lineas = []
-
-st.subheader("⚙️ Gestión Técnica")
-
-with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
-
-    tipo_linea = st.radio(
-        "Tipo de gestión:",
-        ["Portabilidad", "Línea Nueva", "Línea Existente"],
-        key="tipo_linea_pop"
-    )
-
-    op_linea = "N/A"
-
-    if tipo_linea == "Portabilidad":
-        op_linea = st.selectbox(
-            "Operador Origen:",
-            ["Claro", "Movistar", "Móvil Éxito", "Wom"],
-            key="op_linea_pop"
-        )
-
-    cant_linea = st.number_input(
-        "Cantidad:",
-        min_value=1,
-        value=1,
-        key="cant_linea_pop"
-    )
-
-    num_linea = st.text_input(
-        "Número de línea:",
-        key="num_linea_pop"
-    )
-
-    if st.button("➕ Agregar línea", key="btn_add_linea"):
-
-        st.session_state.lista_lineas.append({
-            "cantidad": cant_linea,
-            "tipo": tipo_linea,
-            "operador": op_linea,
-            "numero": num_linea
-        })
-
-        st.success(f"✅ Línea {num_linea} agregada.")
-
-    if st.session_state.lista_lineas:
-
-        st.markdown("**Líneas acumuladas:**")
-
-        for i, ln in enumerate(st.session_state.lista_lineas, start=1):
-            st.write(
-                f"{i}. {ln['tipo']} | {ln['operador']} | "
-                f"{ln['numero']} | x{ln['cantidad']}"
-            )
-
-        if st.button("🗑️ Limpiar líneas", key="btn_clear_lineas"):
-            st.session_state.lista_lineas = []
-            st.rerun()
-
-    else:
-        st.info("La gestión móvil aplica también para Full Tigo.")
-
-    col_izq, col_der = st.columns(2)
-
+    # --- COLUMNA DERECHA: REPRESENTANTE Y GESTIÓN TÉCNICA ---
     with col_der:
         st.markdown("### 👤 Representante Legal")
         nombre_rep  = st.text_input("Nombre Rep. Legal:", key="reg_nombre_rep")
         cedula_rep  = st.text_input("Cédula Rep. Legal:", key="reg_cedula_rep")
         email_rep   = st.text_input("Correo Rep. Legal:", key="reg_email_rep")
         movil_rep   = st.text_input("Móvil Rep. Legal:", key="reg_movil_rep")
+
+        st.markdown("---")
+        st.subheader("⚙️ Gestión Técnica")
+
+        with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
+            tipo_linea = st.radio("Tipo de gestión:", ["Portabilidad", "Línea Nueva", "Línea Existente"], key="tipo_linea_pop")
+            
+            op_linea = "N/A"
+            if tipo_linea == "Portabilidad":
+                op_linea = st.selectbox("Operador Origen:", ["Claro", "Movistar", "Móvil Éxito", "Wom"], key="op_linea_pop")
+            
+            cant_linea = st.number_input("Cantidad:", min_value=1, value=1, key="cant_linea_pop")
+            num_linea  = st.text_input("Número de línea:", key="num_linea_pop")
+
+            if st.button("➕ Agregar línea", key="btn_add_linea"):
+                st.session_state.lista_lineas.append({
+                    "cantidad": cant_linea, "tipo": tipo_linea,
+                    "operador": op_linea, "numero": num_linea
+                })
+                st.success(f"✅ Línea {num_linea} agregada.")
+                st.rerun()
+
+            if st.session_state.lista_lineas:
+                st.markdown("**Líneas acumuladas:**")
+                for i, ln in enumerate(st.session_state.lista_lineas, start=1):
+                    st.write(f"{i}. {ln['tipo']} | {ln['operador']} | {ln['numero']} | x{ln['cantidad']}")
+                
+                if st.button("🗑️ Limpiar líneas", key="btn_clear_lineas"):
+                    st.session_state.lista_lineas = []
+                    st.rerun()
+            else:
+                st.info("La gestión móvil aplica también para Full Tigo.")
 
         st.markdown("### 📊 Estado y Plan")
         estado_ini = st.selectbox("Estado inicial:", ESTADOS, key="reg_estado")
