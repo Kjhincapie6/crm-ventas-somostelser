@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 from datetime import datetime, date
 import os
 import requests as req
+import random
 
 # ─── CONFIGURACIÓN DE PÁGINA ───────────────────────────────
 st.set_page_config(
@@ -586,6 +587,23 @@ def tab_registrar_venta():
             else:
                 desc_info = "Descuentos 6.0: 3-5L=13% · 6-9L=25% · 10+L=30% · Portación=50% 1er mes"
             st.caption(desc_info)
+            # Definir la lista al inicio del archivo, fuera de las funciones
+            FRASES_MOTIVACION = [
+                "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
+                "💎 La calidad de tu servicio es nuestra mayor ventaja.",
+                "📈 ¡A superar la meta de ventas de este mes!",
+                "🤝 Cada cliente cuenta, ¡haz que esta venta sea memorable!",
+                "🎯 ¡Enfocados en el objetivo, excelente gestión!",
+                "⚡ ¡Tu energía determina tu éxito, mantén el ritmo!",
+                "🌟 Un cliente feliz es la mejor estrategia de crecimiento.",
+                "📊 Buenos datos y gran estrategia siempre cierran ventas.",
+                "🔥 La persistencia vence a la resistencia, ¡tú puedes!",
+                "🏆 Los grandes logros nacen de la constancia diaria.",
+                "💼 Profesionalismo y visión: así se construyen relaciones duraderas.",
+                "🧠 Conecta con el cliente, entiende su necesidad y el cierre será natural.",
+                "💡 Cada gestión bien hecha es una semilla para el éxito de mañana.",
+                "🥇 ¡No hay límites cuando hay buena planeación y actitud!",
+            ]
             st.markdown(f"""
             <div style="background:#e0f2fe; border-left:4px solid #00aaff; border-radius:6px;
                         padding:12px 16px; margin:8px 0;">
