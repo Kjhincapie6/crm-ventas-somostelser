@@ -762,6 +762,12 @@ def tab_actualizar_estado(df: pd.DataFrame):
 # ════════════════════════════════════════════════════════════
  
 def tab_base_datos(df: pd.DataFrame):
+    # Paleta corporativa Somos Telser
+    COLOR_AZUL      = "#00a0e3"   # Instaladas / Activadas
+    COLOR_GRIS_OSC  = "#231f20"   # Anuladas
+    COLOR_FONDO     = "#f4f4f4"   # Fondos y detalles
+    COLOR_AZUL_SEC  = "#0288d1"   # Botones / secundario
+ 
     rol = st.session_state.get("rol", "asesor")
     nombre_rol = "Administrador" if rol == "admin" else "Asesor"
     st.markdown(f"### 📊 Dashboard y Base de Datos — Vista {nombre_rol}")
@@ -770,45 +776,76 @@ def tab_base_datos(df: pd.DataFrame):
         st.info("📭 Sin datos aún.")
         return
  
-    # ── KPIs principales ──────────────────────────────────
-    total     = len(df)
-    activadas = len(df[df["ESTADO"] == "Activado"])
+    # ── KPIs — calculados directo desde el DataFrame ──────
+    total      = len(df)
     instalados = len(df[df["ESTADO"] == "Instalado"])
-    anulados  = len(df[df["ESTADO"] == "Anulado"])
-    fijo_c    = len(df[df["PORTAFOLIO"] == "FIJO"])
-    movil_c   = len(df[df["PORTAFOLIO"] == "MOVIL"])
+    activados  = len(df[df["ESTADO"] == "Activado"])
+    anulados   = len(df[df["ESTADO"] == "Anulado"])
+    fijo_c     = len(df[df["PORTAFOLIO"] == "FIJO"])
+    movil_c    = len(df[df["PORTAFOLIO"] == "MOVIL"])
+ 
+    # Instalados/Anulados/Activados por portafolio — fuente única: df
+    fijo_instalado  = len(df[(df["PORTAFOLIO"] == "FIJO")  & (df["ESTADO"] == "Instalado")])
+    fijo_anulado    = len(df[(df["PORTAFOLIO"] == "FIJO")  & (df["ESTADO"] == "Anulado")])
+    movil_activado  = len(df[(df["PORTAFOLIO"] == "MOVIL") & (df["ESTADO"] == "Activado")])
+    movil_anulado   = len(df[(df["PORTAFOLIO"] == "MOVIL") & (df["ESTADO"] == "Anulado")])
  
     try:
-        ingresos = df["VALOR_TOTAL"].apply(lambda x: float(str(x)) if str(x).replace('.','').isdigit() else 0).sum()
+        ingresos = df["VALOR_TOTAL"].apply(
+            lambda x: float(str(x).replace(",","")) if str(x).replace(".","").replace(",","").isdigit() else 0
+        ).sum()
         ingresos_fmt = f"${ingresos:,.0f}"
     except Exception:
         ingresos_fmt = "$0"
  
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        st.markdown(f"<div style='font-size:11px; color:#64748b;'>📋 Registros</div><div style='font-size:32px; font-weight:800;'>{total}</div>", unsafe_allow_html=True)
-    with col2:
-        st.markdown(f"<div style='font-size:11px; color:#64748b;'>✅ Activadas</div><div style='font-size:32px; font-weight:800;'>{activadas}</div>", unsafe_allow_html=True)
-    with col3:
-        st.markdown(f"<div style='font-size:11px; color:#64748b;'>💰 Ingresos</div><div style='font-size:32px; font-weight:800;'>{ingresos_fmt}</div>", unsafe_allow_html=True)
-    with col4:
-        st.markdown(f"<div style='font-size:11px; color:#64748b;'>🌐 Fijo</div><div style='font-size:32px; font-weight:800;'>{fijo_c}</div>", unsafe_allow_html=True)
-    with col5:
-        st.markdown(f"<div style='font-size:11px; color:#64748b;'>📱 Móvil</div><div style='font-size:32px; font-weight:800;'>{movil_c}</div>", unsafe_allow_html=True)
+    # ── Tarjetas KPI con paleta corporativa ──────────────
+    def kpi_card(label, valor, color_borde, color_num="#1e293b"):
+        return f"""
+        <div style="background:{COLOR_FONDO}; border-left:5px solid {color_borde};
+                    border-radius:8px; padding:14px 16px; text-align:center;
+                    box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+          <div style="font-size:11px; color:#64748b; font-weight:600;
+                      text-transform:uppercase; letter-spacing:0.5px;">{label}</div>
+          <div style="font-size:30px; font-weight:800; color:{color_num}; margin-top:4px;">{valor}</div>
+        </div>"""
  
-    st.markdown("---")
+    c1, c2, c3, c4, c5 = st.columns(5)
+    with c1: st.markdown(kpi_card("📋 Registros", total, COLOR_AZUL_SEC), unsafe_allow_html=True)
+    with c2: st.markdown(kpi_card("✅ Instalados", instalados, COLOR_AZUL), unsafe_allow_html=True)
+    with c3: st.markdown(kpi_card("⚡ Activados", activados, COLOR_AZUL), unsafe_allow_html=True)
+    with c4: st.markdown(kpi_card("❌ Anulados", anulados, COLOR_GRIS_OSC, COLOR_GRIS_OSC), unsafe_allow_html=True)
+    with c5: st.markdown(kpi_card("🌐 Fijo / 📱 Móvil", f"{fijo_c} / {movil_c}", COLOR_AZUL_SEC), unsafe_allow_html=True)
+ 
+    st.markdown("<br>", unsafe_allow_html=True)
  
     # ── Gráfica 1: Ventas por Estado ─────────────────────
     st.markdown("#### 📈 Ventas por Estado")
     conteo_estado = df["ESTADO"].value_counts().reset_index()
     conteo_estado.columns = ["Estado", "Cantidad"]
-    fig_estado = px.bar(conteo_estado, x="Estado", y="Cantidad",
-                        color_discrete_sequence=["#00aaff"],
-                        template="plotly_white")
-    fig_estado.update_layout(height=300, showlegend=False,
-                              xaxis_title="Estado", yaxis_title="Cantidad",
-                              margin=dict(l=0, r=0, t=10, b=80))
-    fig_estado.update_xaxes(tickangle=45)
+    # Colores corporativos por estado
+    def color_estado(e):
+        if e in ("Instalado", "Activado"):  return COLOR_AZUL
+        if e == "Anulado":                  return COLOR_GRIS_OSC
+        return COLOR_AZUL_SEC
+ 
+    conteo_estado["Color"] = conteo_estado["Estado"].apply(color_estado)
+    fig_estado = px.bar(
+        conteo_estado, x="Estado", y="Cantidad",
+        color="Estado",
+        color_discrete_map={row["Estado"]: row["Color"] for _, row in conteo_estado.iterrows()},
+        template="plotly_white",
+        text="Cantidad",
+    )
+    fig_estado.update_traces(textposition="outside", textfont_size=11)
+    fig_estado.update_layout(
+        height=340, showlegend=False,
+        xaxis_title="", yaxis_title="Cantidad",
+        margin=dict(l=0, r=0, t=20, b=10),
+        font=dict(family="Arial", size=12),
+        plot_bgcolor="white",
+    )
+    # Etiquetas horizontales — sin tickangle
+    fig_estado.update_xaxes(tickangle=0, tickfont=dict(size=11))
     st.plotly_chart(fig_estado, use_container_width=True)
  
     st.markdown("---")
@@ -817,34 +854,87 @@ def tab_base_datos(df: pd.DataFrame):
     st.markdown("#### 👤 Ventas por Asesor")
     try:
         df_asesor = df.copy()
-        df_asesor["VALOR_NUM"] = pd.to_numeric(df_asesor["VALOR_TOTAL"], errors="coerce").fillna(0)
-        por_asesor = df_asesor.groupby("ASESOR")["VALOR_NUM"].sum().reset_index()
-        por_asesor.columns = ["Asesor", "Valor Total COP"]
-        fig_asesor = px.bar(por_asesor, x="Asesor", y="Valor Total COP",
-                            color_discrete_sequence=["#00aaff"],
-                            template="plotly_white")
-        fig_asesor.update_layout(height=280, showlegend=False,
-                                  margin=dict(l=0, r=0, t=10, b=80))
-        fig_asesor.update_xaxes(tickangle=45)
+        # Contar ventas (no valor, ya que VALOR_TOTAL puede estar vacío en registros migrados)
+        por_asesor = df_asesor.groupby("ASESOR")["ID_VENTA"].count().reset_index()
+        por_asesor.columns = ["Asesor", "Ventas"]
+        # Abreviar correos para eje X legible
+        por_asesor["Asesor_corto"] = por_asesor["Asesor"].apply(
+            lambda x: str(x).split("@")[0].replace(".", " ").replace("distribuidor","dist.").title()
+            if "@" in str(x) else str(x)
+        )
+        fig_asesor = px.bar(
+            por_asesor, x="Asesor_corto", y="Ventas",
+            color_discrete_sequence=[COLOR_AZUL],
+            template="plotly_white",
+            text="Ventas",
+        )
+        fig_asesor.update_traces(textposition="outside", textfont_size=11)
+        fig_asesor.update_layout(
+            height=300, showlegend=False,
+            xaxis_title="", yaxis_title="Nº Ventas",
+            margin=dict(l=0, r=0, t=20, b=10),
+            font=dict(family="Arial", size=12),
+        )
+        fig_asesor.update_xaxes(tickangle=0, tickfont=dict(size=11))
         st.plotly_chart(fig_asesor, use_container_width=True)
     except Exception as e:
         st.warning(f"No se pudo generar gráfica de asesor: {e}")
  
     st.markdown("---")
  
-    # ── Gráfica 3: Activadas y Anuladas por Portafolio ───
-    st.markdown("#### 📊 Activadas y Anuladas por Portafolio")
-    df_aa = df[df["ESTADO"].isin(["Activado", "Anulado"])].copy()
-    if not df_aa.empty:
-        fig_aa = px.bar(df_aa, x="PORTAFOLIO", color="ESTADO",
-                        barmode="group",
-                        color_discrete_map={"Activado": "#00aaff", "Anulado": "#1e3a8a"},
-                        template="plotly_white",
-                        labels={"PORTAFOLIO": "Portafolio", "count": "Cantidad"})
-        fig_aa.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=40))
-        st.plotly_chart(fig_aa, use_container_width=True)
+    # ── Gráfica 3: Instalados / Activados / Anulados por Portafolio ──
+    st.markdown("#### 📊 Instalados, Activados y Anulados por Portafolio")
+ 
+    # Construcción del DataFrame desde el cruce real de datos
+    datos_portafolio = []
+    for portafolio in ["FIJO", "MOVIL"]:
+        for estado in ["Instalado", "Activado", "Anulado"]:
+            cnt = len(df[(df["PORTAFOLIO"] == portafolio) & (df["ESTADO"] == estado)])
+            if cnt > 0:
+                datos_portafolio.append({
+                    "Portafolio": portafolio,
+                    "Estado": estado,
+                    "Cantidad": cnt,
+                })
+ 
+    if datos_portafolio:
+        df_port = pd.DataFrame(datos_portafolio)
+        fig_port = px.bar(
+            df_port,
+            x="Portafolio", y="Cantidad", color="Estado",
+            barmode="group",
+            color_discrete_map={
+                "Instalado": COLOR_AZUL,
+                "Activado":  COLOR_AZUL_SEC,
+                "Anulado":   COLOR_GRIS_OSC,
+            },
+            template="plotly_white",
+            text="Cantidad",
+        )
+        fig_port.update_traces(textposition="outside", textfont_size=12)
+        fig_port.update_layout(
+            height=340,
+            xaxis_title="", yaxis_title="Cantidad",
+            margin=dict(l=0, r=0, t=20, b=10),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            font=dict(family="Arial", size=12),
+            plot_bgcolor="white",
+        )
+        fig_port.update_xaxes(tickangle=0, tickfont=dict(size=13, color="#1e293b"))
+        st.plotly_chart(fig_port, use_container_width=True)
+ 
+        # Resumen textual de los indicadores clave
+        col_r1, col_r2, col_r3, col_r4 = st.columns(4)
+        with col_r1:
+            st.markdown(kpi_card("FIJO — Instalado", fijo_instalado, COLOR_AZUL), unsafe_allow_html=True)
+        with col_r2:
+            st.markdown(kpi_card("FIJO — Anulado", fijo_anulado, COLOR_GRIS_OSC, COLOR_GRIS_OSC), unsafe_allow_html=True)
+        with col_r3:
+            st.markdown(kpi_card("MÓVIL — Activado", movil_activado, COLOR_AZUL), unsafe_allow_html=True)
+        with col_r4:
+            st.markdown(kpi_card("MÓVIL — Anulado", movil_anulado, COLOR_GRIS_OSC, COLOR_GRIS_OSC), unsafe_allow_html=True)
     else:
-        st.info("Sin datos de Activadas/Anuladas.")
+        st.info("Sin datos de Instalados/Activados/Anulados.")
  
     st.markdown("---")
  
@@ -951,3 +1041,4 @@ def main():
  
 if __name__ == "__main__":
     main()
+ 
