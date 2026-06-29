@@ -860,7 +860,7 @@ def tab_actualizar_estado(df: pd.DataFrame):
         notas_prev = str(venta.get("NOTAS", ""))
         nueva_nota = ""
         if nota_bitacora.strip():
-            nueva_nota = f"\n[{datetime.now().strftime('%d/%m/%Y %H:%M')}] {nota_bitacora.strip()}"
+            nueva_nota = f"\n[{datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}] {nota_bitacora.strip()}"
         campos = {
             "ESTADO": nuevo_estado,
             "NOTAS":  notas_prev + nueva_nota,
@@ -1116,7 +1116,7 @@ def tab_base_datos(df: pd.DataFrame):
     st.download_button(
         "📥 Descargar Vista Actual",
         data=csv_vista,
-        file_name=f"crm_vista_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+        file_name=f"crm_vista_{datetime.now(TZ).strftime('%Y%m%d_%H%M')}.csv",
         mime="text/csv",
         key="btn_dl_vista"
     )
