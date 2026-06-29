@@ -1,4 +1,3 @@
-# ============================================================
 # CRM SOMOS TELSER — Portal de Ventas
 # Versión Optimizada — Diseño 100% fiel al original
 # ============================================================
@@ -43,10 +42,10 @@ div[data-testid="stTabs"] button[aria-selected="true"] {
 }
 [data-testid="stSidebar"] * { color: #1e293b !important; }
 
-/* Botón principal — color corporativo #0288d1 */
+/* Botón principal azul tipo el original */
 div.stButton > button[kind="primary"],
 div.stButton > button {
-    background-color: #0288d1;
+    background-color: #00aaff;
     color: white;
     border: none;
     border-radius: 6px;
@@ -54,7 +53,7 @@ div.stButton > button {
     width: 100%;
 }
 div.stButton > button:hover {
-    background-color: #00a0e3;
+    background-color: #0088cc;
 }
 
 /* Botón Cerrar Sesión rojo */
@@ -108,59 +107,20 @@ DEPARTAMENTOS_MUNICIPIOS = {
 }
 
 # ─── PLANES TIGO BUSINESS ──────────────────────────────────
-# CORRECCIÓN 1: Planes completos con precios exactos por línea
-# Fuente: Ayuda Venta Tigo Junio 2026
-
-# Precios base 1 línea
 PLANES_MOVIL = {
     "Negocios 5.0": {
-        "Pospago Fidelización Negocios 4.9 Plus+ — 60GB": 44900,
-        "Pospago Negocios 5.4 Plus+ — 100GB":             53900,
-        "Pospago 5.3 Empresarial — Ilimitado":           113900,
+        "Pospago Negocios 4.9 Plus+ 60GB [5.0]": 44900,
+        "Pospago Negocios 5.4 Plus+ 100GB [5.0]": 53900,
+        "Pospago 5.3 Empresarial Ilimitado [5.0]": 113900,
     },
     "Empresarial 6.0": {
-        "Plan Datos Tigo Empresarial 6.9 — 30GB":         38300,
-        "Plan Datos Tigo Empresarial 6.10 — 60GB":        47900,
-        "Plan Datos Tigo Empresarial 6.11 — 110GB":       57900,
-        "Plan Datos Tigo Empresarial 6.12 — Ilimitado":  113900,
+        "Plan Datos Tigo Empresarial 6.9 — 30GB": 38300,
+        "Plan Datos Tigo Empresarial 6.10 — 60GB": 47900,
+        "Plan Datos Tigo Empresarial 6.11 — 110GB": 57900,
+        "Plan Datos Tigo Empresarial 6.12 — Ilimitado": 113900,
         "Plan Datos Tigo Empresarial 6.7 Full Equipo — Ilimitado": 89900,
-        "Plan Datos Tigo Empresarial 6.8 Full Tigo — Ilimitado":   54900,
+        "Plan Datos Tigo Empresarial 6.8 Full Tigo — Ilimitado": 54900,
     }
-}
-
-# Tabla de precios POR LÍNEA para Negocios 5.0 (exactos del ayuda venta)
-PRECIOS_5_POR_LINEA = {
-    "Pospago Fidelización Negocios 4.9 Plus+ — 60GB": {
-        1: 44900, 2: 40410, "3-5": 35920, "6-8": 33675, "9+": 31430
-    },
-    "Pospago Negocios 5.4 Plus+ — 100GB": {
-        1: 53900, 2: 48510, "3-5": 43120, "6-8": 40425, "9+": 37730
-    },
-    "Pospago 5.3 Empresarial — Ilimitado": {
-        1: 113900, 2: 102510, "3-5": 91120, "6-8": 85425, "9+": 79730
-    },
-}
-
-# Tabla de precios POR LÍNEA para Empresarial 6.0 (exactos del ayuda venta)
-PRECIOS_6_POR_LINEA = {
-    "Plan Datos Tigo Empresarial 6.9 — 30GB": {
-        1: 38300, "3-5": 33321, "6-9": 28725, "10+": 26810
-    },
-    "Plan Datos Tigo Empresarial 6.10 — 60GB": {
-        1: 47900, "3-5": 41673, "6-9": 35925, "10+": 33530
-    },
-    "Plan Datos Tigo Empresarial 6.11 — 110GB": {
-        1: 57900, "3-5": 50373, "6-9": 43425, "10+": 40530
-    },
-    "Plan Datos Tigo Empresarial 6.12 — Ilimitado": {
-        1: 113900, "3-5": 99093, "6-9": 85425, "10+": 79730
-    },
-    "Plan Datos Tigo Empresarial 6.7 Full Equipo — Ilimitado": {
-        1: 89900, "3-5": 89900, "6-9": 89900, "10+": 89900
-    },
-    "Plan Datos Tigo Empresarial 6.8 Full Tigo — Ilimitado": {
-        1: 54900, "3-5": 54900, "6-9": 54900, "10+": 54900
-    },
 }
 
 DESCUENTOS_5 = {1: 0.0, 2: 0.10, "3-5": 0.20, "6-8": 0.25, "9+": 0.30}
@@ -335,49 +295,22 @@ def enviar_telegram(msg: str):
     except Exception:
         pass
 
-# ─── CORRECCIÓN 1: CÁLCULO DE PRECIO MÓVIL ─────────────────
-# Usa tablas exactas del Ayuda Venta en lugar de porcentajes
+# ─── CÁLCULO DE PRECIO MÓVIL ───────────────────────────────
 def calcular_precio_movil(familia: str, plan: str, lineas: int) -> int:
+    planes = PLANES_MOVIL.get(familia, {})
+    base = planes.get(plan, 0)
     if familia == "Negocios 5.0":
-        tabla = PRECIOS_5_POR_LINEA.get(plan, {})
-        if lineas == 1:   clave = 1
-        elif lineas == 2: clave = 2
-        elif lineas <= 5: clave = "3-5"
-        elif lineas <= 8: clave = "6-8"
-        else:             clave = "9+"
+        if lineas == 1:   pct = 0.0
+        elif lineas == 2: pct = 0.10
+        elif lineas <= 5: pct = 0.20
+        elif lineas <= 8: pct = 0.25
+        else:             pct = 0.30
     else:
-        tabla = PRECIOS_6_POR_LINEA.get(plan, {})
-        if lineas <= 2:    clave = 1
-        elif lineas <= 5:  clave = "3-5"
-        elif lineas <= 9:  clave = "6-9"
-        else:              clave = "10+"
-    precio_linea = tabla.get(clave, PLANES_MOVIL.get(familia, {}).get(plan, 0))
-    return int(precio_linea * lineas)
-
-
-def _tabla_descuentos_html(familia: str, plan: str) -> str:
-    """Retorna HTML con precios por línea para mostrar bajo el selector de plan."""
-    if familia == "Negocios 5.0":
-        t = PRECIOS_5_POR_LINEA.get(plan, {})
-        return (
-            f"<small style='color:#0369a1;'>"
-            f"1L: <b>${t.get(1,0):,}</b> &nbsp;|&nbsp; "
-            f"2L: <b>${t.get(2,0):,}</b> &nbsp;|&nbsp; "
-            f"3-5L: <b>${t.get('3-5',0):,}</b> &nbsp;|&nbsp; "
-            f"6-8L: <b>${t.get('6-8',0):,}</b> &nbsp;|&nbsp; "
-            f"9+L: <b>${t.get('9+',0):,}</b> &nbsp;— precio por línea"
-            f"</small>"
-        )
-    else:
-        t = PRECIOS_6_POR_LINEA.get(plan, {})
-        return (
-            f"<small style='color:#0369a1;'>"
-            f"1L: <b>${t.get(1,0):,}</b> &nbsp;|&nbsp; "
-            f"3-5L: <b>${t.get('3-5',0):,}</b> &nbsp;|&nbsp; "
-            f"6-9L: <b>${t.get('6-9',0):,}</b> &nbsp;|&nbsp; "
-            f"10+L: <b>${t.get('10+',0):,}</b> &nbsp;— precio por línea"
-            f"</small>"
-        )
+        if lineas == 1:    pct = 0.0
+        elif lineas <= 5:  pct = 0.13
+        elif lineas <= 9:  pct = 0.25
+        else:              pct = 0.30
+    return int(base * (1 - pct) * lineas)
 
 # ════════════════════════════════════════════════════════════
 # LOGIN
@@ -580,24 +513,17 @@ def tab_registrar_venta():
             lineas = st.number_input("Líneas:", min_value=1, max_value=200, value=1, key="reg_lineas",
                                       help="Use + / - para ajustar")
 
-            # CORRECCIÓN 1: precio por tabla exacta + tabla de descuentos visible
             precio_total = calcular_precio_movil(familia, plan_sel, lineas)
-            precio_linea = precio_total // lineas if lineas > 0 else 0
-            st.markdown(_tabla_descuentos_html(familia, plan_sel), unsafe_allow_html=True)
-
             if familia == "Negocios 5.0":
-                desc_info = "Dctos 5.0: 2L=10% · 3-5L=20% · 6-8L=25% · 9+L=30% · Portación=50% 1er mes"
+                desc_info = "Descuentos 5.0: 2L=10% · 3-5L=20% · 6-8L=25% · 9+L=30% · Portación=50% 1er mes"
             else:
-                desc_info = "Dctos 6.0: 3-5L=13% · 6-9L=25% · 10+L=30% · Portación=50% 1er mes"
+                desc_info = "Descuentos 6.0: 3-5L=13% · 6-9L=25% · 10+L=30% · Portación=50% 1er mes"
             st.caption(desc_info)
             st.markdown(f"""
-            <div style="background:#e0f2fe; border-left:4px solid #00a0e3; border-radius:6px;
+            <div style="background:#e0f2fe; border-left:4px solid #00aaff; border-radius:6px;
                         padding:12px 16px; margin:8px 0;">
               <span style="font-size:16px; font-weight:700; color:#0369a1;">
                 💰 Total Estimado: ${precio_total:,} COP
-              </span>
-              <span style="font-size:12px; color:#0369a1; margin-left:10px;">
-                (${precio_linea:,} / línea)
               </span><br>
               <span style="font-size:12px; color:#0ea5e9; font-style:italic;">
                 • Conecta con el cliente, entiende su necesidad y el cierre será natural.
@@ -791,171 +717,95 @@ def tab_actualizar_estado(df: pd.DataFrame):
 # ════════════════════════════════════════════════════════════
 # TAB 3 — BASE DE DATOS / DASHBOARD
 # ════════════════════════════════════════════════════════════
-
+ 
 def tab_base_datos(df: pd.DataFrame):
-    # ── CORRECCIÓN 3: Paleta corporativa ──────────────────
-    COLOR_AZUL     = "#00a0e3"   # Instaladas / Activadas
-    COLOR_OSCURO   = "#231f20"   # Anuladas
-    COLOR_FONDO    = "#f4f4f4"   # Fondo tarjetas
-    COLOR_SEC      = "#0288d1"   # Secundario / botones
-
     rol = st.session_state.get("rol", "asesor")
     nombre_rol = "Administrador" if rol == "admin" else "Asesor"
     st.markdown(f"### 📊 Dashboard y Base de Datos — Vista {nombre_rol}")
-
+ 
     if df.empty:
         st.info("📭 Sin datos aún.")
         return
-
-    # ── KPIs — todos calculados desde el DataFrame real ───
-    total      = len(df)
+ 
+    # ── KPIs principales ──────────────────────────────────
+    total     = len(df)
+    activadas = len(df[df["ESTADO"] == "Activado"])
     instalados = len(df[df["ESTADO"] == "Instalado"])
-    activados  = len(df[df["ESTADO"] == "Activado"])
-    anulados   = len(df[df["ESTADO"] == "Anulado"])
-    fijo_c     = len(df[df["PORTAFOLIO"] == "FIJO"])
-    movil_c    = len(df[df["PORTAFOLIO"] == "MOVIL"])
-
-    # CORRECCIÓN 2: valores por portafolio calculados directamente
-    fijo_instalado = len(df[(df["PORTAFOLIO"] == "FIJO")  & (df["ESTADO"] == "Instalado")])
-    fijo_anulado   = len(df[(df["PORTAFOLIO"] == "FIJO")  & (df["ESTADO"] == "Anulado")])
-    movil_activado = len(df[(df["PORTAFOLIO"] == "MOVIL") & (df["ESTADO"] == "Activado")])
-    movil_anulado  = len(df[(df["PORTAFOLIO"] == "MOVIL") & (df["ESTADO"] == "Anulado")])
-
+    anulados  = len(df[df["ESTADO"] == "Anulado"])
+    fijo_c    = len(df[df["PORTAFOLIO"] == "FIJO"])
+    movil_c   = len(df[df["PORTAFOLIO"] == "MOVIL"])
+ 
     try:
         ingresos = df["VALOR_TOTAL"].apply(lambda x: float(str(x)) if str(x).replace('.','').isdigit() else 0).sum()
         ingresos_fmt = f"${ingresos:,.0f}"
     except Exception:
         ingresos_fmt = "$0"
-
-    # ── Tarjetas KPI con colores corporativos ─────────────
-    def kpi(label, valor, borde, num_color="#1e293b"):
-        return (
-            f"<div style='background:{COLOR_FONDO}; border-left:5px solid {borde};"
-            f"border-radius:8px; padding:14px 16px; text-align:center;"
-            f"box-shadow:0 1px 4px rgba(0,0,0,0.07);'>"
-            f"<div style='font-size:11px; color:#64748b; font-weight:600;"
-            f"text-transform:uppercase; letter-spacing:0.5px;'>{label}</div>"
-            f"<div style='font-size:30px; font-weight:800; color:{num_color}; margin-top:4px;'>{valor}</div>"
-            f"</div>"
-        )
-
+ 
     col1, col2, col3, col4, col5 = st.columns(5)
-    with col1: st.markdown(kpi("📋 Registros",  total,      COLOR_SEC),              unsafe_allow_html=True)
-    with col2: st.markdown(kpi("✅ Instalados", instalados, COLOR_AZUL),             unsafe_allow_html=True)
-    with col3: st.markdown(kpi("⚡ Activados",  activados,  COLOR_AZUL),             unsafe_allow_html=True)
-    with col4: st.markdown(kpi("❌ Anulados",   anulados,   COLOR_OSCURO, COLOR_OSCURO), unsafe_allow_html=True)
-    with col5: st.markdown(kpi("🌐 Fijo / 📱 Móvil", f"{fijo_c} / {movil_c}", COLOR_SEC), unsafe_allow_html=True)
-
+    with col1:
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>📋 Registros</div><div style='font-size:32px; font-weight:800;'>{total}</div>", unsafe_allow_html=True)
+    with col2:
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>✅ Activadas</div><div style='font-size:32px; font-weight:800;'>{activadas}</div>", unsafe_allow_html=True)
+    with col3:
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>💰 Ingresos</div><div style='font-size:32px; font-weight:800;'>{ingresos_fmt}</div>", unsafe_allow_html=True)
+    with col4:
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>🌐 Fijo</div><div style='font-size:32px; font-weight:800;'>{fijo_c}</div>", unsafe_allow_html=True)
+    with col5:
+        st.markdown(f"<div style='font-size:11px; color:#64748b;'>📱 Móvil</div><div style='font-size:32px; font-weight:800;'>{movil_c}</div>", unsafe_allow_html=True)
+ 
     st.markdown("---")
-
-    # ── CORRECCIÓN 4: Gráfica 1 — Ventas por Estado ──────
-    # Etiquetas horizontales, colores corporativos, valores encima
+ 
+    # ── Gráfica 1: Ventas por Estado ─────────────────────
     st.markdown("#### 📈 Ventas por Estado")
     conteo_estado = df["ESTADO"].value_counts().reset_index()
     conteo_estado.columns = ["Estado", "Cantidad"]
-
-    def _color_estado(e):
-        if e in ("Instalado", "Activado"): return COLOR_AZUL
-        if e == "Anulado":                 return COLOR_OSCURO
-        return COLOR_SEC
-
-    conteo_estado["Color"] = conteo_estado["Estado"].apply(_color_estado)
-    fig_estado = px.bar(
-        conteo_estado, x="Estado", y="Cantidad",
-        color="Estado",
-        color_discrete_map={r["Estado"]: r["Color"] for _, r in conteo_estado.iterrows()},
-        template="plotly_white",
-        text="Cantidad",
-    )
-    fig_estado.update_traces(textposition="outside", textfont_size=11)
-    fig_estado.update_layout(
-        height=340, showlegend=False,
-        xaxis_title="", yaxis_title="Cantidad",
-        margin=dict(l=0, r=0, t=24, b=8),
-        font=dict(family="Arial", size=12),
-    )
-    fig_estado.update_xaxes(tickangle=0, tickfont=dict(size=11))
+    fig_estado = px.bar(conteo_estado, x="Estado", y="Cantidad",
+                        color_discrete_sequence=["#00aaff"],
+                        template="plotly_white")
+    fig_estado.update_layout(height=300, showlegend=False,
+                              xaxis_title="Estado", yaxis_title="Cantidad",
+                              margin=dict(l=0, r=0, t=10, b=80))
+    fig_estado.update_xaxes(tickangle=45)
     st.plotly_chart(fig_estado, use_container_width=True)
-
+ 
     st.markdown("---")
-
-    # ── CORRECCIÓN 4: Gráfica 2 — Ventas por Asesor ──────
-    # Cuenta de ventas (no valor), nombre abreviado, etiquetas horizontales
+ 
+    # ── Gráfica 2: Ventas por Asesor ─────────────────────
     st.markdown("#### 👤 Ventas por Asesor")
     try:
-        por_asesor = df.groupby("ASESOR")["ID_VENTA"].count().reset_index()
-        por_asesor.columns = ["Asesor", "Ventas"]
-        por_asesor["Nombre"] = por_asesor["Asesor"].apply(
-            lambda x: str(x).split("@")[0].replace(".", " ").title()
-            if "@" in str(x) else str(x)
-        )
-        fig_asesor = px.bar(
-            por_asesor, x="Nombre", y="Ventas",
-            color_discrete_sequence=[COLOR_AZUL],
-            template="plotly_white",
-            text="Ventas",
-        )
-        fig_asesor.update_traces(textposition="outside", textfont_size=11)
-        fig_asesor.update_layout(
-            height=300, showlegend=False,
-            xaxis_title="", yaxis_title="Nº Ventas",
-            margin=dict(l=0, r=0, t=24, b=8),
-            font=dict(family="Arial", size=12),
-        )
-        fig_asesor.update_xaxes(tickangle=0, tickfont=dict(size=11))
+        df_asesor = df.copy()
+        df_asesor["VALOR_NUM"] = pd.to_numeric(df_asesor["VALOR_TOTAL"], errors="coerce").fillna(0)
+        por_asesor = df_asesor.groupby("ASESOR")["VALOR_NUM"].sum().reset_index()
+        por_asesor.columns = ["Asesor", "Valor Total COP"]
+        fig_asesor = px.bar(por_asesor, x="Asesor", y="Valor Total COP",
+                            color_discrete_sequence=["#00aaff"],
+                            template="plotly_white")
+        fig_asesor.update_layout(height=280, showlegend=False,
+                                  margin=dict(l=0, r=0, t=10, b=80))
+        fig_asesor.update_xaxes(tickangle=45)
         st.plotly_chart(fig_asesor, use_container_width=True)
     except Exception as e:
         st.warning(f"No se pudo generar gráfica de asesor: {e}")
-
+ 
     st.markdown("---")
-
-    # ── CORRECCIÓN 2 + 4: Gráfica 3 — Instalados/Activados/Anulados por Portafolio
-    st.markdown("#### 📊 Instalados, Activados y Anulados por Portafolio")
-
-    filas_port = []
-    for portafolio in ["FIJO", "MOVIL"]:
-        for estado in ["Instalado", "Activado", "Anulado"]:
-            cnt = len(df[(df["PORTAFOLIO"] == portafolio) & (df["ESTADO"] == estado)])
-            if cnt > 0:
-                filas_port.append({"Portafolio": portafolio, "Estado": estado, "Cantidad": cnt})
-
-    if filas_port:
-        df_port = pd.DataFrame(filas_port)
-        fig_port = px.bar(
-            df_port, x="Portafolio", y="Cantidad", color="Estado",
-            barmode="group",
-            color_discrete_map={
-                "Instalado": COLOR_AZUL,
-                "Activado":  COLOR_SEC,
-                "Anulado":   COLOR_OSCURO,
-            },
-            template="plotly_white",
-            text="Cantidad",
-        )
-        fig_port.update_traces(textposition="outside", textfont_size=12)
-        fig_port.update_layout(
-            height=340,
-            xaxis_title="", yaxis_title="Cantidad",
-            margin=dict(l=0, r=0, t=24, b=8),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-            font=dict(family="Arial", size=12),
-        )
-        fig_port.update_xaxes(tickangle=0, tickfont=dict(size=13))
-        st.plotly_chart(fig_port, use_container_width=True)
-
-        # Tarjetas resumen de los 4 indicadores clave por portafolio
-        st.markdown("<br>", unsafe_allow_html=True)
-        cr1, cr2, cr3, cr4 = st.columns(4)
-        with cr1: st.markdown(kpi("FIJO — Instalado",  fijo_instalado, COLOR_AZUL),                    unsafe_allow_html=True)
-        with cr2: st.markdown(kpi("FIJO — Anulado",    fijo_anulado,   COLOR_OSCURO, COLOR_OSCURO),     unsafe_allow_html=True)
-        with cr3: st.markdown(kpi("MÓVIL — Activado",  movil_activado, COLOR_AZUL),                    unsafe_allow_html=True)
-        with cr4: st.markdown(kpi("MÓVIL — Anulado",   movil_anulado,  COLOR_OSCURO, COLOR_OSCURO),     unsafe_allow_html=True)
+ 
+    # ── Gráfica 3: Activadas y Anuladas por Portafolio ───
+    st.markdown("#### 📊 Activadas y Anuladas por Portafolio")
+    df_aa = df[df["ESTADO"].isin(["Activado", "Anulado"])].copy()
+    if not df_aa.empty:
+        fig_aa = px.bar(df_aa, x="PORTAFOLIO", color="ESTADO",
+                        barmode="group",
+                        color_discrete_map={"Activado": "#00aaff", "Anulado": "#1e3a8a"},
+                        template="plotly_white",
+                        labels={"PORTAFOLIO": "Portafolio", "count": "Cantidad"})
+        fig_aa.update_layout(height=300, margin=dict(l=0, r=0, t=10, b=40))
+        st.plotly_chart(fig_aa, use_container_width=True)
     else:
-        st.info("Sin datos de Instalados/Activados/Anulados.")
-
+        st.info("Sin datos de Activadas/Anuladas.")
+ 
     st.markdown("---")
-
-    # ── Análisis y Recomendaciones (sin cambios) ──────────
+ 
+    # ── Análisis y Recomendaciones ────────────────────────
     st.markdown("#### 💡 Análisis y Recomendaciones")
     col_obs, col_oport = st.columns(2)
     tasa_anulacion = (anulados / total * 100) if total > 0 else 0
@@ -973,12 +823,13 @@ def tab_base_datos(df: pd.DataFrame):
             st.markdown("• Portafolio **Fijo** lidera. Potenciar cross-selling hacia clientes **Móviles**.")
         else:
             st.markdown("• Portafolio **Móvil** lidera. Potenciar cross-selling hacia clientes **Fijos**.")
-
+ 
     st.markdown("---")
-
-    # ── Base de Datos Completa (sin cambios) ──────────────
+ 
+    # ── Base de Datos Completa ────────────────────────────
     st.markdown("#### 🗃️ Base de Datos Completa")
-
+ 
+    # Filtros solo para admin
     if rol == "admin":
         asesores_lista = ["Todos"] + sorted(df["ASESOR"].dropna().unique().tolist())
         col_f1, col_f2 = st.columns(2)
@@ -995,17 +846,18 @@ def tab_base_datos(df: pd.DataFrame):
             df_vista = df_vista[df_vista["ESTADO"].isin(f_estados)]
     else:
         df_vista = df[df["ASESOR"] == st.session_state.get("usuario", "")]
-
+ 
     cols_visibles = ["ID_VENTA","ESTADO","PORTAFOLIO","SERVICIO","ASESOR",
                      "FECHA_REGISTRO","NIT","CLIENTE","TEL_CONTACTO","EMAIL_CLIENTE"]
     cols_show = [c for c in cols_visibles if c in df_vista.columns]
-
+ 
     st.dataframe(
         df_vista[cols_show].sort_values("ID_VENTA", ascending=True),
         use_container_width=True,
         hide_index=False,
     )
-
+ 
+    # Exportar vista
     csv_vista = df_vista[cols_show].to_csv(index=False).encode("utf-8")
     st.download_button(
         "📥 Descargar Vista Actual",
@@ -1014,23 +866,23 @@ def tab_base_datos(df: pd.DataFrame):
         mime="text/csv",
         key="btn_dl_vista"
     )
-
+ 
 # ════════════════════════════════════════════════════════════
 # MAIN
 # ════════════════════════════════════════════════════════════
-
+ 
 def main():
     if "auth" not in st.session_state:
         st.session_state["auth"] = False
-
+ 
     check_auth()
-
+ 
     # Cargar datos una sola vez
     df = cargar_datos()
-
+ 
     # Sidebar
     sidebar_render(df)
-
+ 
     # Encabezado principal (idéntico al original)
     st.markdown("""
     <h1 style="font-size:28px; font-weight:700; color:#1e293b; margin-bottom:2px;">
@@ -1040,22 +892,19 @@ def main():
       Gestión Inteligente de Contratos B2B
     </p>
     """, unsafe_allow_html=True)
-
+ 
     # Tabs principales (idénticos al original)
     tab1, tab2, tab3 = st.tabs(["📋 Registrar Venta", "🔄 Actualizar Estado", "📊 Base de Datos"])
-
+ 
     with tab1:
         tab_registrar_venta()
-
+ 
     with tab2:
         tab_actualizar_estado(df)
-
+ 
     with tab3:
         tab_base_datos(df)
-
-
+ 
+ 
 if __name__ == "__main__":
     main()
-PYEOF
-echo "Escrito: $(wc -l < /home/claude/crm_real.py) líneas"
-Salida
