@@ -223,6 +223,32 @@ USUARIOS = {
         "display": "kely.hincapie.distribuidor@asesorespymestigo.com",
     },
 }
+def main():
+    # ... código de autenticación previo ...
+
+    if st.session_state.get("auth"):
+        rol_usuario = st.session_state.get("rol", "asesor") # Obtenemos el rol guardado
+
+        # Definimos las pestañas base
+        lista_tabs = ["📋 Registrar Venta", "🔄 Actualizar Estado"]
+        
+        # Si es admin, agregamos la tercera pestaña
+        if rol_usuario == "admin":
+            lista_tabs.append("📊 Base de Datos")
+            
+        tabs = st.tabs(lista_tabs)
+
+        # Asignamos el contenido a cada pestaña
+        with tabs[0]:
+            tab_registrar_venta()
+        
+        with tabs[1]:
+            tab_actualizar_estado(df)
+            
+        # Solo si es admin, creamos la lógica para la 3ra
+        if rol_usuario == "admin":
+            with tabs[2]:
+                tab_base_datos(df)
 
 # Telegram
 TELEGRAM_TOKEN   = ""
