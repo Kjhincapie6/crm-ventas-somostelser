@@ -445,6 +445,133 @@ def sidebar_render(df: pd.DataFrame):
         )
 
         # =====================================================
+        # TAREAS PENDIENTES
+        # ====================================================
+
+        st.markdown("### 📅 Agenda de Seguimientos")
+
+        if not df.empty:
+            hoy = datetime.now(TZ).date()
+
+            ICONOS_SEG = {
+                "Llamada":         "📞",
+                "Visita":          "🤝",
+                "Email":           "📧",
+                "WhatsApp":        "💬",
+                "Reunión virtual": "🖥️",
+            }
+
+            ESTADOS_ACTIVOS = [
+                "Cotizado", "Ingresada", "En proceso de firma",
+                "Ingreso de pedido", "Enviado",
+                "Instalacion y aprovisionamiento", "Pendiente activación",
+            ]
+
+            df_seg = df[
+                df["ESTADO"].isin(ESTADOS_ACTIVOS) &
+                df["FECHA_SEGUIMIENTO"].notna() &
+                (df["FECHA_SEGUIMIENTO"].astype(str).str.strip() != "") &
+                (df["FECHA_SEGUIMIENTO"].astype(str).str.lower() != "nan")
+            ].copy()
+
+            if not df_seg.empty:
+                from datetime import timedelta
+
+                def _parsear(f):
+                    try:
+                        return datetime.strptime(str(f).strip(), "%Y-%m-%d").date()
+                    except Exception:
+                        return None
+
+                df_seg["_fecha"] = df_seg["FECHA_SEGUIMIENTO"].apply(_parsear)
+                df_seg = df_seg[df_seg["_fecha"].notna()].sort_values("_fecha")
+
+                vencidos = df_seg[df_seg["_fecha"] < hoy]
+                hoy_df   = df_seg[df_seg["_fecha"] == hoy]
+                proximos = df_seg[
+                    (df_seg["_fecha"] > hoy) &
+                    (df_seg["_fecha"] <= hoy + timedelta(days=7))
+                ]
+
+                # ── Vencidos ─────────────────────────────
+                if not vencidos.empty:
+                    st.markdown(
+                        f"<div style='background:#fee2e2;border-left:4px solid #ef4444;"
+                        f"border-radius:6px;padding:7px 10px;margin-bottom:5px;'>"
+                        f"<b style='color:#dc2626;font-size:12px;'>⚠️ {len(vencidos)} vencido(s)</b>"
+                        f"</div>",
+                        unsafe_allow_html=True
+                    )
+                    for _, r in vencidos.iterrows():
+                        icono   = ICONOS_SEG.get(str(r.get("TIPO_SEGUIMIENTO","")), "📌")
+                        cliente = str(r.get("CLIENTE",""))[:20]
+                        dias_v  = (hoy - r["_fecha"]).days
+                        st.markdown(
+                            f"<div style='background:#fef2f2;border-radius:5px;"
+                            f"padding:5px 9px;margin:2px 0;font-size:11px;'>"
+                            f"{icono} <b>{cliente}</b><br>"
+                            f"<span style='color:#ef4444;'>Venció hace {dias_v}d</span> · "
+                            f"<span style='color:#64748b;'>{r.get('TIPO_SEGUIMIENTO','')}</span>"
+                            f"</div>",
+                            unsafe_allow_html=True
+                        )
+
+                # ── Hoy ──────────────────────────────────
+                if not hoy_df.empty:
+                    st.markdown(
+                        f"<div style='background:#fef9c3;border-left:4px solid #f59e0b;"
+                        f"border-radius:6px;padding:7px 10px;margin:5px 0;'>"
+                        f"<b style='color:#b45309;font-size:12px;'>🔔 {len(hoy_df)} HOY</b>"
+                        f"</div>",
+                        unsafe_allow_html=True
+                    )
+                    for _, r in hoy_df.iterrows():
+                        icono   = ICONOS_SEG.get(str(r.get("TIPO_SEGUIMIENTO","")), "📌")
+                        cliente = str(r.get("CLIENTE",""))[:20]
+                        st.markdown(
+                            f"<div style='background:#fefce8;border-radius:5px;"
+                            f"padding:5px 9px;margin:2px 0;font-size:11px;'>"
+                            f"{icono} <b>{cliente}</b><br>"
+                            f"<span style='color:#f59e0b;'>📅 Hoy</span> · "
+                            f"<span style='color:#64748b;'>{r.get('TIPO_SEGUIMIENTO','')}</span>"
+                            f"</div>",
+                            unsafe_allow_html=True
+                        )
+
+                # ── Próximos 7 días ───────────────────────
+                if not proximos.empty:
+                    st.markdown(
+                        f"<div style='background:#f0fdf4;border-left:4px solid #22c55e;"
+                        f"border-radius:6px;padding:7px 10px;margin:5px 0;'>"
+                        f"<b style='color:#15803d;font-size:12px;'>✅ {len(proximos)} próximo(s)</b>"
+                        f"</div>",
+                        unsafe_allow_html=True
+                    )
+                    for _, r in proximos.iterrows():
+                        icono   = ICONOS_SEG.get(str(r.get("TIPO_SEGUIMIENTO","")), "📌")
+                        cliente = str(r.get("CLIENTE",""))[:20]
+                        dias_f  = (r["_fecha"] - hoy).days
+                        label   = "Mañana" if dias_f == 1 else f"En {dias_f}d"
+                        st.markdown(
+                            f"<div style='background:#f0fdf4;border-radius:5px;"
+                            f"padding:5px 9px;margin:2px 0;font-size:11px;'>"
+                            f"{icono} <b>{cliente}</b><br>"
+                            f"<span style='color:#22c55e;'>📅 {label} · {r['_fecha'].strftime('%d/%m')}</span> · "
+                            f"<span style='color:#64748b;'>{r.get('TIPO_SEGUIMIENTO','')}</span>"
+                            f"</div>",
+                            unsafe_allow_html=True
+                        )
+
+                if vencidos.empty and hoy_df.empty and proximos.empty:
+                    st.caption("✅ Sin seguimientos pendientes esta semana.")
+            else:
+                st.caption("Sin seguimientos activos.")
+
+        st.markdown("---")
+
+    
+
+        # =====================================================
         # ASISTENTE DE OFERTAS
         # =====================================================
 
