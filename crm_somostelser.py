@@ -9,6 +9,7 @@ from datetime import datetime, date
 import os
 import requests as req
 import random
+from zoneinfo import ZoneInfo
 
 # ─── CONFIGURACIÓN DE PÁGINA ───────────────────────────────
 st.set_page_config(
@@ -129,7 +130,7 @@ PLANES_MOVIL = {
  
 # Tabla de descuentos exactos por volumen según ayuda venta
 # Negocios 5.0: 1L=0%, 2L=10%, 3-5L=20%, 6-8L=25%, 9+L=30%
-# Empresarial 6.0: 1L=0%, 3-5L=13%, 6-9L=25%, 10+L=30%
+# Empresarial 6.0: 1-2L=0%, 3-5L=13%, 6-9L=25%, 10+L=30%
 # Ambas: 50% de descuento en el primer mes por portación
  
 # Precios por número de líneas para Negocios 5.0 (por línea)
@@ -331,13 +332,30 @@ def opciones_ventas(df: pd.DataFrame) -> list:
 
 # ─── TELEGRAM ──────────────────────────────────────────────
 def enviar_telegram(msg: str):
+    """Envía una notificación al chat de Telegram."""
+    
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+        st.warning("⚠️ Telegram no está configurado.")
         return
+
     try:
         url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-        req.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": msg, "parse_mode": "HTML"}, timeout=5)
-    except Exception:
-        pass
+
+        response = req.post(
+            url,
+            data={
+                "chat_id": TELEGRAM_CHAT_ID,
+                "text": msg,
+                "parse_mode": "HTML",
+            },
+            timeout=10,
+        )
+
+        # Verifica que Telegram respondió correctamente
+        response.raise_for_status()
+
+    except req.exceptions.RequestException as e:
+        st.error(f"❌ Error enviando notificación a Telegram:\n{e}")
 
 # ─── CÁLCULO DE PRECIO MÓVIL ───────────────────────────────
 def calcular_precio_movil(familia: str, plan: str, lineas: int) -> int:
