@@ -588,8 +588,16 @@ def tab_registrar_venta():
                 desc_info = "Descuentos 6.0: 3-5L=13% · 6-9L=25% · 10+L=30% · Portación=50% 1er mes"
             st.caption(desc_info)
             # Definir la lista al inicio del archivo, fuera de las funciones
-            FRASES_MOTIVACION = [
-                "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
+        
+            st.markdown(f"""
+            <div style="background:#e0f2fe; border-left:4px solid #00aaff; border-radius:6px;
+                        padding:12px 16px; margin:8px 0;">
+              <span style="font-size:16px; font-weight:700; color:#0369a1;">
+                💰 Total Estimado: ${precio_total:,} COP
+              </span><br>
+              <span style="font-size:12px; color:#0ea5e9; font-style:italic;">
+                • Conecta con el cliente, entiende su necesidad y el cierre será natural.
+                 "🚀 ¡Vamos por ese cierre, hoy es un gran día!",
                 "💎 La calidad de tu servicio es nuestra mayor ventaja.",
                 "📈 ¡A superar la meta de ventas de este mes!",
                 "🤝 Cada cliente cuenta, ¡haz que esta venta sea memorable!",
@@ -603,15 +611,6 @@ def tab_registrar_venta():
                 "🧠 Conecta con el cliente, entiende su necesidad y el cierre será natural.",
                 "💡 Cada gestión bien hecha es una semilla para el éxito de mañana.",
                 "🥇 ¡No hay límites cuando hay buena planeación y actitud!",
-            ]
-            st.markdown(f"""
-            <div style="background:#e0f2fe; border-left:4px solid #00aaff; border-radius:6px;
-                        padding:12px 16px; margin:8px 0;">
-              <span style="font-size:16px; font-weight:700; color:#0369a1;">
-                💰 Total Estimado: ${precio_total:,} COP
-              </span><br>
-              <span style="font-size:12px; color:#0ea5e9; font-style:italic;">
-                • Conecta con el cliente, entiende su necesidad y el cierre será natural.
               </span>
             </div>
             """, unsafe_allow_html=True)
