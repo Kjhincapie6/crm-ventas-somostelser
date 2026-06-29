@@ -223,32 +223,6 @@ USUARIOS = {
         "display": "kely.hincapie.distribuidor@asesorespymestigo.com",
     },
 }
-def main():
-    # ... código de autenticación previo ...
-
-    if st.session_state.get("auth"):
-        rol_usuario = st.session_state.get("rol", "asesor") # Obtenemos el rol guardado
-
-        # Definimos las pestañas base
-        lista_tabs = ["📋 Registrar Venta", "🔄 Actualizar Estado"]
-        
-        # Si es admin, agregamos la tercera pestaña
-        if rol_usuario == "admin":
-            lista_tabs.append("📊 Base de Datos")
-            
-        tabs = st.tabs(lista_tabs)
-
-        # Asignamos el contenido a cada pestaña
-        with tabs[0]:
-            tab_registrar_venta()
-        
-        with tabs[1]:
-            tab_actualizar_estado(df)
-            
-        # Solo si es admin, creamos la lógica para la 3ra
-        if rol_usuario == "admin":
-            with tabs[2]:
-                tab_base_datos(df)
 
 # Telegram
 TELEGRAM_TOKEN   = ""
@@ -1069,7 +1043,7 @@ def tab_base_datos(df: pd.DataFrame):
     )
  
 # ════════════════════════════════════════════════════════════
-# MAIN
+# MAIN (CON SEGURIDAD DE ROLES)
 # ════════════════════════════════════════════════════════════
  
 def main():
@@ -1078,13 +1052,16 @@ def main():
  
     check_auth()
  
+    if not st.session_state.get("auth"):
+        return # Si no está autenticado, no seguimos
+
     # Cargar datos una sola vez
     df = cargar_datos()
  
     # Sidebar
     sidebar_render(df)
  
-    # Encabezado principal (idéntico al original)
+    # Encabezado principal
     st.markdown("""
     <h1 style="font-size:28px; font-weight:700; color:#1e293b; margin-bottom:2px;">
       📡 Portal de Ventas Somos Telser
@@ -1094,12 +1071,30 @@ def main():
     </p>
     """, unsafe_allow_html=True)
  
-    # Tabs principales (idénticos al original)
-    tab1, tab2, tab3 = st.tabs(["📋 Registrar Venta", "🔄 Actualizar Estado", "📊 Base de Datos"])
+    # 1. Definir nombres de pestañas según el rol
+    rol = st.session_state.get("rol", "asesor")
+    nombres_tabs = ["📋 Registrar Venta", "🔄 Actualizar Estado"]
+    
+    if rol == "admin":
+        nombres_tabs.append("📊 Base de Datos")
+            
+    # 2. Crear las pestañas dinámicamente
+    lista_tabs = st.tabs(nombres_tabs)
  
-    with tab1:
+    # 3. Asignar contenido a las pestañas
+    with lista_tabs[0]:
         tab_registrar_venta()
  
+    with lista_tabs[1]:
+        tab_actualizar_estado(df)
+            
+    # 4. Solo el admin puede ver la tercera pestaña
+    if rol == "admin":
+        with lista_tabs[2]:
+            tab_base_datos(df)
+ 
+if __name__ == "__main__":
+    main()
     with tab2:
         tab_actualizar_estado(df)
  
