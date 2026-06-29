@@ -1181,9 +1181,7 @@ def tab_actualizar_estado(df: pd.DataFrame):
                                   key="act_nota_nueva", height=70,
                                   placeholder="Esta nota se agregará con fecha y hora...")
 
-    # ════════════════════════════════════════════════════════════
-# MÓDULO DE REGISTRO DE GESTIÓN — va dentro de tab_actualizar_estado
-# Insértalo DESPUÉS del bloque de edición de campos y ANTES del botón
+# ════════════════════════════════════════════════════════════n
 # "💾 Guardar y Notificar"
 # ════════════════════════════════════════════════════════════
 
@@ -1296,7 +1294,7 @@ def tab_actualizar_estado(df: pd.DataFrame):
                 )
 
     # ════════════════════════════════════════════════════════
-    # BOTÓN GUARDAR — reemplaza el que ya tenías
+    # BOTÓN GUARDAR _ reemplaza el que ya tenías
     # ════════════════════════════════════════════════════════
     if st.button("💾 Guardar y Notificar", type="primary",
                  use_container_width=True, key="btn_act_guardar"):
