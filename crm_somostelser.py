@@ -527,8 +527,10 @@ def tab_registrar_venta():
         nombre_contacto = st.text_input("Nombre contacto autorizado:", key="reg_nombre_contacto")
         movil_contacto  = st.text_input("Móvil contacto autorizado:", key="reg_movil_contacto")
 
+    if "lista_lineas" not in st.session_state:
+    st.session_state.lista_lineas = []
     st.subheader("⚙️ Gestión Técnica")
-        
+    
     with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
         tipo_linea = st.radio("Tipo de gestión:",
             ["Portabilidad","Línea Nueva","Línea Existente"], key="tipo_linea_pop")
