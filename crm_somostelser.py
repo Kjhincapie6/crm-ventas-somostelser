@@ -494,21 +494,7 @@ def sidebar_render(df: pd.DataFrame):
                 use_container_width=True
             )
         
-# ════════════════════════════════════════════════════════════
-# TAB 1 — REGISTRAR VENTA (COLUMNA DERECHA AJUSTADA)
-# ════════════════════════════════════════════════════════════
-
-def tab_registrar_venta():
-    if "lista_lineas" not in st.session_state:
-        st.session_state.lista_lineas = []
-
-    st.markdown("### Seleccione División:")
-    division = st.radio("", ["Móvil", "Fijo"], horizontal=True, key="reg_division", label_visibility="collapsed")
-    st.markdown("---")
-
-    col_izq, col_der = st.columns(2)
-
-    # --- COLUMNA IZQUIERDA: DATOS CLIENTE ---
+# --- COLUMNA IZQUIERDA: DATOS CLIENTE + GESTIÓN TÉCNICA ---
     with col_izq:
         st.markdown("### 📱 Datos del Cliente")
         tipo_doc = st.selectbox("Tipo Doc:", TIPOS_DOC, key="reg_tipo_doc")
@@ -519,7 +505,6 @@ def tab_registrar_venta():
 
         deptos = [""] + sorted(DEPARTAMENTOS_MUNICIPIOS.keys())
         depto  = st.selectbox("Departamento:", deptos, key="reg_depto")
-        
         municipios = [""] + DEPARTAMENTOS_MUNICIPIOS.get(depto, []) if depto else [""]
         municipio = st.selectbox("Municipio:", municipios, key="reg_municipio", disabled=(not depto))
 
@@ -527,17 +512,8 @@ def tab_registrar_venta():
         nombre_contacto = st.text_input("Nombre contacto autorizado:", key="reg_nombre_contacto")
         movil_contacto  = st.text_input("Móvil contacto autorizado:", key="reg_movil_contacto")
 
-    # --- COLUMNA DERECHA: REPRESENTANTE Y GESTIÓN TÉCNICA ---
-    with col_der:
-        st.markdown("### 👤 Representante Legal")
-        nombre_rep  = st.text_input("Nombre Rep. Legal:", key="reg_nombre_rep")
-        cedula_rep  = st.text_input("Cédula Rep. Legal:", key="reg_cedula_rep")
-        email_rep   = st.text_input("Correo Rep. Legal:", key="reg_email_rep")
-        movil_rep   = st.text_input("Móvil Rep. Legal:", key="reg_movil_rep")
-
         st.markdown("---")
-        
-        # Gestión Técnica ahora vive dentro de la columna derecha
+        # Gestión Técnica movida a la izquierda
         st.subheader("⚙️ Gestión Técnica")
         with st.popover("📱 Configurar Líneas Móviles / Full Tigo"):
             tipo_linea = st.radio("Tipo de gestión:", ["Portabilidad", "Línea Nueva", "Línea Existente"], key="tipo_linea_pop")
@@ -567,6 +543,14 @@ def tab_registrar_venta():
                     st.rerun()
             else:
                 st.info("La gestión móvil aplica también para Full Tigo.")
+
+    # --- COLUMNA DERECHA: REPRESENTANTE LEGAL ---
+    with col_der:
+        st.markdown("### 👤 Representante Legal")
+        nombre_rep  = st.text_input("Nombre Rep. Legal:", key="reg_nombre_rep")
+        cedula_rep  = st.text_input("Cédula Rep. Legal:", key="reg_cedula_rep")
+        email_rep   = st.text_input("Correo Rep. Legal:", key="reg_email_rep")
+        movil_rep   = st.text_input("Móvil Rep. Legal:", key="reg_movil_rep")
 
         st.markdown("### 📊 Estado y Plan")
         estado_ini = st.selectbox("Estado inicial:", ESTADOS, key="reg_estado")
