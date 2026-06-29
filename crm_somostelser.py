@@ -11,6 +11,9 @@ import requests as req
 import random
 from zoneinfo import ZoneInfo
 
+# Zona horaria Colombia
+TZ = ZoneInfo("America/Bogota")
+
 # ─── CONFIGURACIÓN DE PÁGINA ───────────────────────────────
 st.set_page_config(
     page_title="CRM de Ventas B2B con Analítica e Inteligencia Artificial",
