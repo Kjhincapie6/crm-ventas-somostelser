@@ -1180,6 +1180,216 @@ def tab_actualizar_estado(df: pd.DataFrame):
         nota_nueva = st.text_area("💬 Agregar nota al historial (opcional):",
                                   key="act_nota_nueva", height=70,
                                   placeholder="Esta nota se agregará con fecha y hora...")
+
+    # ════════════════════════════════════════════════════════════
+# MÓDULO DE REGISTRO DE GESTIÓN — va dentro de tab_actualizar_estado
+# Insértalo DESPUÉS del bloque de edición de campos y ANTES del botón
+# "💾 Guardar y Notificar"
+# ════════════════════════════════════════════════════════════
+
+    st.markdown("---")
+    st.markdown("#### 📋 Registrar Gestión de Seguimiento")
+    st.caption("Registra cada contacto con el cliente. Queda guardado en el historial.")
+
+    col_g1, col_g2 = st.columns(2)
+
+    with col_g1:
+        tipo_gestion = st.selectbox(
+            "Tipo de gestión realizada:",
+            [
+                "📞 Llamada — Contestó",
+                "📞 Llamada — No contestó",
+                "📞 Llamada — Buzón de voz",
+                "💬 WhatsApp — Respondió",
+                "💬 WhatsApp — No respondió",
+                "💬 WhatsApp — Visto sin respuesta",
+                "📧 Correo — Enviado",
+                "📧 Correo — Respondió",
+                "🤝 Visita — Realizada",
+                "🤝 Visita — No estaba / reprogramar",
+                "🖥️ Reunión virtual — Realizada",
+                "🖥️ Reunión virtual — No se conectó",
+            ],
+            key="act_tipo_gestion"
+        )
+
+        resultado_gestion = st.selectbox(
+            "Resultado:",
+            [
+                "✅ Interesado — avanza",
+                "🔄 Pendiente — requiere seguimiento",
+                "📅 Cita agendada",
+                "❌ No interesado",
+                "⏳ Solicita más tiempo",
+                "📄 Solicitó propuesta formal",
+                "✍️ En proceso de firma",
+                "🚫 No disponible / cambiar fecha",
+            ],
+            key="act_resultado_gestion"
+        )
+
+    with col_g2:
+        # Próxima fecha de seguimiento
+        fecha_prox = st.date_input(
+            "📅 Próxima fecha de seguimiento:",
+            value=date.today(),
+            key="act_fecha_prox"
+        )
+
+        tipo_prox = st.selectbox(
+            "Tipo de próximo contacto:",
+            TIPOS_SEGUIMIENTO,
+            key="act_tipo_prox"
+        )
+
+        detalle_gestion = st.text_area(
+            "📝 Detalle / observación:",
+            placeholder="Ej: El cliente solicitó revisar la propuesta con su socio...",
+            key="act_detalle_gestion",
+            height=90
+        )
+
+    # ── Vista previa del registro que se va a guardar ──────
+    if detalle_gestion.strip() or tipo_gestion:
+        ts_prev = datetime.now(TZ).strftime("%d/%m/%Y %H:%M")
+        st.markdown(
+            f"<div style='background:#f8fafc; border:1px solid #e2e8f0; "
+            f"border-radius:8px; padding:10px 14px; margin:8px 0; font-size:12px;'>"
+            f"<b>Vista previa del registro:</b><br>"
+            f"📅 {ts_prev} · {tipo_gestion}<br>"
+            f"📌 {resultado_gestion}<br>"
+            f"🗓️ Próximo contacto: {fecha_prox.strftime('%d/%m/%Y')} · {tipo_prox}<br>"
+            f"💬 {detalle_gestion.strip() or '(sin detalle)'}"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+
+    st.markdown("---")
+
+    # ════════════════════════════════════════════════════════
+    # HISTORIAL DE GESTIONES ANTERIORES
+    # ════════════════════════════════════════════════════════
+    notas_existentes = val(venta.get("NOTAS"), "")
+    if notas_existentes:
+        with st.expander("📂 Ver historial de gestiones anteriores", expanded=False):
+            # Mostrar cada línea del historial con estilo
+            for linea in notas_existentes.split("\n"):
+                linea = linea.strip()
+                if not linea:
+                    continue
+                # Color según tipo de gestión registrada
+                if "Contestó" in linea or "Respondió" in linea or "Interesado" in linea:
+                    color = "#f0fdf4"; borde = "#22c55e"
+                elif "No contestó" in linea or "No respondió" in linea or "No interesado" in linea:
+                    color = "#fef2f2"; borde = "#ef4444"
+                elif "Cita" in linea or "firma" in linea or "propuesta" in linea:
+                    color = "#eff6ff"; borde = "#3b82f6"
+                else:
+                    color = "#f8fafc"; borde = "#cbd5e1"
+
+                st.markdown(
+                    f"<div style='background:{color}; border-left:3px solid {borde}; "
+                    f"border-radius:5px; padding:6px 10px; margin:3px 0; font-size:11px;'>"
+                    f"{linea}"
+                    f"</div>",
+                    unsafe_allow_html=True
+                )
+
+    # ════════════════════════════════════════════════════════
+    # BOTÓN GUARDAR — reemplaza el que ya tenías
+    # ════════════════════════════════════════════════════════
+    if st.button("💾 Guardar y Notificar", type="primary",
+                 use_container_width=True, key="btn_act_guardar"):
+
+        errores = []
+        if not e_nit.strip():   errores.append("Número de Documento es obligatorio.")
+        if not e_razon.strip(): errores.append("Razón Social / Cliente es obligatorio.")
+        if errores:
+            for err in errores:
+                st.error(f"❌ {err}")
+            return
+
+        # ── Construir entrada del historial ────────────────
+        ts = datetime.now(TZ).strftime("%d/%m/%Y %H:%M")
+        entrada_historial = (
+            f"\n[{ts}] {tipo_gestion} | {resultado_gestion}"
+            f" | Próx: {fecha_prox.strftime('%d/%m/%Y')} {tipo_prox}"
+        )
+        if detalle_gestion.strip():
+            entrada_historial += f"\n    💬 {detalle_gestion.strip()}"
+
+        # Acumular sobre notas previas
+        notas_acumuladas = val(venta.get("NOTAS"), "") + entrada_historial
+
+        # Si el usuario también escribió nota libre adicional
+        nota_libre = st.session_state.get("act_nota_nueva", "").strip()
+        if nota_libre:
+            notas_acumuladas += f"\n[{ts}] 📝 {nota_libre}"
+
+        campos_actualizar = {
+            # Estado
+            "ESTADO":            nuevo_estado,
+            # Datos cliente
+            "TIPO_DOC":          e_tipo_doc,
+            "NIT":               e_nit.strip(),
+            "CLIENTE":           e_razon.strip(),
+            "TEL_CONTACTO":      e_tel.strip(),
+            "EMAIL_CLIENTE":     e_email.strip(),
+            "RAZON_SOCIAL":      e_razon.strip(),
+            "DIRECCION":         e_dir.strip(),
+            "BARRIO":            e_barrio.strip(),
+            "DEPARTAMENTO":      e_depto,
+            "MUNICIPIO":         e_municipio,
+            "EMAIL_CONTACTO":    e_email_c.strip(),
+            "NOMBRE_CONTACTO":   e_nom_c.strip(),
+            "MOVIL_CONTACTO":    e_mov_c.strip(),
+            # Representante legal
+            "NOMBRE_REP":        e_nom_rep.strip(),
+            "CEDULA_REP":        e_ced_rep.strip(),
+            "EMAIL_REP":         e_email_rep.strip(),
+            "MOVIL_REP":         e_mov_rep.strip(),
+            # Plan
+            "DIVISION":          e_division,
+            "PORTAFOLIO":        portafolio_val,
+            "SERVICIO":          servicio_val,
+            "FAMILIA_PLAN":      e_familia,
+            "PLAN":              e_plan,
+            "LINEAS":            str(e_lineas),
+            "VALOR_TOTAL":       str(precio_total),
+            # Seguimiento actualizado con próxima gestión
+            "FECHA_SEGUIMIENTO": str(fecha_prox),
+            "TIPO_SEGUIMIENTO":  tipo_prox,
+            # Historial completo
+            "NOTAS":             notas_acumuladas,
+        }
+
+        ok = actualizar_venta(id_venta, campos_actualizar)
+
+        if ok:
+            st.cache_data.clear()
+
+            # ── Notificación Telegram ──────────────────────
+            msg_tg = (
+                f"🔄 <b>Cambio de Estado — Somos Telser</b>\n"
+                f"📋 ID: {id_venta} | {e_razon.strip()}\n"
+                f"📍 {estado_anterior} → {nuevo_estado}\n"
+                f"📞 {tipo_gestion}\n"
+                f"📌 {resultado_gestion}\n"
+                f"🗓️ Próx: {fecha_prox.strftime('%d/%m/%Y')} · {tipo_prox}\n"
+                f"💬 {detalle_gestion.strip() or 'Sin detalle'}\n"
+                f"📅 {ts}"
+            )
+            enviar_telegram(msg_tg)
+
+            st.success(
+                f"✅ Venta **{id_venta}** guardada. "
+                f"Estado: **{estado_anterior} → {nuevo_estado}**"
+            )
+            st.info("🔔 Notificación enviada a Telegram.")
+            st.rerun()
+
+        else:
+            st.error("❌ No se pudo guardar. Intenta nuevamente.")
  
     # ══════════════════════════════════════════════════════
     # BOTÓN GUARDAR
