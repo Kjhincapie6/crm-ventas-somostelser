@@ -565,7 +565,7 @@ def sidebar_render(df: pd.DataFrame):
             st.download_button(
                 "📤 Exportar CRM",
                 data=csv_export,
-                file_name=f"crm_somostelser_{datetime.now().strftime('%Y%m%d')}.csv"
+                file_name=f"crm_somostelser_{datetime.now().strftime('%Y%m%d')}.csv",
                 mime="text/csv",
                 key="btn_export_sidebar",
                 use_container_width=True
