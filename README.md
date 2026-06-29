@@ -129,9 +129,9 @@ Actualizar el estado del contrato, registrar observaciones y enviar automáticam
 El administrador puede consultar indicadores, analizar el desempeño comercial, aplicar filtros y exportar la información.
 
 📌 Próximas mejoras
-Migración de CSV a SQLite/PostgreSQL.
-Gestión documental integrada.
-Agenda comercial con recordatorios.
-Predicción de probabilidad de cierre mediante Machine Learning.
-Predicción de riesgo de cancelación.
-Integración con modelos de Inteligencia Artificial para asistencia comercial.
+> Migración de CSV a SQLite/PostgreSQL.
+> Gestión documental integrada.
+> Agenda comercial con recordatorios.
+> Predicción de probabilidad de cierre mediante Machine Learning.
+> Predicción de riesgo de cancelación.
+> Integración con modelos de Inteligencia Artificial para asistencia comercial.
