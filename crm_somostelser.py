@@ -707,39 +707,39 @@ def tab_registrar_venta():
 # ════════════════════════════════════════════════════════════
 # TAB 2 — ACTUALIZAR ESTADO
 # ════════════════════════════════════════════════════════════
-
+ 
 def tab_actualizar_estado(df: pd.DataFrame):
     st.markdown("### 🔄 Actualizar Seguimiento de Venta")
-
+ 
     if df.empty:
         st.info("📭 No hay ventas registradas.")
         return
-
+ 
     # Filtro por asesor si es asesor (no admin)
     if st.session_state.get("rol") == "asesor":
         df_filtrado = df[df["ASESOR"] == st.session_state.get("usuario", "")]
     else:
         df_filtrado = df
-
+ 
     if df_filtrado.empty:
         st.info("Sin ventas asignadas.")
         return
-
+ 
     lista_ops = opciones_ventas(df_filtrado)
     seleccion = st.selectbox("Selecciona la venta:", lista_ops, key="act_select")
     id_venta  = extraer_id_opcion(seleccion)
-
+ 
     if id_venta is None:
         st.error("No se pudo identificar la venta.")
         return
-
+ 
     venta = buscar_venta(id_venta)
     if venta is None:
         st.error(f"Venta ID {id_venta} no encontrada.")
         return
-
+ 
     st.markdown("---")
-
+ 
     # Tarjeta de datos actuales (fiel al diseño original)
     col_izq, col_der = st.columns(2)
     with col_izq:
@@ -755,7 +755,7 @@ def tab_actualizar_estado(df: pd.DataFrame):
         st.markdown(f"**Servicio:** {venta.get('SERVICIO','N/A')}")
         lineas_val = venta.get('LINEAS','N/A')
         st.markdown(f"**Líneas:** {lineas_val if lineas_val else 'N/A'}")
-
+ 
     with col_der:
         asesor_val = venta.get("ASESOR", "N/A")
         st.markdown(f"**Asesor:** [{asesor_val}](mailto:{asesor_val})")
@@ -770,12 +770,34 @@ def tab_actualizar_estado(df: pd.DataFrame):
         fecha_seg_v = venta.get("FECHA_SEGUIMIENTO","N/A")
         tipo_seg_v  = venta.get("TIPO_SEGUIMIENTO","N/A")
         st.markdown(f"**Seguimiento:** {fecha_seg_v} | {tipo_seg_v}")
-
+ 
     st.markdown("---")
-
+ 
     idx_estado = ESTADOS.index(estado_actual) if estado_actual in ESTADOS else 0
     nuevo_estado = st.selectbox("Cambiar estado a:", ESTADOS, index=idx_estado, key="act_nuevo_estado")
     nota_bitacora = st.text_area("📝 Agregar nota a la bitácora (opcional):", key="act_nota", height=100)
+ 
+    if st.button("💾 Guardar y Notificar", type="primary", use_container_width=True, key="btn_act_guardar"):
+        notas_prev = str(venta.get("NOTAS", ""))
+        nueva_nota = ""
+        if nota_bitacora.strip():
+            nueva_nota = f"\n[{datetime.now().strftime('%d/%m/%Y %H:%M')}] {nota_bitacora.strip()}"
+        campos = {
+            "ESTADO": nuevo_estado,
+            "NOTAS":  notas_prev + nueva_nota,
+        }
+        ok = actualizar_venta(id_venta, campos)
+        if ok:
+            st.success(f"✅ Estado actualizado a **{nuevo_estado}** — ID {id_venta}")
+            msg = (f"🔄 <b>Cambio de Estado — Somos Telser</b>\n"
+                   f"📋 ID: {id_venta} | {venta.get('CLIENTE','')}\n"
+                   f"📍 {estado_actual} → {nuevo_estado}\n"
+                   f"💬 {nota_bitacora.strip() or 'Sin nota'}\n"
+                   f"📅 {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+            enviar_telegram(msg)
+            st.cache_data.clear()
+        else:
+            st.error("❌ No se pudo actualizar.")
     
 # ════════════════════════════════════════════════════════════
 # BOTÓN GUARDAR Y NOTIFICAR (TAB 2)
