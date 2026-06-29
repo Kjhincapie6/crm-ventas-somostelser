@@ -590,6 +590,8 @@ with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
     else:
         st.info("La gestión móvil aplica también para Full Tigo.")
 
+    col_izq, col_der = st.columns(2)
+
     with col_der:
         st.markdown("### 👤 Representante Legal")
         nombre_rep  = st.text_input("Nombre Rep. Legal:", key="reg_nombre_rep")
