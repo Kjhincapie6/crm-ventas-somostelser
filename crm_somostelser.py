@@ -12,7 +12,7 @@ import random
 
 # ─── CONFIGURACIÓN DE PÁGINA ───────────────────────────────
 st.set_page_config(
-    page_title="CRM Somos Telser",
+    page_title="SaaS De Ventas Somos Telser",
     page_icon="📡",
     layout="wide",
     initial_sidebar_state="expanded"
