@@ -529,33 +529,32 @@ def tab_registrar_venta():
 
     st.subheader("⚙️ Gestión Técnica")
         
-               st.subheader("⚙️ Gestión Técnica")
-        with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
-            tipo_linea = st.radio("Tipo de gestión:",
-                ["Portabilidad","Línea Nueva","Línea Existente"], key="tipo_linea_pop")
-            op_linea = "N/A"
-            if tipo_linea == "Portabilidad":
-                op_linea = st.selectbox("Operador Origen:",
-                    ["Claro","Movistar","Móvil Éxito","Wom"], key="op_linea_pop")
-            cant_linea = st.number_input("Cantidad:", min_value=1, value=1, key="cant_linea_pop")
-            num_linea  = st.text_input("Número de línea:", key="num_linea_pop")
+    with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
+        tipo_linea = st.radio("Tipo de gestión:",
+            ["Portabilidad","Línea Nueva","Línea Existente"], key="tipo_linea_pop")
+        op_linea = "N/A"
+        if tipo_linea == "Portabilidad":
+            op_linea = st.selectbox("Operador Origen:",
+                ["Claro","Movistar","Móvil Éxito","Wom"], key="op_linea_pop")
+        cant_linea = st.number_input("Cantidad:", min_value=1, value=1, key="cant_linea_pop")
+        num_linea  = st.text_input("Número de línea:", key="num_linea_pop")
 
-            if st.button("➕ Agregar línea", key="btn_add_linea"):
-                st.session_state.lista_lineas.append({
-                    "cantidad": cant_linea, "tipo": tipo_linea,
-                    "operador": op_linea,  "numero": num_linea,
-                })
-                st.success(f"✅ Línea {num_linea} agregada.")
+        if st.button("➕ Agregar línea", key="btn_add_linea"):
+            st.session_state.lista_lineas.append({
+                "cantidad": cant_linea, "tipo": tipo_linea,
+                "operador": op_linea,  "numero": num_linea,
+            })
+            st.success(f"✅ Línea {num_linea} agregada.")
 
-            if st.session_state.lista_lineas:
-                st.markdown("**Líneas acumuladas:**")
-                for i, ln in enumerate(st.session_state.lista_lineas, 1):
-                    st.write(f"{i}. {ln['tipo']} | {ln['operador']} | {ln['numero']} | x{ln['cantidad']}")
-                if st.button("🗑️ Limpiar líneas", key="btn_clear_lineas"):
-                    st.session_state.lista_lineas = []
-                    st.rerun()
-            else:
-                st.info("La gestión móvil aplica también para Full Tigo.")
+        if st.session_state.lista_lineas:
+            st.markdown("**Líneas acumuladas:**")
+            for i, ln in enumerate(st.session_state.lista_lineas, 1):
+                st.write(f"{i}. {ln['tipo']} | {ln['operador']} | {ln['numero']} | x{ln['cantidad']}")
+            if st.button("🗑️ Limpiar líneas", key="btn_clear_lineas"):
+                st.session_state.lista_lineas = []
+                st.rerun()
+        else:
+            st.info("La gestión móvil aplica también para Full Tigo.")
 
 
     with col_der:
