@@ -776,28 +776,55 @@ def tab_actualizar_estado(df: pd.DataFrame):
     idx_estado = ESTADOS.index(estado_actual) if estado_actual in ESTADOS else 0
     nuevo_estado = st.selectbox("Cambiar estado a:", ESTADOS, index=idx_estado, key="act_nuevo_estado")
     nota_bitacora = st.text_area("📝 Agregar nota a la bitácora (opcional):", key="act_nota", height=100)
+    
+# ════════════════════════════════════════════════════════════
+# BOTÓN GUARDAR Y NOTIFICAR (TAB 2)
+# ════════════════════════════════════════════════════════════
 
-    if st.button("💾 Guardar y Notificar", type="primary", use_container_width=True, key="btn_act_guardar"):
-        notas_prev = str(venta.get("NOTAS", ""))
-        nueva_nota = ""
-        if nota_bitacora.strip():
-            nueva_nota = f"\n[{datetime.now().strftime('%d/%m/%Y %H:%M')}] {nota_bitacora.strip()}"
-        campos = {
-            "ESTADO": nuevo_estado,
-            "NOTAS":  notas_prev + nueva_nota,
+if st.button("🔄 Guardar y Notificar", key="btn_guardar_tab2", type="primary", use_container_width=True):
+    try:
+        # 1. Actualizar DataFrame
+        df_upd.loc[df_upd["ID_VENTA"] == id_sel, "ESTADO"] = nuevo_estado
+        
+        # 2. Manejar Bitácora
+        if nota_adicional.strip():
+            texto_actual = str(fila.get("BITACORA", ""))
+            nueva_entrada = f"\n[{date.today()}] {nota_adicional.strip()}"
+            df_upd.loc[df_upd["ID_VENTA"] == id_sel, "BITACORA"] = texto_actual + nueva_entrada
+        
+        # 3. Guardar cambios en el archivo
+        df_upd.to_csv(CSV_PATH, index=False)
+
+        # 4. Notificación General
+        enviar_telegram(
+            f"🔄 Venta #{str(id_sel).zfill(4)} actualizada\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n"
+            f"🏢 Cliente: {fila.get('CLIENTE', 'N/A')}\n"
+            f"📌 Nuevo estado: {nuevo_estado}\n"
+            f"👤 Asesor: {st.session_state.get('correo_asesor', 'N/A')}"
+        )
+
+        # 5. Notificación Específica según estado
+        MENSAJES_SEG = {
+            "Cotizado": "📋 SEGUIMIENTO — Cotización enviada\n━━━━━━━━━━━━━━━━━━━━━\nHacer seguimiento para resolver dudas y avanzar al cierre.\n",
+            "En proceso de firma": "✍️ SEGUIMIENTO — En proceso de firma\n━━━━━━━━━━━━━━━━━━━━━\nVerificar que no haya obstáculos para la firma.\n",
+            "Anulado": "❌ ALERTA — Venta Anulada\n━━━━━━━━━━━━━━━━━━━━━\nContactar al cliente para entender el motivo.\n",
         }
-        ok = actualizar_venta(id_venta, campos)
-        if ok:
-            st.success(f"✅ Estado actualizado a **{nuevo_estado}** — ID {id_venta}")
-            msg = (f"🔄 <b>Cambio de Estado — Somos Telser</b>\n"
-                   f"📋 ID: {id_venta} | {venta.get('CLIENTE','')}\n"
-                   f"📍 {estado_actual} → {nuevo_estado}\n"
-                   f"💬 {nota_bitacora.strip() or 'Sin nota'}\n"
-                   f"📅 {datetime.now().strftime('%d/%m/%Y %H:%M')}")
-            enviar_telegram(msg)
-            st.cache_data.clear()
-        else:
-            st.error("❌ No se pudo actualizar.")
+
+        if nuevo_estado in MENSAJES_SEG:
+            enviar_telegram(
+                f"{MENSAJES_SEG[nuevo_estado]}"
+                f"🏢 Cliente: {fila.get('CLIENTE', 'N/A')}\n"
+                f"👤 Asesor: {st.session_state.get('correo_asesor', 'N/A')}\n"
+                f"📞 Tipo seguimiento: {fila.get('TIPO_SEGUIMIENTO', 'N/A')}\n"
+                f"📅 Fecha programada: {fila.get('FECHA_SEGUIMIENTO', 'N/A')}"
+            )
+
+        st.success("✅ Estado actualizado y notificado correctamente.")
+        st.rerun()
+
+    except Exception as e:
+        st.error(f"Error al guardar o notificar: {e}")
 
 # ════════════════════════════════════════════════════════════
 # TAB 3 — BASE DE DATOS / DASHBOARD
