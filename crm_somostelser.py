@@ -777,40 +777,29 @@ def tab_registrar_venta():
             "FECHA_SEGUIMIENTO": str(fecha_seg),
             "TIPO_SEGUIMIENTO": tipo_seg,
         }
-        Ese error indica que la indentación antes de la línea 781 está mezclada. No necesariamente significa que la línea ok, resultado = crear_venta(registro) esté mal, sino que alguna línea anterior usa una combinación de tabulaciones (TAB) y espacios, o tiene un nivel de sangría incorrecto.
 
-En el código que me mostraste, ese bloque debería verse exactamente así:
-
-    registro = {
-        "ESTADO": estado_ini,
-        "PORTAFOLIO": portafolio_val,
-        "SERVICIO": servicio_val,
-        ...
-        "TIPO_SEGUIMIENTO": tipo_seg,
-    }
-
-    ok, resultado = crear_venta(registro)
-
-    if ok:
-        st.success(f"✅ Venta registrada exitosamente. **ID_VENTA: {resultado}**")
-
-        msg = (
-            f"🆕 <b>Nueva Venta — Somos Telser</b>\n"
-            f"📋 ID: {resultado} | {razon.strip()}\n"
-            f"📦 {portafolio_val} | {plan_sel}\n"
-            f"💰 ${precio_total:,} COP\n"
-            f"📍 {estado_ini} | {depto}, {municipio}\n"
-            f"🧑 {st.session_state.get('usuario','')}\n"
-            f"📅 {datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}"
-        )
-
-        enviar_telegram(msg)
-
-        st.cache_data.clear()
-        st.rerun()
-
-    else:
-        st.error(f"❌ Error al registrar: {resultado}")
+        ok, resultado = crear_venta(registro)
+    
+        if ok:
+            st.success(f"✅ Venta registrada exitosamente. **ID_VENTA: {resultado}**")
+    
+            msg = (
+                f"🆕 <b>Nueva Venta — Somos Telser</b>\n"
+                f"📋 ID: {resultado} | {razon.strip()}\n"
+                f"📦 {portafolio_val} | {plan_sel}\n"
+                f"💰 ${precio_total:,} COP\n"
+                f"📍 {estado_ini} | {depto}, {municipio}\n"
+                f"🧑 {st.session_state.get('usuario','')}\n"
+                f"📅 {datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}"
+            )
+    
+            enviar_telegram(msg)
+    
+            st.cache_data.clear()
+            st.rerun()
+    
+        else:
+            st.error(f"❌ Error al registrar: {resultado}")
 
       
 # ════════════════════════════════════════════════════════════
