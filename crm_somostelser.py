@@ -704,7 +704,7 @@ def tab_registrar_venta():
         else:
             st.error(f"❌ Error al registrar: {resultado}")
 
-# ════════════════════════════════════════════════════════════
+ ════════════════════════════════════════════════════════════
 # TAB 2 — ACTUALIZAR ESTADO
 # ════════════════════════════════════════════════════════════
  
@@ -798,31 +798,7 @@ def tab_actualizar_estado(df: pd.DataFrame):
             st.cache_data.clear()
         else:
             st.error("❌ No se pudo actualizar.")
-    
-# ════════════════════════════════════════════════════════════
-# BOTÓN GUARDAR Y NOTIFICAR (TAB 2)
-# ════════════════════════════════════════════════════════════
-if st.button("💾 Guardar y Notificar", type="primary", use_container_width=True, key="btn_act_guardar"):
-        notas_prev = str(venta.get("NOTAS", ""))
-        nueva_nota = ""
-        if nota_bitacora.strip():
-            nueva_nota = f"\n[{datetime.now().strftime('%d/%m/%Y %H:%M')}] {nota_bitacora.strip()}"
-        campos = {
-            "ESTADO": nuevo_estado,
-            "NOTAS":  notas_prev + nueva_nota,
-        }
-        ok = actualizar_venta(id_venta, campos)
-        if ok:
-            st.success(f"✅ Estado actualizado a **{nuevo_estado}** — ID {id_venta}")
-            msg = (f"🔄 <b>Cambio de Estado — Somos Telser</b>\n"
-                   f"📋 ID: {id_venta} | {venta.get('CLIENTE','')}\n"
-                   f"📍 {estado_actual} → {nuevo_estado}\n"
-                   f"💬 {nota_bitacora.strip() or 'Sin nota'}\n"
-                   f"📅 {datetime.now().strftime('%d/%m/%Y %H:%M')}")
-            enviar_telegram(msg)
-            st.cache_data.clear()
-        else:
-            st.error("❌ No se pudo actualizar.")
+ 
 # ════════════════════════════════════════════════════════════
 # TAB 3 — BASE DE DATOS / DASHBOARD
 # ════════════════════════════════════════════════════════════
