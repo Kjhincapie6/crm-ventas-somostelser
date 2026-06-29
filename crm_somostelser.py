@@ -778,26 +778,32 @@ def tab_registrar_venta():
             "TIPO_SEGUIMIENTO": tipo_seg,
         }
 
+       El error ya no es de sintaxis, ahora es de indentación.
+
+
+
         ok, resultado = crear_venta(registro)
+        
         if ok:
             st.success(f"✅ Venta registrada exitosamente. **ID_VENTA: {resultado}**")
-             msg = (
-                   f"🆕 <b>Nueva Venta — Somos Telser</b>\n"
-                   f"📋 ID: {resultado} | {razon.strip()}\n"
-                   f"📦 {portafolio_val} | {plan_sel}\n"
-                   f"💰 ${precio_total:,} COP\n"
-                   f"📍 {estado_ini} | {depto}, {municipio}\n"
-                   f"🧑 {st.session_state.get('usuario','')}\n"
-                   f"📅 {datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}"
-               )
-            
-               enviar_telegram(msg)
-            
-               st.cache_data.clear()
-               st.rerun()
-            
-           else:
-               st.error(f"❌ Error al registrar: {resultado}")
+        
+            msg = (
+                f"🆕 <b>Nueva Venta — Somos Telser</b>\n"
+                f"📋 ID: {resultado} | {razon.strip()}\n"
+                f"📦 {portafolio_val} | {plan_sel}\n"
+                f"💰 ${precio_total:,} COP\n"
+                f"📍 {estado_ini} | {depto}, {municipio}\n"
+                f"🧑 {st.session_state.get('usuario','')}\n"
+                f"📅 {datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}"
+            )
+        
+            enviar_telegram(msg)
+        
+            st.cache_data.clear()
+            st.rerun()
+        
+        else:
+            st.error(f"❌ Error al registrar: {resultado}")
 
 # ════════════════════════════════════════════════════════════
 # TAB 2 — ACTUALIZAR ESTADO
