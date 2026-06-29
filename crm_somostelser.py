@@ -866,27 +866,37 @@ def tab_registrar_venta():
             st.error(f"❌ Error al registrar: {resultado}")
 
       
-# ════════════════════════════════════════════════════════════
-# TAB 2 — ACTUALIZAR ESTADO
+# ═══════════=================================================
+# TAB 2 — ACTUALIZAR ESTADO + EDICIÓN COMPLETA DE LA VENTA
 # ════════════════════════════════════════════════════════════
  
 def tab_actualizar_estado(df: pd.DataFrame):
+ 
+    # ── Helper: limpia nan/None/"" → fallback ──────────────
+    def val(v, fallback=""):
+        if v is None:
+            return fallback
+        s = str(v).strip()
+        return fallback if s.lower() in ("nan", "none", "") else s
+ 
     st.markdown("### 🔄 Actualizar Seguimiento de Venta")
  
     if df.empty:
         st.info("📭 No hay ventas registradas.")
         return
  
-    # Filtro por asesor si es asesor (no admin)
-    if st.session_state.get("rol") == "asesor":
-        df_filtrado = df[df["ASESOR"] == st.session_state.get("usuario", "")]
-    else:
-        df_filtrado = df
+    # Filtro por rol
+    df_filtrado = (
+        df[df["ASESOR"] == st.session_state.get("usuario", "")]
+        if st.session_state.get("rol") == "asesor"
+        else df
+    )
  
     if df_filtrado.empty:
         st.info("Sin ventas asignadas.")
         return
  
+    # ── Selector de venta ──────────────────────────────────
     lista_ops = opciones_ventas(df_filtrado)
     seleccion = st.selectbox("Selecciona la venta:", lista_ops, key="act_select")
     id_venta  = extraer_id_opcion(seleccion)
@@ -900,69 +910,234 @@ def tab_actualizar_estado(df: pd.DataFrame):
         st.error(f"Venta ID {id_venta} no encontrada.")
         return
  
+    estado_anterior = val(venta.get("ESTADO"), "Sin estado")
+ 
     st.markdown("---")
  
-    # Tarjeta de datos actuales (fiel al diseño original)
+    # ══════════════════════════════════════════════════════
+    # BLOQUE 1 — ESTADO (siempre visible arriba, destacado)
+    # ══════════════════════════════════════════════════════
+    st.markdown(f"""
+    <div style="background:#e0f2fe; border-left:5px solid #00a0e3;
+                border-radius:8px; padding:12px 18px; margin-bottom:16px;">
+      <span style="font-size:14px; font-weight:700; color:#0369a1;">
+        📍 Estado actual: <u>{estado_anterior}</u>
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        🆔 ID Venta: <b>{id_venta}</b>
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        👤 {val(venta.get('CLIENTE'), 'Sin nombre')}
+      </span>
+    </div>
+    """, unsafe_allow_html=True)
+ 
+    idx_actual = ESTADOS.index(estado_anterior) if estado_anterior in ESTADOS else 0
+    nuevo_estado = st.selectbox(
+        "🔁 Cambiar estado a:",
+        ESTADOS,
+        index=idx_actual,
+        key="act_nuevo_estado"
+    )
+ 
+    st.markdown("---")
+ 
+    # ══════════════════════════════════════════════════════
+    # BLOQUE 2 — EDICIÓN COMPLETA DE TODOS LOS CAMPOS
+    # ══════════════════════════════════════════════════════
+    st.markdown("#### ✏️ Revisar y corregir datos de la venta")
+ 
     col_izq, col_der = st.columns(2)
+ 
+    # ── COLUMNA IZQUIERDA: Datos del Cliente ──────────────
     with col_izq:
-        estado_actual = str(venta.get("ESTADO", ""))
+        st.markdown("##### 📋 Datos del Cliente")
+ 
+        tipo_doc_actual = val(venta.get("TIPO_DOC"), "NIT")
+        tipo_doc_idx = TIPOS_DOC.index(tipo_doc_actual) if tipo_doc_actual in TIPOS_DOC else 0
+        e_tipo_doc = st.selectbox("Tipo Doc:", TIPOS_DOC, index=tipo_doc_idx, key="act_tipo_doc")
+ 
+        e_nit      = st.text_input("Número de Documento:", value=val(venta.get("NIT")),      key="act_nit")
+        e_razon    = st.text_input("Razón Social / Cliente:", value=val(venta.get("CLIENTE")), key="act_razon")
+        e_tel      = st.text_input("Teléfono Contacto:", value=val(venta.get("TEL_CONTACTO")), key="act_tel")
+        e_email    = st.text_input("Email Cliente:", value=val(venta.get("EMAIL_CLIENTE")),   key="act_email")
+        e_dir      = st.text_input("Dirección:", value=val(venta.get("DIRECCION")),           key="act_dir")
+        e_barrio   = st.text_input("Barrio:", value=val(venta.get("BARRIO")),                 key="act_barrio")
+ 
+        # Departamento / Municipio
+        deptos_lista = [""] + sorted(DEPARTAMENTOS_MUNICIPIOS.keys())
+        depto_actual = val(venta.get("DEPARTAMENTO"))
+        depto_idx    = deptos_lista.index(depto_actual) if depto_actual in deptos_lista else 0
+        e_depto = st.selectbox("Departamento:", deptos_lista, index=depto_idx, key="act_depto")
+ 
+        muni_lista   = [""] + DEPARTAMENTOS_MUNICIPIOS.get(e_depto, []) if e_depto else [""]
+        muni_actual  = val(venta.get("MUNICIPIO"))
+        muni_idx     = muni_lista.index(muni_actual) if muni_actual in muni_lista else 0
+        e_municipio  = st.selectbox("Municipio:", muni_lista, index=muni_idx,
+                                    key="act_municipio", disabled=(not e_depto))
+ 
+        e_email_c  = st.text_input("Email Contacto:", value=val(venta.get("EMAIL_CONTACTO")),   key="act_email_c")
+        e_nom_c    = st.text_input("Nombre Contacto:", value=val(venta.get("NOMBRE_CONTACTO")), key="act_nom_c")
+        e_mov_c    = st.text_input("Móvil Contacto:", value=val(venta.get("MOVIL_CONTACTO")),   key="act_mov_c")
+ 
+    # ── COLUMNA DERECHA: Rep. Legal + Plan + Seguimiento ──
+    with col_der:
+        st.markdown("##### 👤 Representante Legal")
+        e_nom_rep  = st.text_input("Nombre Rep. Legal:", value=val(venta.get("NOMBRE_REP")), key="act_nom_rep")
+        e_ced_rep  = st.text_input("Cédula Rep. Legal:", value=val(venta.get("CEDULA_REP")), key="act_ced_rep")
+        e_email_rep= st.text_input("Correo Rep. Legal:", value=val(venta.get("EMAIL_REP")),  key="act_email_rep")
+        e_mov_rep  = st.text_input("Móvil Rep. Legal:", value=val(venta.get("MOVIL_REP")),   key="act_mov_rep")
+ 
+        st.markdown("##### 📦 Portafolio y Plan")
+ 
+        # División
+        div_actual = val(venta.get("DIVISION"), "Fijo")
+        div_opts   = ["Móvil", "Fijo"]
+        div_idx    = div_opts.index(div_actual) if div_actual in div_opts else 1
+        e_division = st.radio("División:", div_opts, index=div_idx,
+                              horizontal=True, key="act_division")
+ 
+        # Portafolio derivado de la división
+        portafolio_val = "MOVIL" if e_division == "Móvil" else "FIJO"
+ 
+        if e_division == "Móvil":
+            familias   = list(PLANES_MOVIL.keys())
+            fam_actual = val(venta.get("FAMILIA_PLAN"), familias[0])
+            fam_idx    = familias.index(fam_actual) if fam_actual in familias else 0
+            e_familia  = st.radio("Familia:", familias, index=fam_idx,
+                                  horizontal=True, key="act_familia")
+ 
+            planes_lista = list(PLANES_MOVIL[e_familia].keys())
+            plan_actual  = val(venta.get("PLAN"), planes_lista[0])
+            plan_idx     = planes_lista.index(plan_actual) if plan_actual in planes_lista else 0
+            e_plan       = st.selectbox("Plan:", planes_lista, index=plan_idx, key="act_plan")
+ 
+            e_lineas = st.number_input("Líneas:", min_value=1, max_value=200,
+                                       value=max(1, int(val(venta.get("LINEAS"), "1") or "1")),
+                                       key="act_lineas")
+            precio_total = calcular_precio_movil(e_familia, e_plan, e_lineas)
+            servicio_val = "AVANZADO" if "Empresarial" in e_familia else "BASICO"
+        else:
+            e_familia    = "FIJO"
+            planes_fijo  = list(PLANES_FIJO.keys())
+            plan_actual  = val(venta.get("PLAN"), planes_fijo[0])
+            plan_idx     = planes_fijo.index(plan_actual) if plan_actual in planes_fijo else 0
+            e_plan       = st.selectbox("Plan Fijo:", planes_fijo, index=plan_idx, key="act_plan_fijo")
+            e_lineas     = 1
+            precio_total = PLANES_FIJO.get(e_plan, 0)
+            servicio_val = "AVANZADO" if "Avanzado" in e_plan or "Empresarial" in e_plan else "BASICO"
+ 
         st.markdown(f"""
-        <div style="background:#e0f2fe; border-radius:8px; padding:12px 16px; margin-bottom:12px;">
-          <span style="font-size:13px; font-weight:700; color:#0369a1;">
-            📍 Estado actual: {estado_actual}
+        <div style="background:#e0f2fe; border-left:4px solid #00a0e3;
+                    border-radius:6px; padding:10px 14px; margin:8px 0;">
+          <span style="font-size:15px; font-weight:700; color:#0369a1;">
+            💰 Total: ${precio_total:,} COP
           </span>
         </div>
         """, unsafe_allow_html=True)
-        st.markdown(f"**Cliente:** {venta.get('CLIENTE','N/A')}")
-        st.markdown(f"**Servicio:** {venta.get('SERVICIO','N/A')}")
-        lineas_val = venta.get('LINEAS','N/A')
-        st.markdown(f"**Líneas:** {lineas_val if lineas_val else 'N/A'}")
  
-    with col_der:
-        asesor_val = venta.get("ASESOR", "N/A")
-        st.markdown(f"**Asesor:** [{asesor_val}](mailto:{asesor_val})")
-        division_val = venta.get("DIVISION", "Sin dato")
-        st.markdown(f"**División:** {division_val if division_val else 'Sin dato'}")
-        valor_val = venta.get("VALOR_TOTAL", "0")
+        st.markdown("##### 📅 Seguimiento")
+        # Fecha de seguimiento
+        fecha_raw = val(venta.get("FECHA_SEGUIMIENTO"))
         try:
-            valor_fmt = f"${int(float(str(valor_val))):,} COP"
-        except Exception:
-            valor_fmt = "$0 COP"
-        st.markdown(f"**Valor:** {valor_fmt}")
-        fecha_seg_v = venta.get("FECHA_SEGUIMIENTO","N/A")
-        tipo_seg_v  = venta.get("TIPO_SEGUIMIENTO","N/A")
-        st.markdown(f"**Seguimiento:** {fecha_seg_v} | {tipo_seg_v}")
+            fecha_val = datetime.strptime(fecha_raw, "%Y-%m-%d").date() if fecha_raw else date.today()
+        except ValueError:
+            fecha_val = date.today()
+        e_fecha_seg = st.date_input("Fecha seguimiento:", value=fecha_val, key="act_fecha_seg")
  
+        tipo_seg_actual = val(venta.get("TIPO_SEGUIMIENTO"), TIPOS_SEGUIMIENTO[0])
+        tipo_seg_idx    = TIPOS_SEGUIMIENTO.index(tipo_seg_actual) if tipo_seg_actual in TIPOS_SEGUIMIENTO else 0
+        e_tipo_seg = st.selectbox("Tipo seguimiento:", TIPOS_SEGUIMIENTO,
+                                  index=tipo_seg_idx, key="act_tipo_seg")
+ 
+        e_notas = st.text_area("📝 Notas / Bitácora:", value=val(venta.get("NOTAS")),
+                               key="act_notas", height=90)
+ 
+        nota_nueva = st.text_area("💬 Agregar nota al historial (opcional):",
+                                  key="act_nota_nueva", height=70,
+                                  placeholder="Esta nota se agregará con fecha y hora...")
+ 
+    # ══════════════════════════════════════════════════════
+    # BOTÓN GUARDAR
+    # ══════════════════════════════════════════════════════
     st.markdown("---")
+    if st.button("💾 Guardar y Notificar", type="primary",
+                 use_container_width=True, key="btn_act_guardar"):
  
-    idx_estado = ESTADOS.index(estado_actual) if estado_actual in ESTADOS else 0
-    nuevo_estado = st.selectbox("Cambiar estado a:", ESTADOS, index=idx_estado, key="act_nuevo_estado")
-    nota_bitacora = st.text_area("📝 Agregar nota a la bitácora (opcional):", key="act_nota", height=100)
+        # Validaciones mínimas
+        errores = []
+        if not e_nit.strip():   errores.append("Número de Documento es obligatorio.")
+        if not e_razon.strip(): errores.append("Razón Social / Cliente es obligatorio.")
  
-    if st.button("💾 Guardar y Notificar", type="primary", use_container_width=True, key="btn_act_guardar"):
-        notas_prev = str(venta.get("NOTAS", ""))
-        nueva_nota = ""
-        if nota_bitacora.strip():
-            nueva_nota = f"\n[{datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}] {nota_bitacora.strip()}"
-        campos = {
-            "ESTADO": nuevo_estado,
-            "NOTAS":  notas_prev + nueva_nota,
+        if errores:
+            for err in errores:
+                st.error(f"❌ {err}")
+            return
+ 
+        # Construir historial de notas
+        notas_acumuladas = val(venta.get("NOTAS"), "")
+        if nota_nueva.strip():
+            ts = datetime.now().strftime("%d/%m/%Y %H:%M")
+            notas_acumuladas += f"\n[{ts}] {nota_nueva.strip()}"
+ 
+        campos_actualizar = {
+            # Estado
+            "ESTADO":           nuevo_estado,
+            # Datos cliente
+            "TIPO_DOC":         e_tipo_doc,
+            "NIT":              e_nit.strip(),
+            "CLIENTE":          e_razon.strip(),
+            "TEL_CONTACTO":     e_tel.strip(),
+            "EMAIL_CLIENTE":    e_email.strip(),
+            "RAZON_SOCIAL":     e_razon.strip(),
+            "DIRECCION":        e_dir.strip(),
+            "BARRIO":           e_barrio.strip(),
+            "DEPARTAMENTO":     e_depto,
+            "MUNICIPIO":        e_municipio,
+            "EMAIL_CONTACTO":   e_email_c.strip(),
+            "NOMBRE_CONTACTO":  e_nom_c.strip(),
+            "MOVIL_CONTACTO":   e_mov_c.strip(),
+            # Representante legal
+            "NOMBRE_REP":       e_nom_rep.strip(),
+            "CEDULA_REP":       e_ced_rep.strip(),
+            "EMAIL_REP":        e_email_rep.strip(),
+            "MOVIL_REP":        e_mov_rep.strip(),
+            # Plan
+            "DIVISION":         e_division,
+            "PORTAFOLIO":       portafolio_val,
+            "SERVICIO":         servicio_val,
+            "FAMILIA_PLAN":     e_familia,
+            "PLAN":             e_plan,
+            "LINEAS":           str(e_lineas),
+            "VALOR_TOTAL":      str(precio_total),
+            # Seguimiento
+            "FECHA_SEGUIMIENTO": str(e_fecha_seg),
+            "TIPO_SEGUIMIENTO":  e_tipo_seg,
+            "NOTAS":             notas_acumuladas,
         }
-        ok = actualizar_venta(id_venta, campos)
+ 
+        ok = actualizar_venta(id_venta, campos_actualizar)
+ 
         if ok:
-            st.success(f"✅ Estado actualizado a **{nuevo_estado}** — ID {id_venta}")
-            msg = (f"🔄 <b>Cambio de Estado — Somos Telser</b>\n"
-                   f"📋 ID: {id_venta} | {venta.get('CLIENTE','')}\n"
-                   f"📍 {estado_actual} → {nuevo_estado}\n"
-                   f"💬 {nota_bitacora.strip() or 'Sin nota'}\n"
-                   f"📅 {datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}")
-            enviar_telegram(msg)
-            st.cache_data.clear()
-            st.success(f"✅ Estado actualizado a **{nuevo_estado}** — ID {id_venta}")
+            # Notificación Telegram
+            ts_fmt = datetime.now().strftime("%d/%m/%Y %H:%M")
+            msg_tg = (
+                f"🔄 <b>Cambio de Estado — Somos Telser</b>\n"
+                f"📋 ID: {id_venta} | {e_razon.strip()}\n"
+                f"📍 {estado_anterior} → {nuevo_estado}\n"
+                f"💬 {nota_nueva.strip() or 'Sin nota'}\n"
+                f"📅 {ts_fmt}"
+            )
+            enviar_telegram(msg_tg)
+ 
+            st.success(
+                f"✅ Venta **{id_venta}** actualizada correctamente. "
+                f"Estado: **{estado_anterior} → {nuevo_estado}**"
+            )
+            st.info("🔔 Notificación enviada a Telegram.")
+ 
+            # Limpiar panel → fuerza recarga limpia
             st.rerun()
-            
         else:
-            st.error("❌ No se pudo actualizar.")
+            st.error("❌ No se pudo guardar. Verifica los datos e intenta nuevamente.")
  
 # ════════════════════════════════════════════════════════════
 # TAB 3 — BASE DE DATOS / DASHBOARD
