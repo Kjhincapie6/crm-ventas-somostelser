@@ -241,6 +241,10 @@ COLUMNAS = ["ID_VENTA","ESTADO","PORTAFOLIO","SERVICIO","ASESOR","FECHA_REGISTRO
             "EMAIL_REP","MOVIL_REP","DIVISION","FAMILIA_PLAN","PLAN","LINEAS",
             "VALOR_TOTAL","NOTAS","FECHA_SEGUIMIENTO","TIPO_SEGUIMIENTO"]
 
+Casi, Kely. Hay un pequeño error: tienes dos except FileNotFoundError, y además el return quedó dentro del primer except, lo que hace que parte del código nunca se ejecute.
+
+Déjala así:
+
 # ════════════════════════════════════════════════════════════
 # CAPA DE DATOS — Centralizada (preparada para migración SQL)
 # ════════════════════════════════════════════════════════════
@@ -248,13 +252,21 @@ COLUMNAS = ["ID_VENTA","ESTADO","PORTAFOLIO","SERVICIO","ASESOR","FECHA_REGISTRO
 def cargar_datos() -> pd.DataFrame:
     try:
         df = pd.read_csv(CSV_PATH, dtype=str)
-        df["ID_VENTA"] = pd.to_numeric(df["ID_VENTA"], errors="coerce").fillna(0).astype(int)
+        df["ID_VENTA"] = pd.to_numeric(
+            df["ID_VENTA"],
+            errors="coerce"
+        ).fillna(0).astype(int)
+
+        # Asegurar que existan todas las columnas
         for col in COLUMNAS:
             if col not in df.columns:
                 df[col] = ""
+
         return df
+
     except FileNotFoundError:
         return pd.DataFrame(columns=COLUMNAS)
+
     except Exception as e:
         st.error(f"❌ Error cargando datos: {e}")
         return pd.DataFrame(columns=COLUMNAS)
@@ -772,7 +784,14 @@ def tab_registrar_venta():
         ok, resultado = crear_venta(registro)
         if ok:
             st.success(f"✅ Venta registrada exitosamente. **ID_VENTA: {resultado}**")
-            msg = (f"🆕 <b>Nueva Venta — Somos Telser</b>\n"
+             msg = (
+                 ...
+             )
+            
+            enviar_telegram(msg)
+            
+            st.cache_data.clear()
+            st.rerun()
                    f"📋 ID: {resultado} | {razon.strip()}\n"
                    f"📦 {portafolio_val} | {plan_sel}\n"
                    f"💰 ${precio_total:,} COP\n"
