@@ -1043,7 +1043,7 @@ def tab_base_datos(df: pd.DataFrame):
     )
  
 # ════════════════════════════════════════════════════════════
-# MAIN (CON SEGURIDAD DE ROLES)
+# MAIN (SEGURIDAD DE ROLES SIN AFECTAR CACHÉ)
 # ════════════════════════════════════════════════════════════
  
 def main():
@@ -1051,11 +1051,11 @@ def main():
         st.session_state["auth"] = False
  
     check_auth()
- 
+    
     if not st.session_state.get("auth"):
-        return # Si no está autenticado, no seguimos
+        return
 
-    # Cargar datos una sola vez
+    # Cargar datos una sola vez (la caché de @st.cache_data protegerá esto)
     df = cargar_datos()
  
     # Sidebar
@@ -1071,37 +1071,25 @@ def main():
     </p>
     """, unsafe_allow_html=True)
  
-    # 1. Definir nombres de pestañas según el rol
-    rol = st.session_state.get("rol", "asesor")
-    nombres_tabs = ["📋 Registrar Venta", "🔄 Actualizar Estado"]
-    
-    if rol == "admin":
-        nombres_tabs.append("📊 Base de Datos")
-            
-    # 2. Crear las pestañas dinámicamente
-    lista_tabs = st.tabs(nombres_tabs)
+    # Definir roles
+    es_admin = st.session_state.get("rol") == "admin"
  
-    # 3. Asignar contenido a las pestañas
-    with lista_tabs[0]:
+    # Crear pestañas condicionales
+    if es_admin:
+        tab1, tab2, tab3 = st.tabs(["📋 Registrar Venta", "🔄 Actualizar Estado", "📊 Base de Datos"])
+    else:
+        tab1, tab2 = st.tabs(["📋 Registrar Venta", "🔄 Actualizar Estado"])
+ 
+    # Renderizar contenido
+    with tab1:
         tab_registrar_venta()
  
-    with lista_tabs[1]:
+    with tab2:
         tab_actualizar_estado(df)
             
-    # 4. Solo el admin puede ver la tercera pestaña
-    if rol == "admin":
-        with lista_tabs[2]:
+    if es_admin:
+        with tab3:
             tab_base_datos(df)
  
 if __name__ == "__main__":
     main()
-    with tab2:
-        tab_actualizar_estado(df)
- 
-    with tab3:
-        tab_base_datos(df)
- 
- 
-if __name__ == "__main__":
-    main()
- 
