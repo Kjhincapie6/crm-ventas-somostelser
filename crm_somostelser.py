@@ -495,11 +495,10 @@ def sidebar_render(df: pd.DataFrame):
             )
         
 # ════════════════════════════════════════════════════════════
-# TAB 1 — REGISTRAR VENTA (ORDENADO)
+# TAB 1 — REGISTRAR VENTA (COLUMNA DERECHA AJUSTADA)
 # ════════════════════════════════════════════════════════════
 
 def tab_registrar_venta():
-    # Inicializar estado seguro
     if "lista_lineas" not in st.session_state:
         st.session_state.lista_lineas = []
 
@@ -537,9 +536,10 @@ def tab_registrar_venta():
         movil_rep   = st.text_input("Móvil Rep. Legal:", key="reg_movil_rep")
 
         st.markdown("---")
+        
+        # Gestión Técnica ahora vive dentro de la columna derecha
         st.subheader("⚙️ Gestión Técnica")
-
-        with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
+        with st.popover("📱 Configurar Líneas Móviles / Full Tigo"):
             tipo_linea = st.radio("Tipo de gestión:", ["Portabilidad", "Línea Nueva", "Línea Existente"], key="tipo_linea_pop")
             
             op_linea = "N/A"
@@ -557,10 +557,10 @@ def tab_registrar_venta():
                 st.success(f"✅ Línea {num_linea} agregada.")
                 st.rerun()
 
-            if st.session_state.lista_lineas:
+            if st.session_state.get("lista_lineas"):
                 st.markdown("**Líneas acumuladas:**")
                 for i, ln in enumerate(st.session_state.lista_lineas, start=1):
-                    st.write(f"{i}. {ln['tipo']} | {ln['operador']} | {ln['numero']} | x{ln['cantidad']}")
+                    st.write(f"{i}. {ln['tipo']} | {ln['numero']} (x{ln['cantidad']})")
                 
                 if st.button("🗑️ Limpiar líneas", key="btn_clear_lineas"):
                     st.session_state.lista_lineas = []
