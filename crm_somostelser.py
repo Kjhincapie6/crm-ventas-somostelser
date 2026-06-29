@@ -957,6 +957,7 @@ def tab_actualizar_estado(df: pd.DataFrame):
                    f"💬 {nota_bitacora.strip() or 'Sin nota'}\n"
                    f"📅 {datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}")
             enviar_telegram(msg)
+            limpiar_formulario()
             st.cache_data.clear()
             st.success(f"✅ Estado actualizado a **{nuevo_estado}** — ID {id_venta}")
             st.rerun()
