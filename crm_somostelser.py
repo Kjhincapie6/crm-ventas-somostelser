@@ -778,11 +778,7 @@ def tab_registrar_venta():
             "TIPO_SEGUIMIENTO": tipo_seg,
         }
 
-       El error ya no es de sintaxis, ahora es de indentación.
-
-
-
-        ok, resultado = crear_venta(registro)
+     ok, resultado = crear_venta(registro)
         
         if ok:
             st.success(f"✅ Venta registrada exitosamente. **ID_VENTA: {resultado}**")
@@ -804,7 +800,7 @@ def tab_registrar_venta():
         
         else:
             st.error(f"❌ Error al registrar: {resultado}")
-
+       
 # ════════════════════════════════════════════════════════════
 # TAB 2 — ACTUALIZAR ESTADO
 # ════════════════════════════════════════════════════════════
