@@ -1049,6 +1049,8 @@ def tab_base_datos(df: pd.DataFrame):
 def main():
     if "auth" not in st.session_state:
         st.session_state["auth"] = False
+        st.warning("Acceso restringido.")
+        return
  
     check_auth()
     
