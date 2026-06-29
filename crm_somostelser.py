@@ -875,6 +875,9 @@ def tab_actualizar_estado(df: pd.DataFrame):
                    f"📅 {datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}")
             enviar_telegram(msg)
             st.cache_data.clear()
+            st.success(f"✅ Estado actualizado a **{nuevo_estado}** — ID {id_venta}")
+            st.rerun()
+            
         else:
             st.error("❌ No se pudo actualizar.")
  
