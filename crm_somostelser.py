@@ -59,7 +59,7 @@ div.stButton > button:hover {
 
 /* Botón Cerrar Sesión negro */
 button[data-testid="cerrar_sesion"] {
-    background-color: #ef4444 !important;
+    background-color: #000000 !important;
 }
 
 /* Input fields */
