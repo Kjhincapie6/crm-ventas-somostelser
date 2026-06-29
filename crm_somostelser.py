@@ -767,6 +767,10 @@ def tab_registrar_venta():
            for e in errores:
                st.error(f"❌ {e}")
            st.stop()
+
+        registro = {
+            ...
+        }
                 
         ok, resultado = crear_venta(registro)      
 
