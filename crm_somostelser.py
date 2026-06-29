@@ -767,12 +767,6 @@ def tab_registrar_venta():
                 st.error(f"❌ {e}")
             st.stop()
         
-        # Solo llega aquí si todo está correcto
-        registro = {
-            "ESTADO": estado_ini,
-            ...
-        }
-        
         ok, resultado = crear_venta(registro)    
 
         registro = {
