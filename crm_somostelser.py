@@ -780,7 +780,6 @@ def tab_actualizar_estado(df: pd.DataFrame):
 # ════════════════════════════════════════════════════════════
 # BOTÓN GUARDAR Y NOTIFICAR (TAB 2)
 # ════════════════════════════════════════════════════════════
-
 if st.button("🔄 Guardar y Notificar", key="btn_guardar_tab2", type="primary", use_container_width=True):
     try:
         # 1. Actualizar DataFrame
