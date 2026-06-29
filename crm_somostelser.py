@@ -497,17 +497,75 @@ def sidebar_render(df: pd.DataFrame):
         # =====================================================
         # RESUMEN
         # =====================================================
-
+        
         st.markdown("### 📊 Resumen")
-
+        
         if not df.empty:
-
+        
+            # KPIs
+            total = len(df)
+            instalados = len(df[df["ESTADO"] == "Instalado"])
+            activados = len(df[df["ESTADO"] == "Activado"])
+            anulados = len(df[df["ESTADO"] == "Anulado"])
+        
+            # Mini gráfico
+            resumen = pd.DataFrame({
+                "Estado": ["Instalado", "Activado", "Anulado"],
+                "Cantidad": [instalados, activados, anulados]
+            })
+        
+            fig = px.bar(
+                resumen,
+                x="Estado",
+                y="Cantidad",
+                text="Cantidad",
+                color="Estado",
+                color_discrete_map={
+                    "Instalado": "#00a0e3",
+                    "Activado": "#0288d1",
+                    "Anulado": "#231f20"
+                },
+                template="plotly_white"
+            )
+        
+            fig.update_layout(
+                height=220,
+                margin=dict(l=0, r=0, t=10, b=0),
+                showlegend=False,
+                xaxis_title="",
+                yaxis_title="",
+                plot_bgcolor="white",
+                paper_bgcolor="white",
+                font=dict(size=11)
+            )
+        
+            fig.update_traces(
+                textposition="outside",
+                marker_line_width=0
+            )
+        
+            st.plotly_chart(
+                fig,
+                use_container_width=True,
+                config={"displayModeBar": False}
+            )
+        
+            # Indicadores rápidos
+            st.caption(
+                f"📋 Total: **{total}** | "
+                f"🟢 Instalados: **{instalados}** | "
+                f"⚡ Activados: **{activados}** | "
+                f"❌ Anulados: **{anulados}**"
+            )
+        
+            st.markdown("---")
+        
             csv_export = df.to_csv(index=False).encode("utf-8")
-
+        
             st.download_button(
                 "📤 Exportar CRM",
                 data=csv_export,
-                file_name=f"crm_somostelser_{datetime.now().strftime('%Y%m%d')}.csv",
+                file_name=f"crm_somostelser_{datetime.now(TZ).strftime('%Y%m%d')}.csv",
                 mime="text/csv",
                 key="btn_export_sidebar",
                 use_container_width=True
