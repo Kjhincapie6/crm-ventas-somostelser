@@ -1,4 +1,4 @@
-# CRM SOMOS TELSER — Portal de Ventas
+# SaaS SOMOS TELSER — Portal de Ventas
 # Versión Optimizada — Diseño 100% fiel al original
 # ============================================================
 import streamlit as st
@@ -361,7 +361,7 @@ def calcular_precio_movil(familia: str, plan: str, lineas: int) -> int:
 # ════════════════════════════════════════════════════════════
 
 def pantalla_login():
-    st.markdown("## 🔒 Acceso al CRM Somos Telser")
+    st.markdown("## 🔒 SaaS de ventas de Somos Telser")
     st.caption("Selecciona tu perfil e ingresa la contraseña:")
     st.markdown("")
     lista_usuarios = list(USUARIOS.keys())
