@@ -493,7 +493,21 @@ def sidebar_render(df: pd.DataFrame):
                 key="btn_export_sidebar",
                 use_container_width=True
             )
-        
+
+# ════════════════════════════════════════════════════════════
+# TAB 1 — REGISTRAR VENTA (COLUMNA DERECHA AJUSTADA)
+# ════════════════════════════════════════════════════════════
+
+def tab_registrar_venta():
+    if "lista_lineas" not in st.session_state:
+        st.session_state.lista_lineas = []
+
+    st.markdown("### Seleccione División:")
+    division = st.radio("", ["Móvil", "Fijo"], horizontal=True, key="reg_division", label_visibility="collapsed")
+    st.markdown("---")
+
+    col_izq, col_der = st.columns(2)
+    
 # --- COLUMNA IZQUIERDA: DATOS CLIENTE + GESTIÓN TÉCNICA ---
     with col_izq:
         st.markdown("### 📱 Datos del Cliente")
