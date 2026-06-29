@@ -527,37 +527,68 @@ def tab_registrar_venta():
         nombre_contacto = st.text_input("Nombre contacto autorizado:", key="reg_nombre_contacto")
         movil_contacto  = st.text_input("Móvil contacto autorizado:", key="reg_movil_contacto")
 
-    if "lista_lineas" not in st.session_state:
+    # Inicializar la lista una sola vez
+if "lista_lineas" not in st.session_state:
     st.session_state.lista_lineas = []
-    st.subheader("⚙️ Gestión Técnica")
-    
-    with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
-        tipo_linea = st.radio("Tipo de gestión:",
-            ["Portabilidad","Línea Nueva","Línea Existente"], key="tipo_linea_pop")
-        op_linea = "N/A"
-        if tipo_linea == "Portabilidad":
-            op_linea = st.selectbox("Operador Origen:",
-                ["Claro","Movistar","Móvil Éxito","Wom"], key="op_linea_pop")
-        cant_linea = st.number_input("Cantidad:", min_value=1, value=1, key="cant_linea_pop")
-        num_linea  = st.text_input("Número de línea:", key="num_linea_pop")
 
-        if st.button("➕ Agregar línea", key="btn_add_linea"):
-            st.session_state.lista_lineas.append({
-                "cantidad": cant_linea, "tipo": tipo_linea,
-                "operador": op_linea,  "numero": num_linea,
-            })
-            st.success(f"✅ Línea {num_linea} agregada.")
+st.subheader("⚙️ Gestión Técnica")
 
-        if st.session_state.lista_lineas:
-            st.markdown("**Líneas acumuladas:**")
-            for i, ln in enumerate(st.session_state.lista_lineas, 1):
-                st.write(f"{i}. {ln['tipo']} | {ln['operador']} | {ln['numero']} | x{ln['cantidad']}")
-            if st.button("🗑️ Limpiar líneas", key="btn_clear_lineas"):
-                st.session_state.lista_lineas = []
-                st.rerun()
-        else:
-            st.info("La gestión móvil aplica también para Full Tigo.")
+with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
 
+    tipo_linea = st.radio(
+        "Tipo de gestión:",
+        ["Portabilidad", "Línea Nueva", "Línea Existente"],
+        key="tipo_linea_pop"
+    )
+
+    op_linea = "N/A"
+
+    if tipo_linea == "Portabilidad":
+        op_linea = st.selectbox(
+            "Operador Origen:",
+            ["Claro", "Movistar", "Móvil Éxito", "Wom"],
+            key="op_linea_pop"
+        )
+
+    cant_linea = st.number_input(
+        "Cantidad:",
+        min_value=1,
+        value=1,
+        key="cant_linea_pop"
+    )
+
+    num_linea = st.text_input(
+        "Número de línea:",
+        key="num_linea_pop"
+    )
+
+    if st.button("➕ Agregar línea", key="btn_add_linea"):
+
+        st.session_state.lista_lineas.append({
+            "cantidad": cant_linea,
+            "tipo": tipo_linea,
+            "operador": op_linea,
+            "numero": num_linea
+        })
+
+        st.success(f"✅ Línea {num_linea} agregada.")
+
+    if st.session_state.lista_lineas:
+
+        st.markdown("**Líneas acumuladas:**")
+
+        for i, ln in enumerate(st.session_state.lista_lineas, start=1):
+            st.write(
+                f"{i}. {ln['tipo']} | {ln['operador']} | "
+                f"{ln['numero']} | x{ln['cantidad']}"
+            )
+
+        if st.button("🗑️ Limpiar líneas", key="btn_clear_lineas"):
+            st.session_state.lista_lineas = []
+            st.rerun()
+
+    else:
+        st.info("La gestión móvil aplica también para Full Tigo.")
 
     with col_der:
         st.markdown("### 👤 Representante Legal")
