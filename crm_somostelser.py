@@ -496,7 +496,7 @@ def sidebar_render(df: pd.DataFrame):
                 # ── Vencidos ─────────────────────────────
                 if not vencidos.empty:
                     st.markdown(
-                        f"<div style='background:#fee2e2;border-left:4px solid #ef4444;"
+                        f"<div style='background:#E2E8F0;border-left:4px solid #231F20;"
                         f"border-radius:6px;padding:7px 10px;margin-bottom:5px;'>"
                         f"<b style='color:#dc2626;font-size:12px;'>⚠️ {len(vencidos)} vencido(s)</b>"
                         f"</div>",
@@ -507,11 +507,11 @@ def sidebar_render(df: pd.DataFrame):
                         cliente = str(r.get("CLIENTE",""))[:20]
                         dias_v  = (hoy - r["_fecha"]).days
                         st.markdown(
-                            f"<div style='background:#fef2f2;border-radius:5px;"
+                            f"<div style='background:#E2E8F0;border-radius:5px;"
                             f"padding:5px 9px;margin:2px 0;font-size:11px;'>"
                             f"{icono} <b>{cliente}</b><br>"
-                            f"<span style='color:#ef4444;'>Venció hace {dias_v}d</span> · "
-                            f"<span style='color:#64748b;'>{r.get('TIPO_SEGUIMIENTO','')}</span>"
+                            f"<span style='color:#231F20;'>Venció hace {dias_v}d</span> · "
+                            f"<span style='color:#231F20;'>{r.get('TIPO_SEGUIMIENTO','')}</span>"
                             f"</div>",
                             unsafe_allow_html=True
                         )
@@ -519,7 +519,7 @@ def sidebar_render(df: pd.DataFrame):
                 # ── Hoy ──────────────────────────────────
                 if not hoy_df.empty:
                     st.markdown(
-                        f"<div style='background:#fef9c3;border-left:4px solid #f59e0b;"
+                        f"<div style='background:#E2E8F0;border-left:4px solid #231F20;"
                         f"border-radius:6px;padding:7px 10px;margin:5px 0;'>"
                         f"<b style='color:#b45309;font-size:12px;'>🔔 {len(hoy_df)} HOY</b>"
                         f"</div>",
@@ -529,11 +529,11 @@ def sidebar_render(df: pd.DataFrame):
                         icono   = ICONOS_SEG.get(str(r.get("TIPO_SEGUIMIENTO","")), "📌")
                         cliente = str(r.get("CLIENTE",""))[:20]
                         st.markdown(
-                            f"<div style='background:#fefce8;border-radius:5px;"
+                            f"<div style='background:#E2E8F0;border-radius:5px;"
                             f"padding:5px 9px;margin:2px 0;font-size:11px;'>"
                             f"{icono} <b>{cliente}</b><br>"
-                            f"<span style='color:#f59e0b;'>📅 Hoy</span> · "
-                            f"<span style='color:#64748b;'>{r.get('TIPO_SEGUIMIENTO','')}</span>"
+                            f"<span style='color:#231F20;'>📅 Hoy</span> · "
+                            f"<span style='color:#231F20;'>{r.get('TIPO_SEGUIMIENTO','')}</span>"
                             f"</div>",
                             unsafe_allow_html=True
                         )
@@ -541,7 +541,7 @@ def sidebar_render(df: pd.DataFrame):
                 # ── Próximos 7 días ───────────────────────
                 if not proximos.empty:
                     st.markdown(
-                        f"<div style='background:#f0fdf4;border-left:4px solid #22c55e;"
+                        f"<div style='background:#E2E8F0;border-left:4px solid #231F20;"
                         f"border-radius:6px;padding:7px 10px;margin:5px 0;'>"
                         f"<b style='color:#15803d;font-size:12px;'>✅ {len(proximos)} próximo(s)</b>"
                         f"</div>",
@@ -553,11 +553,11 @@ def sidebar_render(df: pd.DataFrame):
                         dias_f  = (r["_fecha"] - hoy).days
                         label   = "Mañana" if dias_f == 1 else f"En {dias_f}d"
                         st.markdown(
-                            f"<div style='background:#f0fdf4;border-radius:5px;"
+                            f"<div style='background:#E2E8F0;border-radius:5px;"
                             f"padding:5px 9px;margin:2px 0;font-size:11px;'>"
                             f"{icono} <b>{cliente}</b><br>"
-                            f"<span style='color:#22c55e;'>📅 {label} · {r['_fecha'].strftime('%d/%m')}</span> · "
-                            f"<span style='color:#64748b;'>{r.get('TIPO_SEGUIMIENTO','')}</span>"
+                            f"<span style='color:#231F20;'>📅 {label} · {r['_fecha'].strftime('%d/%m')}</span> · "
+                            f"<span style='color:#231F20;'>{r.get('TIPO_SEGUIMIENTO','')}</span>"
                             f"</div>",
                             unsafe_allow_html=True
                         )
