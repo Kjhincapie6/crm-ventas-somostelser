@@ -467,7 +467,7 @@ def sidebar_render(df: pd.DataFrame):
         # =====================================================
 
         if st.button(
-            "🔴 Cerrar Sesión",
+            "⚫ Cerrar Sesión",
             key="btn_logout",
             use_container_width=True
         ):
