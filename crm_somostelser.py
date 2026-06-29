@@ -12,7 +12,7 @@ import random
 
 # ─── CONFIGURACIÓN DE PÁGINA ───────────────────────────────
 st.set_page_config(
-    page_title="SaaS De Ventas Somos Telser",
+    page_title="CRM de Ventas B2B con Analítica e Inteligencia Artificial",
     page_icon="📡",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -57,7 +57,7 @@ div.stButton > button:hover {
     background-color: #0088cc;
 }
 
-/* Botón Cerrar Sesión rojo */
+/* Botón Cerrar Sesión negro */
 button[data-testid="cerrar_sesion"] {
     background-color: #ef4444 !important;
 }
@@ -361,7 +361,7 @@ def calcular_precio_movil(familia: str, plan: str, lineas: int) -> int:
 # ════════════════════════════════════════════════════════════
 
 def pantalla_login():
-    st.markdown("## 🔒 SaaS de ventas de Somos Telser")
+    st.markdown("## 🔒 CRM de Ventas B2B con Analítica e Inteligencia Artificial")
     st.caption("Selecciona tu perfil e ingresa la contraseña:")
     st.markdown("")
     lista_usuarios = list(USUARIOS.keys())
