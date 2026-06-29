@@ -107,20 +107,67 @@ DEPARTAMENTOS_MUNICIPIOS = {
 }
 
 # ─── PLANES TIGO BUSINESS ──────────────────────────────────
+# Fuente: Ayuda Venta Tigo Junio 2026
+ 
+# Precios base por plan (1 línea, sin descuento)
 PLANES_MOVIL = {
     "Negocios 5.0": {
-        "Pospago Negocios 4.9 Plus+ 60GB [5.0]": 44900,
-        "Pospago Negocios 5.4 Plus+ 100GB [5.0]": 53900,
-        "Pospago 5.3 Empresarial Ilimitado [5.0]": 113900,
+        "Pospago Fidelización Negocios 4.9 Plus+ — 60GB": 44900,
+        "Pospago Negocios 5.4 Plus+ — 100GB":             53900,
+        "Pospago 5.3 Empresarial — Ilimitado":           113900,
     },
     "Empresarial 6.0": {
-        "Plan Datos Tigo Empresarial 6.9 — 30GB": 38300,
-        "Plan Datos Tigo Empresarial 6.10 — 60GB": 47900,
-        "Plan Datos Tigo Empresarial 6.11 — 110GB": 57900,
-        "Plan Datos Tigo Empresarial 6.12 — Ilimitado": 113900,
+        "Plan Datos Tigo Empresarial 6.9 — 30GB":         38300,
+        "Plan Datos Tigo Empresarial 6.10 — 60GB":        47900,
+        "Plan Datos Tigo Empresarial 6.11 — 110GB":       57900,
+        "Plan Datos Tigo Empresarial 6.12 — Ilimitado":  113900,
         "Plan Datos Tigo Empresarial 6.7 Full Equipo — Ilimitado": 89900,
-        "Plan Datos Tigo Empresarial 6.8 Full Tigo — Ilimitado": 54900,
+        "Plan Datos Tigo Empresarial 6.8 Full Tigo — Ilimitado":   54900,
     }
+}
+ 
+# Tabla de descuentos exactos por volumen según ayuda venta
+# Negocios 5.0: 1L=0%, 2L=10%, 3-5L=20%, 6-8L=25%, 9+L=30%
+# Empresarial 6.0: 1L=0%, 3-5L=13%, 6-9L=25%, 10+L=30%
+# Ambas: 50% de descuento en el primer mes por portación
+ 
+# Precios por número de líneas para Negocios 5.0 (por línea)
+PRECIOS_5_POR_LINEA = {
+    "Pospago Fidelización Negocios 4.9 Plus+ — 60GB": {
+        1: 44900, 2: 40410, "3-5": 35920, "6-8": 33675, "9+": 31430
+    },
+    "Pospago Negocios 5.4 Plus+ — 100GB": {
+        1: 53900, 2: 48510, "3-5": 43120, "6-8": 40425, "9+": 37730
+    },
+    "Pospago 5.3 Empresarial — Ilimitado": {
+        1: 113900, 2: 102510, "3-5": 91120, "6-8": 85425, "9+": 79730
+    },
+}
+ 
+# Precios por número de líneas para Empresarial 6.0 (por línea)
+PRECIOS_6_POR_LINEA = {
+    "Plan Datos Tigo Empresarial 6.9 — 30GB": {
+        1: 38300, "3-5": 33321, "6-9": 28725, "10+": 26810
+    },
+    "Plan Datos Tigo Empresarial 6.10 — 60GB": {
+        1: 47900, "3-5": 41673, "6-9": 35925, "10+": 33530
+    },
+    "Plan Datos Tigo Empresarial 6.11 — 110GB": {
+        1: 57900, "3-5": 50373, "6-9": 43425, "10+": 40530
+    },
+    "Plan Datos Tigo Empresarial 6.12 — Ilimitado": {
+        1: 113900, "3-5": 99093, "6-9": 85425, "10+": 79730
+    },
+    "Plan Datos Tigo Empresarial 6.7 Full Equipo — Ilimitado": {
+        1: 89900, "3-5": 89900, "6-9": 89900, "10+": 89900
+    },
+    "Plan Datos Tigo Empresarial 6.8 Full Tigo — Ilimitado": {
+        1: 54900, "3-5": 54900, "6-9": 54900, "10+": 54900
+    },
+
+ 
+DESCUENTOS_5 = {1: 0.0, 2: 0.10, "3-5": 0.20, "6-8": 0.25, "9+": 0.30}
+DESCUENTOS_6 = {1: 0.0, "3-5": 0.13, "6-9": 0.25, "10+": 0.30}
 }
 
 DESCUENTOS_5 = {1: 0.0, 2: 0.10, "3-5": 0.20, "6-8": 0.25, "9+": 0.30}
