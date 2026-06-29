@@ -277,7 +277,7 @@ def crear_venta(registro: dict) -> tuple:
         else:
             nuevo_id = int(df["ID_VENTA"].max()) + 1
         registro["ID_VENTA"] = nuevo_id
-        registro["FECHA_REGISTRO"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        registro["FECHA_REGISTRO"] = datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S")
         nueva = pd.DataFrame([registro])
         df = pd.concat([df, nueva], ignore_index=True)
         if guardar_datos(df):
@@ -568,7 +568,7 @@ def sidebar_render(df: pd.DataFrame):
             st.download_button(
                 "📤 Exportar CRM",
                 data=csv_export,
-                file_name=f"crm_somostelser_{datetime.now().strftime('%Y%m%d')}.csv",
+                file_name=f"crm_somostelser_{datetime.now(TZ).strftime('%Y%m%d')}.csv",
                 mime="text/csv",
                 key="btn_export_sidebar",
                 use_container_width=True
@@ -778,7 +778,7 @@ def tab_registrar_venta():
                    f"💰 ${precio_total:,} COP\n"
                    f"📍 {estado_ini} | {depto}, {municipio}\n"
                    f"🧑 {st.session_state.get('usuario','')}\n"
-                   f"📅 {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+                   f"📅 {datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}")
             enviar_telegram(msg)
         else:
             st.error(f"❌ Error al registrar: {resultado}")
@@ -872,7 +872,7 @@ def tab_actualizar_estado(df: pd.DataFrame):
                    f"📋 ID: {id_venta} | {venta.get('CLIENTE','')}\n"
                    f"📍 {estado_actual} → {nuevo_estado}\n"
                    f"💬 {nota_bitacora.strip() or 'Sin nota'}\n"
-                   f"📅 {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+                   f"📅 {datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}")
             enviar_telegram(msg)
             st.cache_data.clear()
         else:
