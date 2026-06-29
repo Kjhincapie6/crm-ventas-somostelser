@@ -2,7 +2,6 @@
 
 > Plataforma web desarrollada para digitalizar, centralizar y optimizar la gestión comercial de ventas B2B en el sector de telecomunicaciones mediante analítica de datos, automatización de procesos y visualización interactiva.
 
----
 
 ## 1. 📊 Información General del Sistema
 * Nombre del modelo: Proyecto: CRM de Ventas B2B con Analítica de Datos e Inteligencia Artificial
