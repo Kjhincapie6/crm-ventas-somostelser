@@ -734,8 +734,6 @@ def tab_registrar_venta():
     st.markdown("---")
     guardar_col = st.columns([1])[0]
     if st.button("💾 Guardar Venta", type="primary", use_container_width=True, key="btn_guardar_venta"):
-        
-      Sí, el error ya se ve claro en la captura.
           
         # Validaciones
         errores = []
