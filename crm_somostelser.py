@@ -241,9 +241,6 @@ COLUMNAS = ["ID_VENTA","ESTADO","PORTAFOLIO","SERVICIO","ASESOR","FECHA_REGISTRO
             "EMAIL_REP","MOVIL_REP","DIVISION","FAMILIA_PLAN","PLAN","LINEAS",
             "VALOR_TOTAL","NOTAS","FECHA_SEGUIMIENTO","TIPO_SEGUIMIENTO"]
 
-Casi, Kely. Hay un pequeño error: tienes dos except FileNotFoundError, y además el return quedó dentro del primer except, lo que hace que parte del código nunca se ejecute.
-
-Déjala así:
 
 # ════════════════════════════════════════════════════════════
 # CAPA DE DATOS — Centralizada (preparada para migración SQL)
