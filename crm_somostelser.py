@@ -669,7 +669,7 @@ with st.popover("📱 Configurar Líneas Móviles (Click aquí)"):
         if errores:
             for e in errores:
                 st.error(f"❌ {e}")
-                return
+            st.stop()       
 
         registro = {
             "ESTADO":           estado_ini,
