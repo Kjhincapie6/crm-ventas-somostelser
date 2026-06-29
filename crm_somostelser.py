@@ -582,6 +582,47 @@ def sidebar_render(df: pd.DataFrame):
                 key="btn_export_sidebar",
                 use_container_width=True
             )
+# ════════════════════════════════════════════════════════════
+# LIMPIAR FORMULARIO
+# ════════════════════════════════════════════════════════════
+
+def limpiar_formulario():
+
+    keys = [
+        "reg_division",
+        "reg_tipo_doc",
+        "reg_num_doc",
+        "reg_razon",
+        "reg_dir",
+        "reg_barrio",
+        "reg_depto",
+        "reg_municipio",
+        "reg_email_contacto",
+        "reg_nombre_contacto",
+        "reg_movil_contacto",
+        "reg_nombre_rep",
+        "reg_cedula_rep",
+        "reg_email_rep",
+        "reg_movil_rep",
+        "reg_estado",
+        "reg_notas",
+        "reg_fecha_seg",
+        "reg_tipo_seg",
+        "reg_familia",
+        "reg_plan",
+        "reg_plan_fijo",
+        "reg_lineas",
+        "reg_docs",
+        "tipo_linea_pop",
+        "op_linea_pop",
+        "cant_linea_pop",
+        "num_linea_pop",
+    ]
+
+    for key in keys:
+        st.session_state.pop(key, None)
+
+    st.session_state["lista_lineas"] = []
 
 # ════════════════════════════════════════════════════════════
 # TAB 1 — REGISTRAR VENTA (COLUMNA DERECHA AJUSTADA)
@@ -816,6 +857,7 @@ def tab_registrar_venta():
             )
     
             enviar_telegram(msg)
+            limpiar_formulario()
     
             st.cache_data.clear()
             st.rerun()
