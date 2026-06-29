@@ -206,7 +206,7 @@ ESTADOS = [
 ]
 
 TIPOS_SEGUIMIENTO = ["Llamada", "Visita", "Email", "WhatsApp", "Reunión virtual"]
-TIPOS_DOC = ["NIT", "Cédula", "Pasaporte", "CE"]
+TIPOS_DOC = ["NIT", "CV", "Pasaporte", "CE" , "PPT"]
 
 # ─── USUARIOS Y ROLES ──────────────────────────────────────
 USUARIOS = {
