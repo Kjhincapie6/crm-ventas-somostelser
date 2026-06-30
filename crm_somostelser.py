@@ -7,14 +7,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, date
 import os
-import os as _os
 import requests as req
 import random
 from zoneinfo import ZoneInfo
 
- 
-import os as _os  # ya tienes "import os" arriba, esto es solo referencia
- 
+
 def guardar_documentos_cliente(id_venta: int, nit: str, archivos: list) -> list:
     """
     Guarda los archivos subidos en disco, en una carpeta única por venta.
@@ -24,11 +21,11 @@ def guardar_documentos_cliente(id_venta: int, nit: str, archivos: list) -> list:
     if not archivos:
         return []
     try:
-        carpeta = _os.path.join("documentos_clientes", f"{id_venta}_{nit}".strip("_"))
-        _os.makedirs(carpeta, exist_ok=True)
+        carpeta = os.path.join("documentos_clientes", f"{id_venta}_{nit}".strip("_"))
+        os.makedirs(carpeta, exist_ok=True)
         nombres_guardados = []
         for archivo in archivos:
-            ruta_destino = _os.path.join(carpeta, archivo.name)
+            ruta_destino = os.path.join(carpeta, archivo.name)
             with open(ruta_destino, "wb") as f:
                 f.write(archivo.getbuffer())
             nombres_guardados.append(archivo.name)
@@ -36,6 +33,28 @@ def guardar_documentos_cliente(id_venta: int, nit: str, archivos: list) -> list:
     except Exception as e:
         st.warning(f"⚠️ No se pudieron guardar algunos documentos: {e}")
         return []
+
+
+def listar_documentos_venta(id_venta: int, nit: str) -> list:
+    """
+    Devuelve la lista de rutas completas de los documentos guardados
+    para una venta puntual, leyendo directamente la carpeta en disco.
+    No depende de la columna DOCUMENTOS del CSV, así que funciona aunque
+    el dato no se haya escrito ahí por cualquier motivo.
+    """
+    try:
+        carpeta = os.path.join("documentos_clientes", f"{id_venta}_{nit}".strip("_"))
+        if not os.path.isdir(carpeta):
+            return []
+        archivos = []
+        for nombre in sorted(os.listdir(carpeta)):
+            ruta = os.path.join(carpeta, nombre)
+            if os.path.isfile(ruta):
+                archivos.append({"nombre": nombre, "ruta": ruta})
+        return archivos
+    except Exception:
+        return []
+
 
 # Zona horaria Colombia
 TZ = ZoneInfo("America/Bogota")
@@ -139,7 +158,7 @@ DEPARTAMENTOS_MUNICIPIOS = {
 
 # ─── PLANES TIGO BUSINESS ──────────────────────────────────
 # Fuente: Ayuda Venta Tigo Junio 2026
- 
+
 # Precios base por plan (1 línea, sin descuento)
 PLANES_MOVIL = {
     "Negocios 5.0": {
@@ -156,12 +175,12 @@ PLANES_MOVIL = {
         "Plan Datos Tigo Empresarial 6.8 Full Tigo — Ilimitado":   54900,
     }
 }
- 
+
 # Tabla de descuentos exactos por volumen según ayuda venta
 # Negocios 5.0: 1L=0%, 2L=10%, 3-5L=20%, 6-8L=25%, 9+L=30%
 # Empresarial 6.0: 1-2L=0%, 3-5L=13%, 6-9L=25%, 10+L=30%
 # Ambas: 50% de descuento en el primer mes por portación
- 
+
 # Precios por número de líneas para Negocios 5.0 (por línea)
 PRECIOS_5_POR_LINEA = {
     "Pospago Fidelización Negocios 4.9 Plus+ — 60GB": {
@@ -174,7 +193,7 @@ PRECIOS_5_POR_LINEA = {
         1: 113900, 2: 102510, "3-5": 91120, "6-8": 85425, "9+": 79730
     },
 }
- 
+
 # Precios por número de líneas para Empresarial 6.0 (por línea)
 PRECIOS_6_POR_LINEA = {
     "Plan Datos Tigo Empresarial 6.9 — 30GB": {
@@ -196,7 +215,7 @@ PRECIOS_6_POR_LINEA = {
         "1-2": 54900, "3-5": 54900, "6-9": 54900, "10+": 54900
     },
 }
- 
+
 DESCUENTOS_5 = {1: 0.0, 2: 0.10, "3-5": 0.20, "6-8": 0.25, "9+": 0.30}
 DESCUENTOS_6 = {"1-2": 0.0, "3-5": 0.13, "6-9": 0.25, "10+": 0.30}
 
@@ -820,8 +839,26 @@ def tab_registrar_venta():
             serial_chip = "" # Valor por defecto
             if tipo_linea in ["Portabilidad", "Línea Nueva"]:
                 serial_chip = st.text_input("Serial del Chip (ICCID):", key="serial_chip_pop")
-           
-            st.success(f"✅ Línea {num_linea} agregada.")
+
+            # ── MEJORA 1 (restaurada): botón que faltaba.
+            # Sin este botón, ninguna línea entraba a session_state.lista_lineas
+            # y la validación de Gestión Técnica obligatoria para Móvil/Full Tigo
+            # nunca se podía cumplir, bloqueando el guardado de toda venta móvil.
+            if st.button("➕ Agregar línea", key="btn_add_linea"):
+                if num_linea.strip():
+                    st.session_state.lista_lineas.append({
+                        "cantidad": cant_linea,
+                        "tipo": tipo_linea,
+                        "operador": op_linea,
+                        "numero": num_linea.strip(),
+                        "serial": serial_chip.strip()
+                    })
+                    st.success(f"✅ Línea {num_linea} agregada.")
+                    st.session_state["num_linea_pop"] = ""
+                    st.session_state["serial_chip_pop"] = ""
+                    st.rerun()
+                else:
+                    st.warning("⚠️ Ingresa el número de línea antes de agregar.")
 
             if st.session_state.get("lista_lineas"):
                 st.markdown("**Líneas acumuladas:**")
@@ -1226,6 +1263,28 @@ def tab_actualizar_estado(df: pd.DataFrame):
  
         e_notas = st.text_area("📝 Notas / Bitácora (editable):", value=val(venta.get("NOTAS")),
                                key=k("act_notas"), height=90)
+
+        # ── MEJORA 2: visualización de los documentos guardados ──
+        # Lista los archivos físicos asociados a esta venta (leídos
+        # directamente de la carpeta en disco) y permite descargarlos
+        # sin salir de la pantalla de Actualizar Estado.
+        st.markdown("##### 📎 Documentos Adjuntos")
+        docs_guardados = listar_documentos_venta(id_venta, e_nit)
+        if docs_guardados:
+            for doc_info in docs_guardados:
+                try:
+                    with open(doc_info["ruta"], "rb") as f_doc:
+                        st.download_button(
+                            label=f"⬇️ {doc_info['nombre']}",
+                            data=f_doc.read(),
+                            file_name=doc_info["nombre"],
+                            key=k(f"dl_{doc_info['nombre']}"),
+                            use_container_width=True
+                        )
+                except Exception:
+                    st.caption(f"⚠️ No se pudo leer: {doc_info['nombre']}")
+        else:
+            st.caption("Sin documentos adjuntos para esta venta.")
  
     st.markdown("---")
  
