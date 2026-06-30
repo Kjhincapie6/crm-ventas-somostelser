@@ -758,7 +758,6 @@ def sidebar_render(df: pd.DataFrame):
 # ════════════════════════════════════════════════════════════
 # LIMPIAR FORMULARIO
 # ════════════════════════════════════════════════════════════
-
 def limpiar_formulario():
     # Activamos una "bandera" para que Streamlit limpie los campos
     # en la próxima recarga, ANTES de dibujarlos.
@@ -767,8 +766,13 @@ def limpiar_formulario():
 # ⭐ TAB 1 — REGISTRAR VENTA COLUMNA DERECHA AJUSTADA
 # ════════════════════════════════════════════════════════════
 def tab_registrar_venta():
+
     if "lista_lineas" not in st.session_state:
         st.session_state.lista_lineas = []
+
+    # ← AGREGAR ESTO
+    if "reg_docs_key" not in st.session_state:
+        st.session_state.reg_docs_key = 0
 
     # ==============================================================
     # NUEVO: LÓGICA DE LIMPIEZA ANTES DE DIBUJAR LOS CAMPOS
@@ -951,7 +955,10 @@ def tab_registrar_venta():
         st.caption("Adjuntar documentos")
         docs = st.file_uploader("", accept_multiple_files=True,
                                  type=["pdf","png","jpg","docx","xlsx"],
-                                 key="reg_docs", label_visibility="collapsed")
+                                 key=f"reg_docs_{st.session_state.reg_docs_key}",
+                             label_visibility="collapsed"
+        )
+                                 
         if docs:
             for d in docs:
                 st.success(f"✅ {d.name}")
@@ -1062,14 +1069,15 @@ def tab_registrar_venta():
                 f"📅 {fecha_actual}"
             )
             enviar_telegram(msg)
- 
-            # 3. Limpiar base de datos en caché para el dashboard
+            # 3. Limpiar el cargador de documentos
+            st.session_state.reg_docs_key += 1
+            # 4. Limpiar base de datos en caché para el dashboard
             st.cache_data.clear()
  
-            # 4. Activar la limpieza automática del formulario
+            # 5. Activar la limpieza automática del formulario
             limpiar_formulario()
  
-            # 5. Forzar la recarga para que los campos amanezcan en blanco
+            # 6. Forzar la recarga para que los campos amanezcan en blanco
             st.rerun()
  
         else:
