@@ -7,9 +7,35 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, date
 import os
+import os as _os
 import requests as req
 import random
 from zoneinfo import ZoneInfo
+
+ 
+import os as _os  # ya tienes "import os" arriba, esto es solo referencia
+ 
+def guardar_documentos_cliente(id_venta: int, nit: str, archivos: list) -> list:
+    """
+    Guarda los archivos subidos en disco, en una carpeta única por venta.
+    Devuelve la lista de nombres de archivo guardados (para el CSV).
+    Si no hay archivos, devuelve lista vacía sin error.
+    """
+    if not archivos:
+        return []
+    try:
+        carpeta = _os.path.join("documentos_clientes", f"{id_venta}_{nit}".strip("_"))
+        _os.makedirs(carpeta, exist_ok=True)
+        nombres_guardados = []
+        for archivo in archivos:
+            ruta_destino = _os.path.join(carpeta, archivo.name)
+            with open(ruta_destino, "wb") as f:
+                f.write(archivo.getbuffer())
+            nombres_guardados.append(archivo.name)
+        return nombres_guardados
+    except Exception as e:
+        st.warning(f"⚠️ No se pudieron guardar algunos documentos: {e}")
+        return []
 
 # Zona horaria Colombia
 TZ = ZoneInfo("America/Bogota")
