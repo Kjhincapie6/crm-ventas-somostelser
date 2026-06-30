@@ -714,64 +714,51 @@ def sidebar_render(df: pd.DataFrame):
 # ════════════════════════════════════════════════════════════
 
 def limpiar_formulario():
-    # 1. Para limpiar visualmente los inputs de texto, debemos asignar "" explícitamente
-    campos_texto = [
-        "reg_num_doc", "reg_razon", "reg_dir", "reg_barrio",
-        "reg_email_contacto", "reg_nombre_contacto", "reg_movil_contacto",
-        "reg_nombre_rep", "reg_cedula_rep", "reg_email_rep", "reg_movil_rep",
-        "reg_notas", "num_linea_pop"
-    ]
-    for key in campos_texto:
-        st.session_state[key] = ""
-
-    # 2. Restaurar campos numéricos a su valor base (1)
-    campos_numericos = ["reg_lineas", "cant_linea_pop"]
-    for key in campos_numericos:
-        st.session_state[key] = 1
-
-    # 3. Eliminar selectores, fechas y documentos para que vuelvan a su estado por defecto
-    campos_select = [
-        "reg_division", "reg_tipo_doc", "reg_depto", "reg_municipio",
-        "reg_estado", "reg_tipo_seg", "reg_familia", "reg_plan",
-        "reg_plan_fijo", "tipo_linea_pop", "op_linea_pop", "reg_docs", "reg_fecha_seg"
-    ]
-    for key in campos_select:
-        st.session_state.pop(key, None)
-
-    # 4. Vaciar la lista temporal de líneas
-    st.session_state["lista_lineas"] = []
+    # Activamos una "bandera" para que Streamlit limpie los campos
+    # en la próxima recarga, ANTES de dibujarlos.
+    st.session_state["activar_limpieza"] = True
 # ════════════════════════════════════════════════════════════
 # ⭐ TAB 1 — REGISTRAR VENTA COLUMNA DERECHA AJUSTADA
 # ════════════════════════════════════════════════════════════
-
 def tab_registrar_venta():
     if "lista_lineas" not in st.session_state:
         st.session_state.lista_lineas = []
-        
-    # Inicializamos la bandera si no existe
-    if "limpiar_campos_ahora" not in st.session_state:
-        st.session_state["limpiar_campos_ahora"] = False
 
-    # Lógica para borrar los estados de Streamlit ANTES de dibujar los inputs
-    if st.session_state["limpiar_campos_ahora"]:
-        keys_a_borrar = [
-            "reg_division", "reg_tipo_doc", "reg_num_doc", "reg_razon", "reg_dir",
-            "reg_barrio", "reg_depto", "reg_municipio", "reg_email_contacto",
-            "reg_nombre_contacto", "reg_movil_contacto", "reg_nombre_rep",
-            "reg_cedula_rep", "reg_email_rep", "reg_movil_rep", "reg_estado",
-            "reg_notas", "reg_fecha_seg", "reg_tipo_seg", "reg_familia",
-            "reg_plan", "reg_plan_fijo", "reg_lineas", "reg_docs",
-            "tipo_linea_pop", "op_linea_pop", "cant_linea_pop", "num_linea_pop"
+    # ==============================================================
+    # NUEVO: LÓGICA DE LIMPIEZA ANTES DE DIBUJAR LOS CAMPOS
+    # ==============================================================
+    if st.session_state.get("activar_limpieza", False):
+        # 1. Textos en blanco
+        campos_texto = [
+            "reg_num_doc", "reg_razon", "reg_dir", "reg_barrio",
+            "reg_email_contacto", "reg_nombre_contacto", "reg_movil_contacto",
+            "reg_nombre_rep", "reg_cedula_rep", "reg_email_rep", "reg_movil_rep",
+            "reg_notas", "num_linea_pop"
         ]
-        for key in keys_a_borrar:
-            if key in st.session_state:
-                del st.session_state[key]
-        st.session_state["limpiar_campos_ahora"] = False
+        for key in campos_texto:
+            st.session_state[key] = ""
+
+        # 2. Numéricos a 1
+        for key in ["reg_lineas", "cant_linea_pop"]:
+            st.session_state[key] = 1
+
+        # 3. Eliminar selectores para volver a default
+        campos_select = [
+            "reg_division", "reg_tipo_doc", "reg_depto", "reg_municipio",
+            "reg_estado", "reg_tipo_seg", "reg_familia", "reg_plan",
+            "reg_plan_fijo", "tipo_linea_pop", "op_linea_pop", "reg_docs", "reg_fecha_seg"
+        ]
+        for key in campos_select:
+            st.session_state.pop(key, None)
+
+        st.session_state["lista_lineas"] = []
+        st.session_state["activar_limpieza"] = False
+    # ==============================================================
 
     st.markdown("### Seleccione División:")
     division = st.radio("", ["Móvil", "Fijo"], horizontal=True, key="reg_division", label_visibility="collapsed")
     st.markdown("---")
-
+    
     col_izq, col_der = st.columns(2)
     
 # --- COLUMNA IZQUIERDA: DATOS CLIENTE + GESTIÓN TÉCNICA ---
