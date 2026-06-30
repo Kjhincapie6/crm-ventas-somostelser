@@ -990,6 +990,12 @@ def tab_registrar_venta():
             for e in errores:
                 st.error(f"❌ {e}")
             st.stop()
+            
+        # ← AQUÍ VA EL JSON, DESPUÉS DE LAS VALIDACIONES
+        gestion_tecnica = json.dumps(
+            st.session_state.get("lista_lineas", []),
+            ensure_ascii=False
+        )
  
         registro = {
             "ESTADO":           estado_ini,
@@ -1021,7 +1027,8 @@ def tab_registrar_venta():
             "NOTAS":            notas.strip(),
             "FECHA_SEGUIMIENTO": str(fecha_seg),
             "TIPO_SEGUIMIENTO": tipo_seg,
-            "DOCUMENTOS":       "",  # se completa después de obtener el ID
+            "GESTION_TECNICA": gestion_tecnica,
+            "DOCUMENTOS": "",  # se completa después de obtener el ID
         }
  
         ok, resultado = crear_venta(registro)
