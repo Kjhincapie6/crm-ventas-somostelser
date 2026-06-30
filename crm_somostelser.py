@@ -796,7 +796,9 @@ def tab_registrar_venta():
             if st.button("➕ Agregar línea", key="btn_add_linea"):
                 st.session_state.lista_lineas.append({
                     "cantidad": cant_linea, "tipo": tipo_linea,
+                    "tipo": tipo_linea,
                     "operador": op_linea, "numero": num_linea
+                    "numero": num_linea,
                     "serial": serial_chip.strip()
                 })
                 st.success(f"✅ Línea {num_linea} agregada.")
