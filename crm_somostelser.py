@@ -992,78 +992,59 @@ def tab_registrar_venta():
             st.error(f"❌ Error al registrar: {resultado}")
 
       
-# ═══════════=================================================
-# TAB 2 — ACTUALIZAR ESTADO 
-# ════════════════════════════════════════════════════════════
-
+# ════════════════════════════════════════════════════════════=
+# ⭐TAB 2 — ACTUALIZAR ESTADO + EDICIÓN COMPLETA DE LA VENT
+# VERSIÓN FINAL — bug de carga de datos resuelto de raíz
+# ═══════════════════════════════════════════════════════════
+ 
 def tab_actualizar_estado(df: pd.DataFrame):
-
+ 
     # ── Helper: limpia nan/None/"" → fallback ──────────────
     def val(v, fallback=""):
         if v is None:
             return fallback
         s = str(v).strip()
         return fallback if s.lower() in ("nan", "none", "") else s
-
+ 
     st.markdown("### 🔄 Actualizar Seguimiento de Venta")
-
+ 
     if df.empty:
         st.info("📭 No hay ventas registradas.")
         return
-
+ 
     # Filtro por rol
     df_filtrado = (
         df[df["ASESOR"] == st.session_state.get("usuario", "")]
         if st.session_state.get("rol") == "asesor"
         else df
     )
-
+ 
     if df_filtrado.empty:
         st.info("Sin ventas asignadas.")
         return
-
+ 
     # ── Selector de venta ──────────────────────────────────
     lista_ops = opciones_ventas(df_filtrado)
     seleccion = st.selectbox("Selecciona la venta:", lista_ops, key="act_select")
     id_venta  = extraer_id_opcion(seleccion)
-
+ 
     if id_venta is None:
         st.error("No se pudo identificar la venta.")
         return
-
+ 
     venta = buscar_venta(id_venta)
     if venta is None:
         st.error(f"Venta ID {id_venta} no encontrada.")
         return
-
+ 
     estado_anterior = val(venta.get("ESTADO"), "Sin estado")
-
-    # ──────────────────────────────────────────────────────
-    # Detectar cambio de venta y limpiar TODOS los campos
-    # (incluye edición + gestión, antes solo cubría edición)
-    # ──────────────────────────────────────────────────────
-    KEYS_EDICION = [
-        # Datos cliente
-        "act_tipo_doc", "act_nit", "act_razon", "act_tel", "act_email",
-        "act_dir", "act_barrio", "act_depto", "act_municipio",
-        "act_email_c", "act_nom_c", "act_mov_c",
-        # Representante legal
-        "act_nom_rep", "act_ced_rep", "act_email_rep", "act_mov_rep",
-        # Plan
-        "act_division", "act_familia", "act_plan", "act_plan_fijo", "act_lineas",
-        # Seguimiento
-        "act_fecha_seg", "act_tipo_seg", "act_notas",
-        # Estado
-        "act_nuevo_estado",
-        # Gestión de seguimiento (antes NO se limpiaban)
-        "act_tipo_gestion", "act_resultado_gestion", "act_detalle_gestion",
-    ]
-
-    if st.session_state.get("act_id_cargado") != id_venta:
-        for k in KEYS_EDICION:
-            st.session_state.pop(k, None)
-        st.session_state["act_id_cargado"] = id_venta
-
+ 
+    # ⭐ FIX: sufijo único por venta para TODAS las keys del formulario.
+    # Esto garantiza que el cambio de cliente cargue siempre los datos
+    # correctos, sin importar el nombre, el tipo de documento o si es
+    # una persona natural o una empresa.
+    k = lambda nombre: f"{nombre}_{id_venta}"
+ 
     # ══════════════════════════════════════════════════════
     # BLOQUE 1 — ESTADO (siempre visible arriba, destacado)
     # ══════════════════════════════════════════════════════
@@ -1079,92 +1060,92 @@ def tab_actualizar_estado(df: pd.DataFrame):
       </span>
     </div>
     """, unsafe_allow_html=True)
-
+ 
     idx_actual = ESTADOS.index(estado_anterior) if estado_anterior in ESTADOS else 0
     nuevo_estado = st.selectbox(
         "🔁 Cambiar estado a:",
         ESTADOS,
         index=idx_actual,
-        key="act_nuevo_estado"
+        key=k("act_nuevo_estado")
     )
-
+ 
     st.markdown("---")
-
+ 
     # ══════════════════════════════════════════════════════
     # BLOQUE 2 — EDICIÓN COMPLETA DE TODOS LOS CAMPOS
     # ══════════════════════════════════════════════════════
     st.markdown("#### ✏️ Revisar y corregir datos de la venta")
-
+ 
     col_izq, col_der = st.columns(2)
-
+ 
     # ── COLUMNA IZQUIERDA: Datos del Cliente ──────────────
     with col_izq:
         st.markdown("##### 📋 Datos del Cliente")
-
+ 
         tipo_doc_actual = val(venta.get("TIPO_DOC"), "NIT")
         tipo_doc_idx = TIPOS_DOC.index(tipo_doc_actual) if tipo_doc_actual in TIPOS_DOC else 0
-        e_tipo_doc = st.selectbox("Tipo Doc:", TIPOS_DOC, index=tipo_doc_idx, key="act_tipo_doc")
-
-        e_nit      = st.text_input("Número de Documento:", value=val(venta.get("NIT")),      key="act_nit")
-        e_razon    = st.text_input("Razón Social / Cliente:", value=val(venta.get("CLIENTE")), key="act_razon")
-        e_tel      = st.text_input("Teléfono Contacto:", value=val(venta.get("TEL_CONTACTO")), key="act_tel")
-        e_email    = st.text_input("Email Cliente:", value=val(venta.get("EMAIL_CLIENTE")),   key="act_email")
-        e_dir      = st.text_input("Dirección:", value=val(venta.get("DIRECCION")),           key="act_dir")
-        e_barrio   = st.text_input("Barrio:", value=val(venta.get("BARRIO")),                 key="act_barrio")
-
+        e_tipo_doc = st.selectbox("Tipo Doc:", TIPOS_DOC, index=tipo_doc_idx, key=k("act_tipo_doc"))
+ 
+        e_nit      = st.text_input("Número de Documento:", value=val(venta.get("NIT")),        key=k("act_nit"))
+        e_razon    = st.text_input("Razón Social / Cliente:", value=val(venta.get("CLIENTE")),  key=k("act_razon"))
+        e_tel      = st.text_input("Teléfono Contacto:", value=val(venta.get("TEL_CONTACTO")),  key=k("act_tel"))
+        e_email    = st.text_input("Email Cliente:", value=val(venta.get("EMAIL_CLIENTE")),     key=k("act_email"))
+        e_dir      = st.text_input("Dirección:", value=val(venta.get("DIRECCION")),             key=k("act_dir"))
+        e_barrio   = st.text_input("Barrio:", value=val(venta.get("BARRIO")),                   key=k("act_barrio"))
+ 
         # Departamento / Municipio
         deptos_lista = [""] + sorted(DEPARTAMENTOS_MUNICIPIOS.keys())
         depto_actual = val(venta.get("DEPARTAMENTO"))
         depto_idx    = deptos_lista.index(depto_actual) if depto_actual in deptos_lista else 0
-        e_depto = st.selectbox("Departamento:", deptos_lista, index=depto_idx, key="act_depto")
-
+        e_depto = st.selectbox("Departamento:", deptos_lista, index=depto_idx, key=k("act_depto"))
+ 
         muni_lista   = [""] + DEPARTAMENTOS_MUNICIPIOS.get(e_depto, []) if e_depto else [""]
         muni_actual  = val(venta.get("MUNICIPIO"))
         muni_idx     = muni_lista.index(muni_actual) if muni_actual in muni_lista else 0
         e_municipio  = st.selectbox("Municipio:", muni_lista, index=muni_idx,
-                                    key="act_municipio", disabled=(not e_depto))
-
-        e_email_c  = st.text_input("Email Contacto:", value=val(venta.get("EMAIL_CONTACTO")),   key="act_email_c")
-        e_nom_c    = st.text_input("Nombre Contacto:", value=val(venta.get("NOMBRE_CONTACTO")), key="act_nom_c")
-        e_mov_c    = st.text_input("Móvil Contacto:", value=val(venta.get("MOVIL_CONTACTO")),   key="act_mov_c")
-
+                                    key=k("act_municipio"), disabled=(not e_depto))
+ 
+        e_email_c  = st.text_input("Email Contacto:", value=val(venta.get("EMAIL_CONTACTO")),   key=k("act_email_c"))
+        e_nom_c    = st.text_input("Nombre Contacto:", value=val(venta.get("NOMBRE_CONTACTO")), key=k("act_nom_c"))
+        e_mov_c    = st.text_input("Móvil Contacto:", value=val(venta.get("MOVIL_CONTACTO")),   key=k("act_mov_c"))
+ 
     # ── COLUMNA DERECHA: Rep. Legal + Plan + Seguimiento ──
     with col_der:
         st.markdown("##### 👤 Representante Legal")
-        e_nom_rep   = st.text_input("Nombre Rep. Legal:", value=val(venta.get("NOMBRE_REP")), key="act_nom_rep")
-        e_ced_rep   = st.text_input("Cédula Rep. Legal:", value=val(venta.get("CEDULA_REP")), key="act_ced_rep")
-        e_email_rep = st.text_input("Correo Rep. Legal:", value=val(venta.get("EMAIL_REP")),  key="act_email_rep")
-        e_mov_rep   = st.text_input("Móvil Rep. Legal:", value=val(venta.get("MOVIL_REP")),   key="act_mov_rep")
-
+        e_nom_rep   = st.text_input("Nombre Rep. Legal:", value=val(venta.get("NOMBRE_REP")), key=k("act_nom_rep"))
+        e_ced_rep   = st.text_input("Cédula Rep. Legal:", value=val(venta.get("CEDULA_REP")), key=k("act_ced_rep"))
+        e_email_rep = st.text_input("Correo Rep. Legal:", value=val(venta.get("EMAIL_REP")),  key=k("act_email_rep"))
+        e_mov_rep   = st.text_input("Móvil Rep. Legal:", value=val(venta.get("MOVIL_REP")),   key=k("act_mov_rep"))
+ 
         st.markdown("##### 📦 Portafolio y Plan")
-
+ 
         div_actual = val(venta.get("DIVISION"), "Fijo")
         div_opts   = ["Móvil", "Fijo"]
         div_idx    = div_opts.index(div_actual) if div_actual in div_opts else 1
         e_division = st.radio("División:", div_opts, index=div_idx,
-                              horizontal=True, key="act_division")
-
+                              horizontal=True, key=k("act_division"))
+ 
         portafolio_val = "MOVIL" if e_division == "Móvil" else "FIJO"
-
+ 
         if e_division == "Móvil":
             familias   = list(PLANES_MOVIL.keys())
             fam_actual = val(venta.get("FAMILIA_PLAN"), familias[0])
             fam_idx    = familias.index(fam_actual) if fam_actual in familias else 0
             e_familia  = st.radio("Familia:", familias, index=fam_idx,
-                                  horizontal=True, key="act_familia")
-
+                                  horizontal=True, key=k("act_familia"))
+ 
             planes_lista = list(PLANES_MOVIL[e_familia].keys())
             plan_actual  = val(venta.get("PLAN"), planes_lista[0])
             plan_idx     = planes_lista.index(plan_actual) if plan_actual in planes_lista else 0
-            e_plan       = st.selectbox("Plan:", planes_lista, index=plan_idx, key="act_plan")
-
+            e_plan       = st.selectbox("Plan:", planes_lista, index=plan_idx, key=k("act_plan"))
+ 
             lineas_actual = val(venta.get("LINEAS"), "1")
             try:
                 lineas_default = max(1, int(lineas_actual))
             except (ValueError, TypeError):
                 lineas_default = 1
             e_lineas = st.number_input("Líneas:", min_value=1, max_value=200,
-                                       value=lineas_default, key="act_lineas")
+                                       value=lineas_default, key=k("act_lineas"))
             precio_total = calcular_precio_movil(e_familia, e_plan, e_lineas)
             servicio_val = "AVANZADO" if "Empresarial" in e_familia else "BASICO"
         else:
@@ -1172,11 +1153,11 @@ def tab_actualizar_estado(df: pd.DataFrame):
             planes_fijo  = list(PLANES_FIJO.keys())
             plan_actual  = val(venta.get("PLAN"), planes_fijo[0])
             plan_idx     = planes_fijo.index(plan_actual) if plan_actual in planes_fijo else 0
-            e_plan       = st.selectbox("Plan Fijo:", planes_fijo, index=plan_idx, key="act_plan_fijo")
+            e_plan       = st.selectbox("Plan Fijo:", planes_fijo, index=plan_idx, key=k("act_plan_fijo"))
             e_lineas     = 1
             precio_total = PLANES_FIJO.get(e_plan, 0)
             servicio_val = "AVANZADO" if "Avanzado" in e_plan or "Empresarial" in e_plan else "BASICO"
-
+ 
         st.markdown(f"""
         <div style="background:#e0f2fe; border-left:4px solid #00a0e3;
                     border-radius:6px; padding:10px 14px; margin:8px 0;">
@@ -1185,10 +1166,10 @@ def tab_actualizar_estado(df: pd.DataFrame):
           </span>
         </div>
         """, unsafe_allow_html=True)
-
+ 
         st.markdown("##### 📅 Seguimiento")
-
-        # FIX: soporta fecha con o sin hora ("YYYY-MM-DD" o "YYYY-MM-DD HH:MM:SS")
+ 
+        # Soporta fecha con o sin hora
         fecha_raw = val(venta.get("FECHA_SEGUIMIENTO"))
         fecha_val = date.today()
         if fecha_raw:
@@ -1198,28 +1179,27 @@ def tab_actualizar_estado(df: pd.DataFrame):
                     break
                 except ValueError:
                     continue
-
-        e_fecha_seg = st.date_input("Próxima fecha de seguimiento:", value=fecha_val, key="act_fecha_seg")
-
+ 
+        e_fecha_seg = st.date_input("Próxima fecha de seguimiento:", value=fecha_val, key=k("act_fecha_seg"))
+ 
         tipo_seg_actual = val(venta.get("TIPO_SEGUIMIENTO"), TIPOS_SEGUIMIENTO[0])
         tipo_seg_idx    = TIPOS_SEGUIMIENTO.index(tipo_seg_actual) if tipo_seg_actual in TIPOS_SEGUIMIENTO else 0
         e_tipo_seg = st.selectbox("Tipo de próximo contacto:", TIPOS_SEGUIMIENTO,
-                                  index=tipo_seg_idx, key="act_tipo_seg")
-
-        # FIX: este campo ahora SÍ se persiste al guardar (antes se ignoraba)
+                                  index=tipo_seg_idx, key=k("act_tipo_seg"))
+ 
         e_notas = st.text_area("📝 Notas / Bitácora (editable):", value=val(venta.get("NOTAS")),
-                               key="act_notas", height=90)
-
+                               key=k("act_notas"), height=90)
+ 
     st.markdown("---")
-
+ 
     # ══════════════════════════════════════════════════════
     # BLOQUE 3 — REGISTRAR GESTIÓN DE SEGUIMIENTO
     # ══════════════════════════════════════════════════════
     st.markdown("#### 📋 Registrar Gestión de Seguimiento")
     st.caption("Registra el contacto realizado con el cliente. Queda guardado en el historial.")
-
+ 
     col_g1, col_g2 = st.columns(2)
-
+ 
     with col_g1:
         tipo_gestion = st.selectbox(
             "Tipo de gestión realizada:",
@@ -1238,9 +1218,9 @@ def tab_actualizar_estado(df: pd.DataFrame):
                 "🖥️ Reunión virtual — Realizada",
                 "🖥️ Reunión virtual — No se conectó",
             ],
-            key="act_tipo_gestion"
+            key=k("act_tipo_gestion")
         )
-
+ 
         resultado_gestion = st.selectbox(
             "Resultado:",
             [
@@ -1253,20 +1233,19 @@ def tab_actualizar_estado(df: pd.DataFrame):
                 "✍️ En proceso de firma",
                 "🚫 No disponible / cambiar fecha",
             ],
-            key="act_resultado_gestion"
+            key=k("act_resultado_gestion")
         )
-
+ 
     with col_g2:
         detalle_gestion = st.text_area(
             "📝 Detalle / observación de esta gestión:",
             placeholder="Ej: El cliente solicitó revisar la propuesta con su socio...",
-            key="act_detalle_gestion",
+            key=k("act_detalle_gestion"),
             height=150
         )
-
+ 
     hay_gestion_nueva = tipo_gestion != "— Sin gestión nueva —"
-
-    # ── Vista previa del registro que se va a guardar ──────
+ 
     if hay_gestion_nueva:
         ts_prev = datetime.now(TZ).strftime("%d/%m/%Y %H:%M")
         st.markdown(
@@ -1279,9 +1258,9 @@ def tab_actualizar_estado(df: pd.DataFrame):
             f"</div>",
             unsafe_allow_html=True
         )
-
+ 
     st.markdown("---")
-
+ 
     # ════════════════════════════════════════════════════════
     # HISTORIAL DE GESTIONES ANTERIORES
     # ════════════════════════════════════════════════════════
@@ -1300,7 +1279,7 @@ def tab_actualizar_estado(df: pd.DataFrame):
                     color = "#eff6ff"; borde = "#3b82f6"
                 else:
                     color = "#f8fafc"; borde = "#cbd5e1"
-
+ 
                 st.markdown(
                     f"<div style='background:{color}; border-left:3px solid {borde}; "
                     f"border-radius:5px; padding:6px 10px; margin:3px 0; font-size:11px;'>"
@@ -1308,13 +1287,13 @@ def tab_actualizar_estado(df: pd.DataFrame):
                     f"</div>",
                     unsafe_allow_html=True
                 )
-
+ 
     # ════════════════════════════════════════════════════════
     # BOTÓN GUARDAR
     # ════════════════════════════════════════════════════════
     if st.button("💾 Guardar y Notificar", type="primary",
-                 use_container_width=True, key="btn_act_guardar"):
-
+                 use_container_width=True, key=k("btn_act_guardar")):
+ 
         errores = []
         if not e_nit.strip():   errores.append("Número de Documento es obligatorio.")
         if not e_razon.strip(): errores.append("Razón Social / Cliente es obligatorio.")
@@ -1322,27 +1301,20 @@ def tab_actualizar_estado(df: pd.DataFrame):
             for err in errores:
                 st.error(f"❌ {err}")
             return
-
+ 
         with st.spinner("Guardando cambios..."):
-
+ 
             ts = datetime.now(TZ).strftime("%d/%m/%Y %H:%M")
-
-            # FIX: e_notas (edición manual del usuario) es ahora la
-            # base real, no val(venta.get("NOTAS")) por separado —
-            # así se respeta cualquier corrección manual del usuario.
             notas_acumuladas = e_notas
-
-            # Si se registró una gestión nueva, se agrega UNA sola vez
+ 
             if hay_gestion_nueva:
                 entrada_historial = f"\n[{ts}] {tipo_gestion} | {resultado_gestion}"
                 if detalle_gestion.strip():
                     entrada_historial += f"\n    💬 {detalle_gestion.strip()}"
                 notas_acumuladas += entrada_historial
-
+ 
             campos_actualizar = {
-                # Estado
                 "ESTADO":            nuevo_estado,
-                # Datos cliente
                 "TIPO_DOC":          e_tipo_doc,
                 "NIT":               e_nit.strip(),
                 "CLIENTE":           e_razon.strip(),
@@ -1356,12 +1328,10 @@ def tab_actualizar_estado(df: pd.DataFrame):
                 "EMAIL_CONTACTO":    e_email_c.strip(),
                 "NOMBRE_CONTACTO":   e_nom_c.strip(),
                 "MOVIL_CONTACTO":    e_mov_c.strip(),
-                # Representante legal
                 "NOMBRE_REP":        e_nom_rep.strip(),
                 "CEDULA_REP":        e_ced_rep.strip(),
                 "EMAIL_REP":         e_email_rep.strip(),
                 "MOVIL_REP":         e_mov_rep.strip(),
-                # Plan
                 "DIVISION":          e_division,
                 "PORTAFOLIO":        portafolio_val,
                 "SERVICIO":          servicio_val,
@@ -1369,20 +1339,16 @@ def tab_actualizar_estado(df: pd.DataFrame):
                 "PLAN":              e_plan,
                 "LINEAS":            str(e_lineas),
                 "VALOR_TOTAL":       str(precio_total),
-                # FIX: ahora se usan los campos del Bloque 2 (únicos,
-                # ya no hay 2 fechas/2 tipos de seguimiento compitiendo)
                 "FECHA_SEGUIMIENTO": str(e_fecha_seg),
                 "TIPO_SEGUIMIENTO":  e_tipo_seg,
-                # Historial completo (edición + gestión nueva)
                 "NOTAS":             notas_acumuladas,
             }
-
+ 
             ok = actualizar_venta(id_venta, campos_actualizar)
-
+ 
             if ok:
                 st.cache_data.clear()
-
-                # ── Notificación Telegram (formato solicitado) ──
+ 
                 gestion_linea = f"📞 {tipo_gestion}\n" if hay_gestion_nueva else ""
                 msg_tg = (
                     f"🔄 <b>Cambio de Estado — Somos Telser</b>\n"
@@ -1393,8 +1359,7 @@ def tab_actualizar_estado(df: pd.DataFrame):
                     f"📅 {ts}"
                 )
                 enviar_telegram(msg_tg)
-
-        # ── Fuera del spinner: feedback + limpieza automática ──
+ 
         if ok:
             st.success(
                 f"✅ Venta **{id_venta}** actualizada. "
@@ -1402,19 +1367,13 @@ def tab_actualizar_estado(df: pd.DataFrame):
             )
             st.info("🔔 Notificación enviada a Telegram.")
 
-            # ⭐ LIMPIEZA AUTOMÁTICA DEL PANEL (lo solicitado):
-            # Se eliminan las keys de gestión y selección para que,
-            # al volver a esta pestaña, quede lista para una nueva
-            # actualización en blanco — sin arrastrar la gestión
-            # recién guardada.
-            for k in ("act_tipo_gestion", "act_resultado_gestion",
-                      "act_detalle_gestion", "act_id_cargado"):
-                st.session_state.pop(k, None)
-
+            # guardada en los campos de "Registrar Gestión".
+            for nombre in ("act_tipo_gestion", "act_resultado_gestion", "act_detalle_gestion"):
+                st.session_state.pop(k(nombre), None)
+ 
             st.rerun()
         else:
             st.error("❌ No se pudo guardar. Verifica los datos e intenta nuevamente.")
-            
 # ════════════════════════════════════════════════════════════
 # TAB 3 — BASE DE DATOS / DASHBOARD
 # ════════════════════════════════════════════════════════════
