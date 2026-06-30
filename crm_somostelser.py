@@ -1639,6 +1639,7 @@ def main():
     check_auth()
     
     if not st.session_state.get("auth"):
+        pantalla_login()
         return
 
     # Cargar datos una sola vez (la caché de @st.cache_data protegerá esto)
