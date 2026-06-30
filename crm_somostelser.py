@@ -796,7 +796,6 @@ def tab_registrar_venta():
                 serial_chip = st.text_input("Serial del Chip (ICCID):", key="serial_chip_pop")
            
             if st.button("➕ Agregar línea", key="btn_add_linea"):
-                valor_serial = serial_chip.strip() if tipo_linea in ["Portabilidad", "Línea Nueva"] else "N/A"
                 st.session_state.lista_lineas.append({
                     "cantidad": cant_linea, "tipo": tipo_linea,
                     "tipo": tipo_linea,
@@ -806,8 +805,7 @@ def tab_registrar_venta():
                 })
                 st.success(f"✅ Línea {num_linea} agregada.")
                 st.session_state["num_linea_pop"] = ""
-                if "serial_chip_pop" in st.session_state:
-                    st.session_state["serial_chip_pop"]
+                st.session_state["serial_chip_pop"]
                     st.rerun()
 
             if st.session_state.get("lista_lineas"):
