@@ -1032,15 +1032,33 @@ def tab_actualizar_estado(df: pd.DataFrame):
         return
 
     venta = buscar_venta(id_venta)
-    
     if venta is None:
         st.error(f"Venta ID {id_venta} no encontrada.")
         return
-       
+ 
     estado_anterior = val(venta.get("ESTADO"), "Sin estado")
+
+     # ──────────────────────────────────────────────────────
+    # ⭐ CORRECCIÓN: detectar cambio de venta y limpiar campos
+    # ──────────────────────────────────────────────────────
+    KEYS_EDICION = [
+        "act_tipo_doc", "act_nit", "act_razon", "act_tel", "act_email",
+        "act_dir", "act_barrio", "act_depto", "act_municipio",
+        "act_email_c", "act_nom_c", "act_mov_c",
+        "act_nom_rep", "act_ced_rep", "act_email_rep", "act_mov_rep",
+        "act_division", "act_familia", "act_plan", "act_plan_fijo",
+        "act_lineas", "act_fecha_seg", "act_tipo_seg", "act_notas",
+        "act_nota_nueva", "act_nuevo_estado",
+    ]
  
-    st.markdown("---")
- 
+    if st.session_state.get("act_id_cargado") != id_venta:
+        # Cambió la venta seleccionada (o es la primera carga):
+        # borrar las keys viejas para que los widgets se repueblen
+        # con los datos frescos de esta venta.
+        for k in KEYS_EDICION:
+            st.session_state.pop(k, None)
+        st.session_state["act_id_cargado"] = id_venta
+    
     # ══════════════════════════════════════════════════════
     # BLOQUE 1 — ESTADO (siempre visible arriba, destacado)
     # ══════════════════════════════════════════════════════
