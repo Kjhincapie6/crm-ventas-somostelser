@@ -11,6 +11,7 @@ import json
 import requests as req
 import random
 from zoneinfo import ZoneInfo
+import re
 
 
 def guardar_documentos_cliente(id_venta: int, nit: str, archivos: list) -> list:
