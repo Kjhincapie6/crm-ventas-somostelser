@@ -797,7 +797,7 @@ def tab_registrar_venta():
                 st.session_state.lista_lineas.append({
                     "cantidad": cant_linea, "tipo": tipo_linea,
                     "tipo": tipo_linea,
-                    "operador": op_linea, "numero": num_linea
+                    "operador": op_linea, "numero": num_linea,
                     "numero": num_linea,
                     "serial": serial_chip.strip()
                 })
