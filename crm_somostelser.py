@@ -714,41 +714,8 @@ def sidebar_render(df: pd.DataFrame):
 # ════════════════════════════════════════════════════════════
 
 def limpiar_formulario():
-
-    keys = [
-        "reg_division",
-        "reg_tipo_doc",
-        "reg_num_doc",
-        "reg_razon",
-        "reg_dir",
-        "reg_barrio",
-        "reg_depto",
-        "reg_municipio",
-        "reg_email_contacto",
-        "reg_nombre_contacto",
-        "reg_movil_contacto",
-        "reg_nombre_rep",
-        "reg_cedula_rep",
-        "reg_email_rep",
-        "reg_movil_rep",
-        "reg_estado",
-        "reg_notas",
-        "reg_fecha_seg",
-        "reg_tipo_seg",
-        "reg_familia",
-        "reg_plan",
-        "reg_plan_fijo",
-        "reg_lineas",
-        "reg_docs",
-        "tipo_linea_pop",
-        "op_linea_pop",
-        "cant_linea_pop",
-        "num_linea_pop",
-    ]
-
-    for key in keys:
-        st.session_state.pop(key, None)
-
+    # Creamos un flag (bandera) para avisarle a la app que debe borrar los campos
+    st.session_state["limpiar_campos_ahora"] = True
     st.session_state["lista_lineas"] = []
 
 # ════════════════════════════════════════════════════════════
@@ -758,6 +725,26 @@ def limpiar_formulario():
 def tab_registrar_venta():
     if "lista_lineas" not in st.session_state:
         st.session_state.lista_lineas = []
+        
+    # Inicializamos la bandera si no existe
+    if "limpiar_campos_ahora" not in st.session_state:
+        st.session_state["limpiar_campos_ahora"] = False
+
+    # Lógica para borrar los estados de Streamlit ANTES de dibujar los inputs
+    if st.session_state["limpiar_campos_ahora"]:
+        keys_a_borrar = [
+            "reg_division", "reg_tipo_doc", "reg_num_doc", "reg_razon", "reg_dir",
+            "reg_barrio", "reg_depto", "reg_municipio", "reg_email_contacto",
+            "reg_nombre_contacto", "reg_movil_contacto", "reg_nombre_rep",
+            "reg_cedula_rep", "reg_email_rep", "reg_movil_rep", "reg_estado",
+            "reg_notas", "reg_fecha_seg", "reg_tipo_seg", "reg_familia",
+            "reg_plan", "reg_plan_fijo", "reg_lineas", "reg_docs",
+            "tipo_linea_pop", "op_linea_pop", "cant_linea_pop", "num_linea_pop"
+        ]
+        for key in keys_a_borrar:
+            if key in st.session_state:
+                del st.session_state[key]
+        st.session_state["limpiar_campos_ahora"] = False
 
     st.markdown("### Seleccione División:")
     division = st.radio("", ["Móvil", "Fijo"], horizontal=True, key="reg_division", label_visibility="collapsed")
@@ -934,7 +921,7 @@ def tab_registrar_venta():
             for e in errores:
                 st.error(f"❌ {e}")
             st.stop()
-           
+            
 
         registro = {
             "ESTADO":           estado_ini,
@@ -971,8 +958,10 @@ def tab_registrar_venta():
         ok, resultado = crear_venta(registro)
     
         if ok:
+            # 1. Mostrar mensaje de éxito
             st.success(f"✅ Venta registrada exitosamente. **ID_VENTA: {resultado}**")
     
+            # 2. Enviar notificación a Telegram
             msg = (
                 f"🆕 <b>Nueva Venta — Somos Telser</b>\n"
                 f"📋 ID: {resultado} | {razon.strip()}\n"
@@ -982,16 +971,19 @@ def tab_registrar_venta():
                 f"🧑 {st.session_state.get('usuario','')}\n"
                 f"📅 {datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}"
             )
-    
             enviar_telegram(msg)
+            
+            # 3. Limpiar base de datos en caché para el dashboard
             st.cache_data.clear()
+            
+            # 4. Activar la limpieza automática del formulario
             limpiar_formulario()
+            
+            # 5. Forzar la recarga para que los campos amanezcan en blanco
             st.rerun()
     
         else:
             st.error(f"❌ Error al registrar: {resultado}")
-
-      
 # ════════════════════════════════════════════════════════════=
 # ⭐TAB 2 — ACTUALIZAR ESTADO + EDICIÓN COMPLETA DE LA VENT
 # VERSIÓN FINAL — bug de carga de datos resuelto de raíz
