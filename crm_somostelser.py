@@ -752,7 +752,7 @@ def limpiar_formulario():
     st.session_state["lista_lineas"] = []
 
 # ════════════════════════════════════════════════════════════
-# TAB 1 — REGISTRAR VENTA (COLUMNA DERECHA AJUSTADA)
+# ⭐ TAB 1 — REGISTRAR VENTA COLUMNA DERECHA AJUSTADA
 # ════════════════════════════════════════════════════════════
 
 def tab_registrar_venta():
@@ -1375,7 +1375,7 @@ def tab_actualizar_estado(df: pd.DataFrame):
         else:
             st.error("❌ No se pudo guardar. Verifica los datos e intenta nuevamente.")
 # ════════════════════════════════════════════════════════════
-# TAB 3 — BASE DE DATOS / DASHBOARD
+# ⭐ TAB 3 — BASE DE DATOS DASHBOARD
 # ════════════════════════════════════════════════════════════
  
 def tab_base_datos(df: pd.DataFrame):
