@@ -921,40 +921,39 @@ def tab_registrar_venta():
     st.markdown("---")
     guardar_col = st.columns([1])[0]
     if st.button("💾 Guardar Venta", type="primary", use_container_width=True, key="btn_guardar_venta"):
-          
+ 
         # Validaciones
         errores = []
-        
+ 
         if not num_doc.strip():
             errores.append("Número de Documento es obligatorio.")
-        
+ 
         if not razon.strip():
             errores.append("Razón Social o Nombre es obligatorio.")
-        
+ 
         if not depto:
             errores.append("Departamento es obligatorio.")
-        
+ 
         if not municipio:
             errores.append("Municipio es obligatorio.")
-        
+ 
         # Gestión Técnica obligatoria para Móvil y Full Tigo
         requiere_gestion = (
             division == "Móvil"
             or "Full Tigo" in plan_sel
         )
-        
+ 
         if requiere_gestion and not st.session_state.get("lista_lineas"):
             errores.append(
                 "Debe registrar al menos una Gestión Técnica (Portabilidad, Línea Nueva o Línea Existente)."
             )
-        
+ 
         # Si existen errores no continúa
         if errores:
             for e in errores:
                 st.error(f"❌ {e}")
             st.stop()
-            
-
+ 
         registro = {
             "ESTADO":           estado_ini,
             "PORTAFOLIO":       portafolio_val,
@@ -985,35 +984,49 @@ def tab_registrar_venta():
             "NOTAS":            notas.strip(),
             "FECHA_SEGUIMIENTO": str(fecha_seg),
             "TIPO_SEGUIMIENTO": tipo_seg,
+            "DOCUMENTOS":       "",  # se completa después de obtener el ID
         }
-
+ 
         ok, resultado = crear_venta(registro)
-    
+ 
         if ok:
+            nuevo_id = int(resultado)
+ 
+            # ── Guardar documentos físicamente y registrar nombres ──
+            nombres_docs = guardar_documentos_cliente(nuevo_id, num_doc.strip(), docs)
+            if nombres_docs:
+                actualizar_venta(nuevo_id, {"DOCUMENTOS": ", ".join(nombres_docs)})
+ 
             # 1. Mostrar mensaje de éxito
             st.success(f"✅ Venta registrada exitosamente. **ID_VENTA: {resultado}**")
-    
+            if nombres_docs:
+                st.success(f"📎 {len(nombres_docs)} documento(s) guardado(s) correctamente.")
+ 
             # 2. Enviar notificación a Telegram
+            docs_linea = f"📎 Documentos: {len(nombres_docs)} archivo(s)\n" if nombres_docs else ""
+            usuario_actual = st.session_state.get('usuario', '')
+            fecha_actual = datetime.now(TZ).strftime('%d/%m/%Y %H:%M')
             msg = (
                 f"🆕 <b>Nueva Venta — Somos Telser</b>\n"
                 f"📋 ID: {resultado} | {razon.strip()}\n"
                 f"📦 {portafolio_val} | {plan_sel}\n"
                 f"💰 ${precio_total:,} COP\n"
                 f"📍 {estado_ini} | {depto}, {municipio}\n"
-                f"🧑 {st.session_state.get('usuario','')}\n"
-                f"📅 {datetime.now(TZ).strftime('%d/%m/%Y %H:%M')}"
+                f"{docs_linea}"
+                f"🧑 {usuario_actual}\n"
+                f"📅 {fecha_actual}"
             )
             enviar_telegram(msg)
-            
+ 
             # 3. Limpiar base de datos en caché para el dashboard
             st.cache_data.clear()
-            
+ 
             # 4. Activar la limpieza automática del formulario
             limpiar_formulario()
-            
+ 
             # 5. Forzar la recarga para que los campos amanezcan en blanco
             st.rerun()
-    
+ 
         else:
             st.error(f"❌ Error al registrar: {resultado}")
 # ════════════════════════════════════════════════════════════=
