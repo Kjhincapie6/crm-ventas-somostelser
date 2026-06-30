@@ -1030,14 +1030,12 @@ def tab_actualizar_estado(df: pd.DataFrame):
     if id_venta is None:
         st.error("No se pudo identificar la venta.")
         return
- 
+
     venta = buscar_venta(id_venta)
-    st.write("ID seleccionado:", id_venta)
-   
+    
     if venta is None:
         st.error(f"Venta ID {id_venta} no encontrada.")
         return
-    st.write("Venta encontrada:", venta)
        
     estado_anterior = val(venta.get("ESTADO"), "Sin estado")
  
