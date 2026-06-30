@@ -806,6 +806,7 @@ def tab_registrar_venta():
                 })
                 st.success(f"✅ Línea {num_linea} agregada.")
                 st.session_state["num_linea_pop"] = ""
+            if "serial_chip_pop" in st.session_state:
                 st.session_state["serial_chip_pop"]
                 st.rerun()
 
