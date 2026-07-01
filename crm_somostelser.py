@@ -775,6 +775,9 @@ def tab_registrar_venta():
     if "reg_docs_key" not in st.session_state:
         st.session_state.reg_docs_key = 0
 
+    if "linea_key" not in st.session_state:
+        st.session_state.linea_key = 0
+
     # ==============================================================
     # NUEVO: LÓGICA DE LIMPIEZA ANTES DE DIBUJAR LOS CAMPOS
     # ==============================================================
@@ -841,10 +844,16 @@ def tab_registrar_venta():
                 op_linea = st.selectbox("Operador Origen:", ["Claro", "Movistar", "Móvil Éxito", "Wom"], key="op_linea_pop")
             
             cant_linea = st.number_input("Cantidad:", min_value=1, value=1, key="cant_linea_pop")
-            num_linea  = st.text_input("Número de línea:", key="num_linea_pop")
+            num_linea = st.text_input(
+                "Número de línea:",
+                key=f"num_linea_pop_{st.session_state.linea_key}"
+            )
             serial_chip = "" # Valor por defecto
             if tipo_linea in ["Portabilidad", "Línea Nueva"]:
-                serial_chip = st.text_input("Serial del Chip (ICCID):", key="serial_chip_pop")
+                serial_chip = st.text_input(
+                    "Serial del Chip (ICCID):",
+                    key=f"serial_chip_pop_{st.session_state.linea_key}"
+                )
 
             # ── MEJORA 1 (restaurada): botón que faltaba.
             # Sin este botón, ninguna línea entraba a session_state.lista_lineas
@@ -860,8 +869,7 @@ def tab_registrar_venta():
                         "serial": serial_chip.strip()
                     })
                     st.success(f"✅ Línea {num_linea} agregada.")
-                    st.session_state["num_linea_pop"] = ""
-                    st.session_state["serial_chip_pop"] = ""
+                    st.session_state.linea_key += 1
                     st.rerun()
                 else:
                     st.warning("⚠️ Ingresa el número de línea antes de agregar.")
